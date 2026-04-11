@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Page Not Found</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --coral:#D85A30;--coral-dark:#4A1B0C;--coral-light:#FAECE7;--cream:#FBF7F2;--ink:#1A1208;--ink-muted:#6B5C4E;--white:#FFFFFF;--card-border:rgba(26,18,8,0.08);--radius:14px; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+    nav{background:rgba(251,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--card-border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--coral);text-decoration:none;}
+    .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 2rem;}
+    .big-num{font-family:'Playfair Display',serif;font-size:120px;font-weight:900;color:var(--coral-light);line-height:1;margin-bottom:-10px;}
+    h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:10px;}
+    p{font-size:15px;color:var(--ink-muted);margin-bottom:2rem;max-width:360px;line-height:1.6;}
+    .btn-group{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+    .btn{padding:11px 24px;border-radius:25px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;text-decoration:none;cursor:pointer;transition:all 0.15s;}
+    .btn.primary{background:var(--coral);color:#fff;border:none;}
+    .btn.primary:hover{background:var(--coral-dark);}
+    .btn.secondary{background:var(--white);color:var(--ink);border:1px solid var(--card-border);}
+    .btn.secondary:hover{border-color:var(--coral);color:var(--coral);}
+    .suggestions{margin-top:3rem;width:100%;max-width:440px;}
+    .suggestions p{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-muted);margin-bottom:10px;}
+    .suggestion-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .suggestion-links a{font-size:13px;color:var(--coral);text-decoration:none;padding:5px 14px;border-radius:20px;border:1px solid rgba(216,90,48,0.25);background:var(--coral-light);}
+    .suggestion-links a:hover{background:var(--coral);color:#fff;}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+</nav>
+<div class="center">
+  <div class="big-num">404</div>
+  <h1>This page took the day off.</h1>
+  <p>The page you're looking for doesn't exist — it may have moved or the link might be wrong.</p>
+  <div class="btn-group">
+    <a href="index.html" class="btn primary">Back to homepage</a>
+    <a href="map.html" class="btn secondary">Browse the map</a>
+  </div>
+  <div class="suggestions">
+    <p>Popular pages</p>
+    <div class="suggestion-links">
+      <a href="index.html">Directory</a>
+      <a href="map.html">Map view</a>
+      <a href="apply.html">Get listed</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="login.html">Owner login</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Restaurant</title>
+  <meta name="description" content="View restaurant details, hours, location and more on 559eats." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    nav {
+      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-cta { background: var(--coral); color: var(--white) !important; padding: 7px 16px; border-radius: 20px; }
+    .nav-cta:hover { background: var(--coral-dark) !important; }
+    .nav-mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--ink); }
+
+    /* MOBILE NAV DRAWER */
+    .nav-drawer {
+      display: none; position: fixed; top: 60px; left: 0; right: 0;
+      background: var(--white); border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem; z-index: 99; flex-direction: column; gap: 16px;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { font-size: 15px; color: var(--ink-muted); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
+    .nav-drawer a:last-child { border-bottom: none; }
+
+    main { max-width: 800px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    .back-link { font-size: 13px; color: var(--coral); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 1.5rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* HERO CARD */
+    .hero-card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .hero-img {
+      height: 220px; background: var(--coral-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 80px; position: relative;
+    }
+    .hero-sponsored {
+      position: absolute; top: 16px; right: 16px;
+      background: #FAEEDA; color: #633806; font-size: 11px;
+      font-weight: 500; padding: 4px 12px; border-radius: 20px;
+      border: 1px solid #EF9F27;
+    }
+    .hero-body { padding: 1.75rem; }
+    .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .hero-name { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; line-height: 1.1; }
+    .hero-meta { font-size: 14px; color: var(--ink-muted); margin-top: 4px; }
+    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .action-btn {
+      padding: 9px 18px; border-radius: 25px; font-size: 13px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s;
+      text-decoration: none; display: inline-block;
+    }
+    .action-btn.primary { background: var(--coral); color: var(--white); border: none; }
+    .action-btn.primary:hover { background: var(--coral-dark); }
+    .action-btn.secondary { background: var(--white); color: var(--ink); border: 1px solid var(--card-border); }
+    .action-btn.secondary:hover { border-color: var(--coral); color: var(--coral); }
+    .hero-desc { font-size: 14px; color: var(--ink-muted); line-height: 1.7; margin-bottom: 1.25rem; }
+    .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag { font-size: 12px; padding: 4px 12px; border-radius: 15px; background: var(--cream); color: var(--ink-muted); border: 1px solid var(--card-border); }
+    .tag.open { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+    .tag.truck { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
+
+    /* INFO GRID */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+    .info-card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.25rem; }
+    .info-card-title { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1rem; }
+    .info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .info-text { color: var(--ink); line-height: 1.4; }
+    .info-text a { color: var(--coral); text-decoration: none; }
+    .info-text a:hover { text-decoration: underline; }
+
+    /* HOURS */
+    .hours-list { display: flex; flex-direction: column; gap: 6px; }
+    .hour-row { display: flex; justify-content: space-between; font-size: 13px; }
+    .hour-day { color: var(--ink-muted); }
+    .hour-time { font-weight: 500; }
+    .hour-time.closed { color: var(--ink-faint); font-weight: 400; }
+    .today-row .hour-day { color: var(--coral); font-weight: 500; }
+    .today-row .hour-time { color: var(--coral); }
+
+    /* MAP PREVIEW */
+    .map-preview {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .map-preview-inner { height: 220px; background: var(--coral-light); display: flex; align-items: center; justify-content: center; }
+    .map-preview-footer { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .map-preview-addr { font-size: 13px; color: var(--ink-muted); }
+    .map-preview-link { font-size: 13px; color: var(--coral); text-decoration: none; font-weight: 500; }
+
+    /* NEARBY */
+    .nearby-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
+    .nearby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .nearby-card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden; cursor: pointer;
+      text-decoration: none; transition: transform 0.15s; display: block;
+    }
+    .nearby-card:hover { transform: translateY(-3px); }
+    .nearby-img { height: 90px; background: var(--coral-light); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .nearby-body { padding: 10px 12px; }
+    .nearby-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--ink); }
+    .nearby-meta { font-size: 11px; color: var(--ink-muted); }
+
+    /* SHARE */
+    .share-bar {
+      background: var(--coral-dark); border-radius: var(--radius);
+      padding: 1.25rem 1.5rem; display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .share-text { font-size: 14px; color: rgba(255,255,255,0.8); }
+    .share-text strong { color: var(--white); }
+    .share-btn {
+      padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      background: var(--coral); color: var(--white); border: none;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s;
+    }
+    .share-btn:hover { background: var(--coral-mid, #F0997B); }
+
+    /* LOADING */
+    .skeleton { background: linear-gradient(90deg,#f0ebe4 25%,#e8e1d8 50%,#f0ebe4 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--radius-sm); }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    @media (max-width:640px) {
+      .nav-links { display: none; }
+      .nav-mobile-btn { display: block; }
+      .info-grid { grid-template-columns: 1fr; }
+      main { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="map.html">Map</a>
+    <a href="pricing.html">Get listed</a>
+    <a href="pricing.html" class="nav-cta">List your spot</a>
+  </div>
+  <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="index.html">Home</a>
+  <a href="map.html">Map</a>
+  <a href="pricing.html">Get listed</a>
+  <a href="login.html">Owner login</a>
+  <a href="apply.html">Apply for free</a>
+</div>
+
+<main id="main">
+  <a href="index.html" class="back-link">← Back to directory</a>
+  <div id="content">
+    <!-- skeleton -->
+    <div class="hero-card">
+      <div class="hero-img skeleton" style="font-size:0"></div>
+      <div class="hero-body">
+        <div class="skeleton" style="height:32px;width:55%;margin-bottom:10px"></div>
+        <div class="skeleton" style="height:14px;width:35%;margin-bottom:20px"></div>
+        <div class="skeleton" style="height:14px;width:90%;margin-bottom:6px"></div>
+        <div class="skeleton" style="height:14px;width:75%"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
+
+  const ICONS = {
+    'Mexican':'🌮','Vietnamese':'🍜','BBQ':'🍖','Pizza':'🍕',
+    'Hawaiian Fusion':'🍱','Asian Street Food':'🥡',
+    'Mexican Street Food':'🌯','default':'🍽️'
+  };
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  async function api(path) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.json();
+  }
+
+  function slug(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    let id = params.get('id');
+    let name = params.get('name');
+
+    let restaurant = null;
+
+    if (id) {
+      const data = await api(`restaurants?id=eq.${id}&status=eq.approved&is_active=eq.true`);
+      restaurant = data?.[0];
+    } else if (name) {
+      const data = await api(`restaurants?status=eq.approved&is_active=eq.true`);
+      restaurant = data?.find(r => slug(r.name) === name);
+    }
+
+    if (!restaurant) {
+      document.getElementById('content').innerHTML = `
+        <div style="text-align:center;padding:4rem 1rem">
+          <div style="font-size:48px;margin-bottom:1rem">🍽️</div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px">Restaurant not found</h2>
+          <p style="color:var(--ink-muted);font-size:14px;margin-bottom:1.5rem">This listing may have moved or been removed.</p>
+          <a href="index.html" style="color:var(--coral);font-size:14px;text-decoration:none;font-weight:500">← Back to directory</a>
+        </div>`;
+      return;
+    }
+
+    // Update page title + meta
+    document.title = `${restaurant.name} · 559eats`;
+    document.querySelector('meta[name="description"]').setAttribute('content',
+      `${restaurant.name} — ${restaurant.cuisine_type} in ${restaurant.neighborhood}. Find hours, location, and more on 559eats.`
+    );
+
+    // Load hours
+    const hours = await api(`hours?restaurant_id=eq.${restaurant.id}&order=id`);
+    const hoursMap = {};
+    (hours || []).forEach(h => hoursMap[h.day_of_week] = h);
+
+    // Load nearby (same neighborhood, different restaurant)
+    const nearby = await api(
+      `restaurants?neighborhood=eq.${encodeURIComponent(restaurant.neighborhood)}&status=eq.approved&is_active=eq.true&id=neq.${restaurant.id}&limit=3`
+    );
+
+    const todayName = DAYS[new Date().getDay()];
+    const icon = ICONS[restaurant.cuisine_type] || ICONS.default;
+
+    document.getElementById('content').innerHTML = `
+      <div class="hero-card">
+        <div class="hero-img">
+          ${icon}
+          ${restaurant.is_sponsored ? '<div class="hero-sponsored">⭐ Sponsored</div>' : ''}
+        </div>
+        <div class="hero-body">
+          <div class="hero-top">
+            <div>
+              <div class="hero-name">${restaurant.name}</div>
+              <div class="hero-meta">${restaurant.cuisine_type || ''} · ${restaurant.neighborhood || ''}</div>
+            </div>
+            <div class="hero-actions">
+              ${restaurant.phone ? `<a href="tel:${restaurant.phone}" class="action-btn primary">📞 Call</a>` : ''}
+              ${restaurant.website ? `<a href="${restaurant.website}" target="_blank" class="action-btn secondary">Visit website →</a>` : ''}
+              <a href="map.html" class="action-btn secondary">📍 Map</a>
+            </div>
+          </div>
+          ${restaurant.description ? `<p class="hero-desc">${restaurant.description}</p>` : ''}
+          <div class="hero-tags">
+            <span class="tag open">Open now</span>
+            ${restaurant.is_food_truck ? '<span class="tag truck">🚚 Food truck</span>' : ''}
+            ${restaurant.cuisine_type ? `<span class="tag">${restaurant.cuisine_type}</span>` : ''}
+            ${restaurant.neighborhood ? `<span class="tag">${restaurant.neighborhood}</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-title">Contact & location</div>
+          ${restaurant.address ? `
+            <div class="info-row">
+              <span class="info-icon">📍</span>
+              <span class="info-text">${restaurant.address}</span>
+            </div>` : ''}
+          ${restaurant.phone ? `
+            <div class="info-row">
+              <span class="info-icon">📞</span>
+              <span class="info-text"><a href="tel:${restaurant.phone}">${restaurant.phone}</a></span>
+            </div>` : ''}
+          ${restaurant.website ? `
+            <div class="info-row">
+              <span class="info-icon">🌐</span>
+              <span class="info-text"><a href="${restaurant.website}" target="_blank">${restaurant.website.replace('https://','').replace('http://','')}</a></span>
+            </div>` : ''}
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">Hours</div>
+          <div class="hours-list">
+            ${DAYS.map(day => {
+              const h = hoursMap[day];
+              const isToday = day === todayName;
+              if (!h) return `
+                <div class="hour-row ${isToday ? 'today-row' : ''}">
+                  <span class="hour-day">${day.slice(0,3)}</span>
+                  <span class="hour-time" style="color:var(--ink-faint)">—</span>
+                </div>`;
+              if (h.is_closed) return `
+                <div class="hour-row ${isToday ? 'today-row' : ''}">
+                  <span class="hour-day">${day.slice(0,3)}</span>
+                  <span class="hour-time closed">Closed</span>
+                </div>`;
+              return `
+                <div class="hour-row ${isToday ? 'today-row' : ''}">
+                  <span class="hour-day">${day.slice(0,3)}</span>
+                  <span class="hour-time">${h.open_time || ''} – ${h.close_time || ''}</span>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${restaurant.latitude && restaurant.longitude ? `
+        <div class="map-preview">
+          <div class="map-preview-inner">
+            <img
+              src="https://maps.googleapis.com/maps/api/staticmap?center=${restaurant.latitude},${restaurant.longitude}&zoom=15&size=760x220&markers=color:0xD85A30%7C${restaurant.latitude},${restaurant.longitude}&style=feature:poi%7Cvisibility:off&key=${MAPS_KEY}"
+              style="width:100%;height:220px;object-fit:cover"
+              alt="Map of ${restaurant.name}"
+              onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:13px\\'>Map preview unavailable</div>'"
+            />
+          </div>
+          <div class="map-preview-footer">
+            <span class="map-preview-addr">${restaurant.address || 'View on map'}</span>
+            <a href="https://maps.google.com/?q=${encodeURIComponent(restaurant.address || restaurant.name)}" target="_blank" class="map-preview-link">Open in Google Maps →</a>
+          </div>
+        </div>` : ''}
+
+      <div class="share-bar">
+        <div class="share-text"><strong>Know someone who'd love this spot?</strong> Share it with them.</div>
+        <button class="share-btn" onclick="shareRestaurant('${restaurant.name}')">Share this listing</button>
+      </div>
+
+      ${nearby && nearby.length > 0 ? `
+        <div class="nearby-title">More in ${restaurant.neighborhood}</div>
+        <div class="nearby-grid">
+          ${nearby.map(r => `
+            <a class="nearby-card" href="restaurant.html?id=${r.id}">
+              <div class="nearby-img">${ICONS[r.cuisine_type] || ICONS.default}</div>
+              <div class="nearby-body">
+                <div class="nearby-name">${r.name}</div>
+                <div class="nearby-meta">${r.cuisine_type || ''}</div>
+              </div>
+            </a>`).join('')}
+        </div>` : ''}
+    `;
+  }
+
+  function shareRestaurant(name) {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: `${name} on 559eats`, url });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  }
+
+  function toggleMobileNav() {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('mobile-btn');
+    const open = drawer.classList.toggle('open');
+    btn.textContent = open ? '✕' : '☰';
+  }
+
+  init();
+</script>
+</body>
+</html>
