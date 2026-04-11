@@ -4,13 +4,13 @@
 // This runs as a Vercel serverless function
 // ============================================
 
-const stripe = require('stripe')('sk_test_51TKt5q6fFQWsJALk0hL3HapkOjt7FJhtgVrcXjpzLGEk9TiWaheIDJD7Ji7qdzH1QfEySnj7R61vV1edYp5iHa9Q000fD0qew9');
+const stripe = require('stripe')('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');
 
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 
-const PRICE_FEATURED = 'price_1TKt7z6fFQWsJALkCrSm2D7e';
-const PRICE_TRUCK    = 'price_1TKt8R6fFQWsJALkb0LQR7tD';
+const PRICE_FEATURED = 'price_1TKv6u6fFQWsJALk6udajtpi';
+const PRICE_TRUCK    = 'price_1TKv796fFQWsJALkPcruIvwz';
 
 module.exports = async (req, res) => {
   // CORS headers
