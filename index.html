@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>559eats · Discover Fresno's Best Food</title>
   <meta name="description" content="The local food directory for Fresno and the 559. Discover restaurants, food trucks, hours, and more." />
+  <meta property="og:title" content="559eats · Discover Fresno's Best Food" />
+  <meta property="og:description" content="The local food directory for Fresno and the 559. Discover restaurants, food trucks, and hidden gems." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://559eats.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="559eats · Discover Fresno's Best Food" />
+  <meta name="twitter:description" content="The local food directory for Fresno and the 559." />
+  <link rel="canonical" href="https://559eats.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -329,9 +337,15 @@
       color: var(--ink-muted); font-size: 14px;
     }
 
+    .nav-mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--ink); }
+    .nav-drawer { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--card-border); padding: 1rem 2rem; z-index: 99; flex-direction: column; gap: 14px; }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { font-size: 15px; color: var(--ink-muted); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
+    .nav-drawer a:last-child { border-bottom: none; }
     @media (max-width: 600px) {
       nav { padding: 0 1rem; }
-      .nav-links a:not(.nav-cta) { display: none; }
+      .nav-links { display: none; }
+      .nav-mobile-btn { display: block; }
       main { padding: 2rem 1rem; }
       .stats-bar { gap: 1.5rem; }
       .map-banner { flex-direction: column; text-align: center; }
@@ -344,11 +358,19 @@
   <a href="/" class="nav-logo">559eats</a>
   <div class="nav-links">
     <a href="#">Browse</a>
-    <a href="#">Map</a>
+    <a href="map.html">Map</a>
     <a href="#">Food trucks</a>
     <a href="pricing.html" class="nav-cta">List your spot</a>
   </div>
+  <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
 </nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="index.html">Home</a>
+  <a href="map.html">Map</a>
+  <a href="pricing.html">Get listed</a>
+  <a href="login.html">Owner login</a>
+  <a href="apply.html">Apply for free</a>
+</div>
 
 <section class="hero">
   <p class="hero-eyebrow">Fresno &amp; the Central Valley</p>
@@ -553,6 +575,17 @@
     });
   }
 
+  function slug(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  function toggleMobileNav() {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('mobile-btn');
+    const open = drawer.classList.toggle('open');
+    btn.textContent = open ? '✕' : '☰';
+  }
+
   function renderRestaurants() {
     const grid = document.getElementById('restaurant-grid');
     const btn = document.getElementById('load-more-btn');
@@ -566,7 +599,7 @@
 
     const visible = filtered.slice(0, visibleCount);
     grid.innerHTML = visible.map(r => `
-      <div class="r-card">
+      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
         <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
         <div class="r-card-body">
           <div class="r-card-name">${r.name}</div>
@@ -576,7 +609,7 @@
             <span class="badge open">Open now</span>
           </div>
         </div>
-      </div>
+      </a>
     `).join('');
 
     btn.style.display = filtered.length > visibleCount ? 'inline-block' : 'none';
@@ -655,8 +688,9 @@
   }
 
   function openNearMe() {
-  window.location.href = 'map.html';
-}
+    alert('Map view coming soon! We\'re building it next.');
+  }
+
   init();
 </script>
 </body>
