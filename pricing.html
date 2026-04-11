@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Get Listed & Get Sponsored</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+      --amber: #FAEEDA; --amber-text: #633806; --amber-border: #EF9F27;
+      --green-bg: #EAF3DE; --green-text: #27500A; --green-border: #97C459;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+
+    nav {
+      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
+    .nav-links a { font-size: 13px; color: var(--ink-muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--ink); }
+
+    .hero {
+      background: var(--coral-dark); padding: 4rem 2rem 3rem;
+      text-align: center;
+    }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; color: var(--white); margin-bottom: 12px; }
+    .hero p { font-size: 16px; color: rgba(255,255,255,0.7); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+    main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+
+    .plans-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px; margin-bottom: 3rem;
+    }
+
+    .plan-card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 2rem; position: relative;
+      transition: transform 0.2s;
+    }
+    .plan-card:hover { transform: translateY(-4px); }
+    .plan-card.featured { border: 2px solid var(--amber-border); }
+    .plan-card.premium { border: 2px solid var(--coral); }
+
+    .plan-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; font-weight: 500; padding: 3px 14px; border-radius: 20px;
+      white-space: nowrap;
+    }
+    .plan-badge.sponsored { background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-border); }
+    .plan-badge.popular { background: var(--coral); color: var(--white); }
+
+    .plan-icon { font-size: 32px; margin-bottom: 1rem; }
+    .plan-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .plan-desc { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+    .plan-price { margin-bottom: 1.5rem; }
+    .plan-price .amount { font-size: 36px; font-weight: 700; color: var(--ink); }
+    .plan-price .period { font-size: 14px; color: var(--ink-muted); }
+    .plan-price .free { font-size: 28px; font-weight: 700; color: var(--green-text); }
+
+    .plan-features { list-style: none; margin-bottom: 1.75rem; display: flex; flex-direction: column; gap: 8px; }
+    .plan-features li { font-size: 13px; display: flex; align-items: flex-start; gap: 8px; }
+    .plan-features li::before { content: '✓'; color: var(--coral); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .plan-features li.no::before { content: '✗'; color: var(--ink-faint); }
+    .plan-features li.no { color: var(--ink-muted); }
+
+    .plan-btn {
+      width: 100%; padding: 12px; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; border: none;
+    }
+    .plan-btn.primary { background: var(--coral); color: var(--white); }
+    .plan-btn.primary:hover { background: var(--coral-dark); }
+    .plan-btn.secondary { background: var(--cream); color: var(--ink); border: 1px solid var(--card-border); }
+    .plan-btn.secondary:hover { border-color: var(--coral); color: var(--coral); }
+    .plan-btn.amber-btn { background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-border); }
+    .plan-btn.amber-btn:hover { background: #EF9F27; color: var(--white); }
+    .plan-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* CHECKOUT MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,18,8,0.5); z-index: 500;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius);
+      padding: 2rem; width: 100%; max-width: 480px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; color: var(--ink-muted);
+    }
+    .modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .modal .modal-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+    .modal-price {
+      background: var(--cream); border-radius: var(--radius-sm);
+      padding: 12px 16px; margin-bottom: 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-price .label { font-size: 13px; color: var(--ink-muted); }
+    .modal-price .value { font-size: 18px; font-weight: 500; color: var(--ink); }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 5px; }
+    .form-group input {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--ink); background: var(--cream); outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--coral); background: var(--white); }
+
+    #card-element {
+      padding: 11px 12px; border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm); background: var(--cream);
+      transition: border-color 0.2s;
+    }
+    #card-element.StripeElement--focus { border-color: var(--coral); background: var(--white); }
+
+    .pay-btn {
+      width: 100%; padding: 13px; background: var(--coral); color: var(--white);
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; margin-top: 1.25rem;
+    }
+    .pay-btn:hover { background: var(--coral-dark); }
+    .pay-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .stripe-note { font-size: 11px; color: var(--ink-faint); text-align: center; margin-top: 10px; }
+    .pay-error { font-size: 13px; color: #791F1F; margin-top: 8px; display: none; }
+
+    /* SUCCESS */
+    .success-state { text-align: center; padding: 1rem 0; display: none; }
+    .success-state .icon { font-size: 48px; margin-bottom: 1rem; }
+    .success-state h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+    .success-state p { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
+
+    /* FAQ */
+    .faq { margin-bottom: 3rem; }
+    .faq-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 1.25rem; }
+    .faq-item { border-bottom: 1px solid var(--card-border); padding: 1rem 0; }
+    .faq-q { font-size: 14px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-a { font-size: 13px; color: var(--ink-muted); margin-top: 8px; line-height: 1.6; display: none; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-arrow { transition: transform 0.2s; font-size: 12px; }
+
+    @media (max-width: 600px) {
+      .plans-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <div class="nav-links"><a href="index.html">← Back to 559eats</a></div>
+</nav>
+
+<div class="hero">
+  <h1>Grow your business<br>with 559eats</h1>
+  <p>Get in front of thousands of hungry Fresno locals every month. Choose the plan that fits your spot.</p>
+</div>
+
+<main>
+  <div class="plans-grid">
+
+    <!-- FREE -->
+    <div class="plan-card">
+      <div class="plan-icon">🍽️</div>
+      <div class="plan-name">Basic listing</div>
+      <div class="plan-desc">Get your restaurant on the map and in the directory — completely free, forever.</div>
+      <div class="plan-price"><span class="free">Free</span></div>
+      <ul class="plan-features">
+        <li>Listed in the directory</li>
+        <li>Map pin with your location</li>
+        <li>Hours, address & phone</li>
+        <li>Owner login portal</li>
+        <li class="no">Featured on homepage</li>
+        <li class="no">Carousel placement</li>
+        <li class="no">Priority in search</li>
+      </ul>
+      <button class="plan-btn secondary" onclick="window.location.href='apply.html'">Apply for free →</button>
+    </div>
+
+    <!-- FEATURED RESTAURANT -->
+    <div class="plan-card premium">
+      <div class="plan-badge popular">Most popular</div>
+      <div class="plan-icon">⭐</div>
+      <div class="plan-name">Featured restaurant</div>
+      <div class="plan-desc">Stand out in search results and get a featured card on the 559eats homepage.</div>
+      <div class="plan-price">
+        <span class="amount">$29</span>
+        <span class="period">/month</span>
+      </div>
+      <ul class="plan-features">
+        <li>Everything in Basic</li>
+        <li>Featured badge on your card</li>
+        <li>Priority placement in search</li>
+        <li>Homepage featured section</li>
+        <li>Analytics — views & clicks</li>
+        <li class="no">Carousel placement</li>
+      </ul>
+      <button class="plan-btn primary" onclick="openCheckout('featured')">Get featured — $29/mo</button>
+    </div>
+
+    <!-- SPONSORED TRUCK -->
+    <div class="plan-card featured">
+      <div class="plan-badge sponsored">Food trucks</div>
+      <div class="plan-icon">🚚</div>
+      <div class="plan-name">Sponsored truck</div>
+      <div class="plan-desc">Your truck in the homepage carousel — seen by every visitor, every day. Gold badge included.</div>
+      <div class="plan-price">
+        <span class="amount">$49</span>
+        <span class="period">/month</span>
+      </div>
+      <ul class="plan-features">
+        <li>Everything in Basic</li>
+        <li>Homepage carousel placement</li>
+        <li>Gold "Sponsored" badge</li>
+        <li>Priority in food truck filter</li>
+        <li>Analytics — views & clicks</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <button class="plan-btn amber-btn" onclick="openCheckout('truck')">Get sponsored — $49/mo</button>
+    </div>
+
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <div class="faq-title">Common questions</div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I cancel anytime? <span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Yes — cancel anytime from your owner dashboard. No contracts, no cancellation fees. Your listing stays active until the end of your billing period.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How do I get listed first? <span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Submit your free listing application and we'll review it within 24–48 hours. Once approved, you can upgrade to Featured or Sponsored at any time.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Is my payment information secure? <span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Absolutely. Payments are processed by Stripe — the same technology used by Amazon, Google, and millions of businesses. We never see or store your card details.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">When does my listing go live after paying? <span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Immediately after payment. Your badge and placement update automatically — no waiting for manual approval.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">I'm a food truck — which plan do I pick? <span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Start with a free Basic listing to get on the map. If you want carousel placement and the Sponsored badge — which puts you front and center on the homepage — upgrade to Sponsored Truck for $49/month.</div>
+    </div>
+  </div>
+</main>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCheckout()">✕</button>
+
+    <div id="checkout-form">
+      <h2 id="modal-title">Get featured</h2>
+      <p class="modal-sub" id="modal-sub">Monthly subscription · Cancel anytime</p>
+      <div class="modal-price">
+        <span class="label" id="modal-plan-label">Featured restaurant</span>
+        <span class="value" id="modal-plan-price">$29 / month</span>
+      </div>
+
+      <div class="form-group">
+        <label>Restaurant name</label>
+        <input type="text" id="c-restaurant" placeholder="Your restaurant name" />
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="c-email" placeholder="you@yourrestaurant.com" />
+      </div>
+      <div class="form-group">
+        <label>Card details</label>
+        <div id="card-element"></div>
+      </div>
+
+      <div class="pay-error" id="pay-error"></div>
+      <button class="pay-btn" id="pay-btn" onclick="handlePayment()">Subscribe now</button>
+      <p class="stripe-note">🔒 Secured by Stripe · We never store your card details</p>
+    </div>
+
+    <div class="success-state" id="success-state">
+      <div class="icon">🎉</div>
+      <h3>You're live!</h3>
+      <p>Your listing has been upgraded. Check your email for a receipt, and log into your owner dashboard to see your new badge.</p>
+      <button class="plan-btn primary" style="margin-top:1.5rem" onclick="window.location.href='login.html'">Go to dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STRIPE_PK = 'pk_test_51TKt5q6fFQWsJALkMUglyMuCV4hgavA0xWrbfJGT5s5PcDLQUwEHLZk22JXwlk7WUJgUjT74LPv0v9KT9E3d9Ona00aVYz50q8';
+  const PRICE_FEATURED = 'price_1TKt7z6fFQWsJALkCrSm2D7e';
+  const PRICE_TRUCK = 'price_1TKt8R6fFQWsJALkb0LQR7tD';
+
+  const stripe = Stripe(STRIPE_PK);
+  const elements = stripe.elements();
+  const cardElement = elements.create('card', {
+    style: {
+      base: {
+        fontFamily: '"DM Sans", sans-serif',
+        fontSize: '14px',
+        color: '#1A1208',
+        '::placeholder': { color: '#C2B5A8' }
+      }
+    }
+  });
+  cardElement.mount('#card-element');
+
+  let currentPlan = 'featured';
+
+  function openCheckout(plan) {
+    currentPlan = plan;
+    const isTruck = plan === 'truck';
+    document.getElementById('modal-title').textContent = isTruck ? 'Get sponsored' : 'Get featured';
+    document.getElementById('modal-plan-label').textContent = isTruck ? 'Sponsored food truck' : 'Featured restaurant';
+    document.getElementById('modal-plan-price').textContent = isTruck ? '$49 / month' : '$29 / month';
+    document.getElementById('pay-btn').textContent = isTruck ? 'Subscribe — $49/mo' : 'Subscribe — $29/mo';
+    document.getElementById('checkout-form').style.display = 'block';
+    document.getElementById('success-state').style.display = 'none';
+    document.getElementById('pay-error').style.display = 'none';
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeCheckout() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function closeOnOverlay(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeCheckout();
+  }
+
+  async function handlePayment() {
+    const restaurant = document.getElementById('c-restaurant').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const btn = document.getElementById('pay-btn');
+    const errorEl = document.getElementById('pay-error');
+
+    if (!restaurant) { showPayError('Please enter your restaurant name.'); return; }
+    if (!email || !email.includes('@')) { showPayError('Please enter a valid email address.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    errorEl.style.display = 'none';
+
+    try {
+      const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: { email, name: restaurant }
+      });
+
+      if (error) {
+        showPayError(error.message);
+        btn.disabled = false;
+        btn.textContent = currentPlan === 'truck' ? 'Subscribe — $49/mo' : 'Subscribe — $29/mo';
+        return;
+      }
+
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentMethodId: paymentMethod.id,
+          email,
+          restaurantName: restaurant,
+          plan: currentPlan
+        })
+      });
+
+      const result = await response.json();
+      if (result.error) { showPayError(result.error); btn.disabled = false; btn.textContent = currentPlan === 'truck' ? 'Subscribe — $49/mo' : 'Subscribe — $29/mo'; return; }
+
+      if (result.requiresAction) {
+        const { error: confirmError } = await stripe.confirmCardPayment(result.clientSecret);
+        if (confirmError) { showPayError(confirmError.message); btn.disabled = false; return; }
+      }
+
+      document.getElementById('checkout-form').style.display = 'none';
+      document.getElementById('success-state').style.display = 'block';
+
+    } catch (e) {
+      showPayError('Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = currentPlan === 'truck' ? 'Subscribe — $49/mo' : 'Subscribe — $29/mo';
+    }
+  }
+
+  function showPayError(msg) {
+    const el = document.getElementById('pay-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
