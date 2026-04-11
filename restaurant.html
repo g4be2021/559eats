@@ -127,6 +127,43 @@
     .nearby-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--ink); }
     .nearby-meta { font-size: 11px; color: var(--ink-muted); }
 
+    /* BOOKING */
+    .book-btn {
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: 25px;
+      padding: 11px 24px; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .book-btn:hover { background: var(--coral-dark); }
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,18,8,0.55); z-index: 500;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius);
+      padding: 2rem; width: 100%; max-width: 460px;
+      position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-muted); }
+    .modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+    .bform-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .bform-group label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .bform-group input, .bform-group select, .bform-group textarea { padding: 10px 12px; border: 1px solid var(--card-border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--cream); outline: none; transition: border-color 0.2s; width: 100%; }
+    .bform-group input:focus, .bform-group select:focus { border-color: var(--coral); background: var(--white); }
+    .bform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .submit-btn { width: 100%; padding: 12px; background: var(--coral); color: var(--white); border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+    .submit-btn:hover { background: var(--coral-dark); }
+    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .booking-error { font-size: 13px; color: #791F1F; margin-top: 8px; display: none; }
+    .booking-success { text-align: center; padding: 1rem 0; display: none; }
+    .booking-success .sicon { font-size: 48px; margin-bottom: 12px; }
+    .booking-success h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+    .booking-success p { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+
     /* SHARE */
     .share-bar {
       background: var(--coral-dark); border-radius: var(--radius);
@@ -249,6 +286,8 @@
 
     // Update page title + meta
     document.title = `${restaurant.name} · 559eats`;
+    currentRestaurantId = restaurant.id;
+    currentRestaurantName = restaurant.name;
     document.querySelector('meta[name="description"]').setAttribute('content',
       `${restaurant.name} — ${restaurant.cuisine_type} in ${restaurant.neighborhood}. Find hours, location, and more on 559eats.`
     );
@@ -282,6 +321,7 @@
               ${restaurant.phone ? `<a href="tel:${restaurant.phone}" class="action-btn primary">📞 Call</a>` : ''}
               ${restaurant.website ? `<a href="${restaurant.website}" target="_blank" class="action-btn secondary">Visit website →</a>` : ''}
               <a href="map.html" class="action-btn secondary">📍 Map</a>
+              <button class="book-btn" onclick="openBooking()">Reserve a table</button>
             </div>
           </div>
           ${restaurant.description ? `<p class="hero-desc">${restaurant.description}</p>` : ''}
@@ -395,5 +435,170 @@
 
   init();
 </script>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-overlay" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBooking()">✕</button>
+    <div id="booking-form-wrap">
+      <h2>Reserve a table</h2>
+      <p class="modal-sub" id="booking-restaurant-name">Loading...</p>
+      <div class="bform-row">
+        <div class="bform-group">
+          <label>Your name *</label>
+          <input type="text" id="b-name" placeholder="Full name" />
+        </div>
+        <div class="bform-group">
+          <label>Party size *</label>
+          <select id="b-party">
+            <option value="1">1 person</option>
+            <option value="2" selected>2 people</option>
+            <option value="3">3 people</option>
+            <option value="4">4 people</option>
+            <option value="5">5 people</option>
+            <option value="6">6 people</option>
+            <option value="7">7+ people</option>
+          </select>
+        </div>
+      </div>
+      <div class="bform-row">
+        <div class="bform-group">
+          <label>Date *</label>
+          <input type="date" id="b-date" />
+        </div>
+        <div class="bform-group">
+          <label>Time *</label>
+          <select id="b-time">
+            <option value="11:00 AM">11:00 AM</option>
+            <option value="11:30 AM">11:30 AM</option>
+            <option value="12:00 PM">12:00 PM</option>
+            <option value="12:30 PM">12:30 PM</option>
+            <option value="1:00 PM">1:00 PM</option>
+            <option value="1:30 PM">1:30 PM</option>
+            <option value="5:00 PM">5:00 PM</option>
+            <option value="5:30 PM">5:30 PM</option>
+            <option value="6:00 PM">6:00 PM</option>
+            <option value="6:30 PM">6:30 PM</option>
+            <option value="7:00 PM">7:00 PM</option>
+            <option value="7:30 PM">7:30 PM</option>
+            <option value="8:00 PM">8:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="bform-group">
+        <label>Phone number * (for confirmation)</label>
+        <input type="tel" id="b-phone" placeholder="(559) 555-0100" />
+      </div>
+      <div class="bform-group">
+        <label>Email (optional)</label>
+        <input type="email" id="b-email" placeholder="you@email.com" />
+      </div>
+      <div class="bform-group">
+        <label>Special requests</label>
+        <input type="text" id="b-notes" placeholder="Allergies, celebrations, seating preferences..." />
+      </div>
+      <div class="booking-error" id="booking-error"></div>
+      <button class="submit-btn" id="book-submit-btn" onclick="submitBooking()">Request reservation</button>
+      <p style="font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px">
+        The restaurant will confirm via SMS · Powered by 559eats
+      </p>
+    </div>
+    <div class="booking-success" id="booking-success">
+      <div class="sicon">🎉</div>
+      <h3>Request sent!</h3>
+      <p>You'll get a text confirmation once the restaurant accepts your booking. Keep an eye on your phone!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentRestaurantId = null;
+  let currentRestaurantName = null;
+
+  function openBooking() {
+    if (!currentRestaurantId) return;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('b-date').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('b-date').min = tomorrow.toISOString().split('T')[0];
+    document.getElementById('booking-restaurant-name').textContent = currentRestaurantName || 'Make a reservation';
+    document.getElementById('booking-form-wrap').style.display = 'block';
+    document.getElementById('booking-success').style.display = 'none';
+    document.getElementById('booking-error').style.display = 'none';
+    document.getElementById('booking-overlay').classList.add('open');
+  }
+
+  function closeBooking() {
+    document.getElementById('booking-overlay').classList.remove('open');
+  }
+
+  function closeOnOverlay(e) {
+    if (e.target === document.getElementById('booking-overlay')) closeBooking();
+  }
+
+  async function submitBooking() {
+    const name = document.getElementById('b-name').value.trim();
+    const phone = document.getElementById('b-phone').value.trim();
+    const date = document.getElementById('b-date').value;
+    const time = document.getElementById('b-time').value;
+    const party = document.getElementById('b-party').value;
+    const email = document.getElementById('b-email').value.trim();
+    const notes = document.getElementById('b-notes').value.trim();
+    const btn = document.getElementById('book-submit-btn');
+    const errEl = document.getElementById('booking-error');
+
+    if (!name) { showBookingError('Please enter your name.'); return; }
+    if (!phone) { showBookingError('Please enter your phone number.'); return; }
+    if (!date) { showBookingError('Please select a date.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending request...';
+    errEl.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant_id: currentRestaurantId,
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || null,
+          party_size: parseInt(party),
+          booking_date: date,
+          booking_time: time,
+          notes: notes || null
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('booking-form-wrap').style.display = 'none';
+        document.getElementById('booking-success').style.display = 'block';
+      } else {
+        showBookingError(data.error || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Request reservation';
+      }
+    } catch (e) {
+      showBookingError('Network error. Please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Request reservation';
+    }
+  }
+
+  function showBookingError(msg) {
+    const el = document.getElementById('booking-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // Hook into init() to set restaurant ID
+  const _originalInit = init;
+  // We patch currentRestaurantId after restaurant loads
+  // This is handled inline in the restaurant data render
+</script>
+
 </body>
 </html>
