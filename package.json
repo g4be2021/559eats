@@ -1,0 +1,8 @@
+{
+  "name": "559eats",
+  "version": "1.0.0",
+  "description": "Local restaurant directory for Fresno and the 559",
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
+}
