@@ -219,6 +219,21 @@
     </table>
   </div>
 
+
+  <!-- BOOKINGS TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Recent bookings</h3>
+      <span id="booking-count" style="font-size:12px;color:var(--ink-muted)"></span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Guest</th><th>Restaurant</th><th>Date & time</th><th>Party</th><th>Status</th><th>Commission</th></tr>
+      </thead>
+      <tbody id="bookings-body"></tbody>
+    </table>
+  </div>
+
 </main>
 
 <script>
@@ -248,9 +263,10 @@
     document.getElementById('date-badge').textContent =
       now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-    const [all, smsLogs] = await Promise.all([
+    const [all, smsLogs, bookings] = await Promise.all([
       api('restaurants?order=created_at.desc'),
-      api('sms_log?order=sent_at.desc&limit=20')
+      api('sms_log?order=sent_at.desc&limit=20'),
+      api('bookings?order=created_at.desc&limit=30')
     ]);
 
     const approved = all.filter(r => r.status === 'approved' && r.is_active);
@@ -340,6 +356,30 @@
         <td><span class="badge badge-${r.status}">${r.status}</span></td>
         <td style="color:var(--ink-muted)">${new Date(r.created_at).toLocaleDateString()}</td>
       </tr>`).join('');
+
+
+    // Bookings stats
+    const allBookings = bookings || [];
+    const pendingBookings = allBookings.filter(b => b.status === 'pending');
+    const confirmedBookings = allBookings.filter(b => b.status === 'confirmed');
+    const totalCommission = confirmedBookings.reduce((sum, b) => sum + (b.commission_amount || 0), 0);
+
+    document.getElementById('bookings-body').innerHTML = allBookings.length === 0
+      ? '<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2rem">No bookings yet</td></tr>'
+      : allBookings.map(b => {
+          const statusColors = { pending:'background:#FAEEDA;color:#633806', confirmed:'background:#EAF3DE;color:#27500A', declined:'background:#FCEBEB;color:#791F1F' };
+          return `<tr>
+            <td><strong>${b.customer_name}</strong><br><span style="font-size:11px;color:var(--ink-muted)">${b.customer_phone}</span></td>
+            <td style="color:var(--ink-muted)">${b.restaurant_id?.slice(0,8) || '—'}</td>
+            <td>${b.booking_date} at ${b.booking_time}</td>
+            <td>Party of ${b.party_size}</td>
+            <td><span style="font-size:10px;padding:3px 8px;border-radius:8px;font-weight:500;${statusColors[b.status] || ''}">${b.status}</span></td>
+            <td style="font-weight:500;color:var(--coral-dark)">${b.commission_amount ? '$' + b.commission_amount.toFixed(2) : '—'}</td>
+          </tr>`;
+        }).join('');
+
+    document.getElementById('booking-count').textContent =
+      allBookings.length + ' total · ' + pendingBookings.length + ' pending · $' + totalCommission.toFixed(2) + ' earned';
 
     // SMS log
     document.getElementById('sms-body').innerHTML = (smsLogs || []).length === 0
