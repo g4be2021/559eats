@@ -61,19 +61,31 @@ module.exports = async (req, res) => {
 
   try {
     // Get all SMS-managed owners with active approved restaurants
+    // Get all SMS owners
     const owners = await supabase(
-      'owners?auth_method=eq.sms&phone=not.is.null&select=*,restaurants(id,name,status,is_active,sms_last_updated)'
+      'owners?auth_method=eq.sms&phone=not.is.null'
     );
 
     if (!owners || owners.length === 0) {
       return res.json({ sent: 0, message: 'No SMS owners found' });
     }
 
-    const eligible = owners.filter(o =>
-      o.restaurants &&
-      o.restaurants.status === 'approved' &&
-      o.restaurants.is_active === true
-    );
+    // Get their restaurants separately
+    const eligible = [];
+    for (const owner of owners) {
+      if (!owner.restaurant_id) continue;
+      const restaurants = await supabase(
+        `restaurants?id=eq.${owner.restaurant_id}&status=eq.approved&is_active=eq.true`
+      );
+      if (restaurants && restaurants.length > 0) {
+        owner.restaurants = restaurants[0];
+        eligible.push(owner);
+      }
+    }
+
+    if (eligible.length === 0) {
+      return res.json({ sent: 0, message: 'No eligible SMS owners found — check restaurant status' });
+    }
 
     let sent = 0;
     const results = [];
