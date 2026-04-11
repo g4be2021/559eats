@@ -7,7 +7,7 @@
 // ============================================
 
 const TWILIO_SID   = 'AC0311f54c34a54414ddd04c4e6b387b59';
-const TWILIO_TOKEN = '82c47f2512d5afa7312796b074b0bd19';
+const TWILIO_TOKEN = '525516f7020ffe6c2d30269212ebf7b7';
 const TWILIO_FROM  = '+15593773665';
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
