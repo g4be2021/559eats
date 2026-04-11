@@ -650,30 +650,56 @@
 
   function handleSearch() {
     const q = document.getElementById('search-input').value.toLowerCase().trim();
-    if (!q) { currentFilter = ''; currentNeighborhood = ''; renderRestaurants(); return; }
+
+    // Reset filters
+    currentFilter = '';
+    currentNeighborhood = '';
+    visibleCount = 8;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('.filter-chip').classList.add('active');
+
+    if (!q) {
+      renderRestaurants();
+      return;
+    }
+
     const grid = document.getElementById('restaurant-grid');
-    const results = allRestaurants.filter(r =>
+    const btn = document.getElementById('load-more-btn');
+
+    // Search across restaurants AND food trucks
+    const allItems = [...allRestaurants, ...allTrucks];
+    const results = allItems.filter(r =>
       r.name.toLowerCase().includes(q) ||
       (r.cuisine_type || '').toLowerCase().includes(q) ||
-      (r.neighborhood || '').toLowerCase().includes(q)
+      (r.neighborhood || '').toLowerCase().includes(q) ||
+      (r.address || '').toLowerCase().includes(q)
     );
+
     if (results.length === 0) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No results for "' + q + '"</div>';
-    } else {
-      grid.innerHTML = results.map(r => `
-        <div class="r-card">
-          <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
-          <div class="r-card-body">
-            <div class="r-card-name">${r.name}</div>
-            <div class="r-card-meta">${r.cuisine_type} · ${r.neighborhood}</div>
-            <div class="r-card-footer">
-              <span class="stars">★★★★★</span>
-              <span class="badge open">Open now</span>
-            </div>
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+        No results for "<strong>${q}</strong>" — try a cuisine or neighborhood name.
+      </div>`;
+      btn.style.display = 'none';
+      return;
+    }
+
+    grid.innerHTML = results.map(r => `
+      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
+        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
+        <div class="r-card-body">
+          <div class="r-card-name">${r.name}</div>
+          <div class="r-card-meta">${r.cuisine_type || ''} · ${r.neighborhood || ''}</div>
+          <div class="r-card-footer">
+            <span class="stars">★★★★★</span>
+            ${r.is_food_truck ? '<span class="badge truck-badge" style="background:#FAEEDA;color:#633806">🚚 Truck</span>' : '<span class="badge open">Open now</span>'}
           </div>
         </div>
-      `).join('');
-    }
+      </a>
+    `).join('');
+    btn.style.display = 'none';
+
+    // Scroll to results
+    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   document.getElementById('search-input').addEventListener('keydown', e => {
