@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --coral:#D85A30;--coral-dark:#4A1B0C;--coral-light:#FAECE7;
+      --cream:#FBF7F2;--ink:#1A1208;--ink-muted:#6B5C4E;
+      --ink-faint:#C2B5A8;--white:#FFFFFF;--card-border:rgba(26,18,8,0.08);
+      --radius:14px;--radius-sm:8px;
+      --amber:#FAEEDA;--amber-text:#633806;--amber-border:#EF9F27;
+      --green-bg:#EAF3DE;--green-text:#27500A;--green-border:#97C459;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
+    nav{background:var(--coral-dark);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--white);text-decoration:none;}
+    .admin-badge{font-size:11px;background:var(--coral);color:var(--white);padding:3px 10px;border-radius:10px;margin-left:10px;}
+    .nav-links{display:flex;gap:16px;}
+    .nav-links a{font-size:13px;color:rgba(255,255,255,0.7);text-decoration:none;}
+    .nav-links a:hover{color:var(--white);}
+    .nav-links a.active{color:var(--white);font-weight:500;}
+    main{max-width:1000px;margin:0 auto;padding:2.5rem 2rem;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;}
+    .date-badge{font-size:12px;color:var(--ink-muted);background:var(--white);border:1px solid var(--card-border);border-radius:20px;padding:5px 14px;}
+
+    /* STAT CARDS */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2rem;}
+    .stat-card{background:var(--white);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.25rem;}
+    .stat-label{font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
+    .stat-value{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--ink);line-height:1;}
+    .stat-sub{font-size:12px;color:var(--ink-muted);margin-top:6px;}
+    .stat-up{color:#27500A;}
+    .stat-card.highlight{border-color:var(--coral);background:var(--coral-light);}
+    .stat-card.highlight .stat-value{color:var(--coral-dark);}
+
+    /* CHARTS ROW */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem;}
+    .chart-card{background:var(--white);border:1px solid var(--card-border);border-radius:var(--radius);padding:1.5rem;}
+    .chart-title{font-size:14px;font-weight:500;margin-bottom:1.25rem;}
+    .chart-wrap{position:relative;height:200px;}
+
+    /* TABLES */
+    .table-card{background:var(--white);border:1px solid var(--card-border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;}
+    .table-header{padding:14px 18px;border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;}
+    .table-header h3{font-size:14px;font-weight:500;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:var(--cream);padding:9px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--card-border);}
+    td{padding:11px 16px;border-bottom:1px solid var(--card-border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--cream);}
+    .badge{font-size:10px;padding:3px 8px;border-radius:8px;font-weight:500;}
+    .badge-truck{background:var(--amber);color:var(--amber-text);}
+    .badge-sponsored{background:var(--amber);color:var(--amber-text);border:1px solid var(--amber-border);}
+    .badge-featured{background:var(--green-bg);color:var(--green-text);}
+    .badge-approved{background:var(--green-bg);color:var(--green-text);}
+    .bar-wrap{display:flex;align-items:center;gap:8px;}
+    .bar{height:6px;border-radius:3px;background:var(--coral);min-width:4px;}
+
+    /* REVENUE */
+    .revenue-card{background:var(--coral-dark);border-radius:var(--radius);padding:1.75rem;margin-bottom:2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;}
+    .rev-item .rev-label{font-size:11px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;}
+    .rev-item .rev-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--white);}
+    .rev-item .rev-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
+
+    /* SMS LOG */
+    .sms-status{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
+    .sms-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+    .sms-dot.out{background:#378ADD;}
+    .sms-dot.in{background:#27500A;}
+
+    /* PW WALL */
+    #pw-wall{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;gap:1rem;}
+    #pw-wall h2{font-family:'Playfair Display',serif;font-size:24px;}
+    #pw-wall p{font-size:14px;color:var(--ink-muted);}
+    .pw-form{display:flex;gap:8px;}
+    .pw-form input{padding:10px 14px;border:1px solid var(--card-border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+    .pw-form button{padding:10px 20px;background:var(--coral);color:var(--white);border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+
+    @media(max-width:700px){
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .charts-row{grid-template-columns:1fr;}
+      .revenue-card{grid-template-columns:1fr;}
+    }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+</head>
+<body>
+<nav>
+  <div style="display:flex;align-items:center;">
+    <a href="index.html" class="nav-logo">559eats</a>
+    <span class="admin-badge">Admin</span>
+  </div>
+  <div class="nav-links">
+    <a href="admin.html">Listings</a>
+    <a href="analytics.html" class="active">Analytics</a>
+    <a href="index.html">View site →</a>
+  </div>
+</nav>
+
+<div id="pw-wall">
+  <div style="font-size:48px">📊</div>
+  <h2>Analytics</h2>
+  <p>Enter your admin password to continue.</p>
+  <div class="pw-form">
+    <input type="password" id="pw-input" placeholder="Admin password" onkeydown="if(event.key==='Enter')checkPw()" />
+    <button onclick="checkPw()">Enter</button>
+  </div>
+  <p id="pw-error" style="color:#D85A30;font-size:13px;display:none">Incorrect password.</p>
+</div>
+
+<main id="analytics-main" style="display:none">
+
+  <div class="page-header">
+    <div class="page-title">Analytics</div>
+    <span class="date-badge" id="date-badge">Loading...</span>
+  </div>
+
+  <!-- REVENUE -->
+  <div class="revenue-card" id="revenue-card">
+    <div class="rev-item">
+      <div class="rev-label">Monthly recurring revenue</div>
+      <div class="rev-value" id="rev-mrr">$0</div>
+      <div class="rev-sub">From active subscriptions</div>
+    </div>
+    <div class="rev-item">
+      <div class="rev-label">Sponsored trucks</div>
+      <div class="rev-value" id="rev-trucks">0</div>
+      <div class="rev-sub">× $49/mo each</div>
+    </div>
+    <div class="rev-item">
+      <div class="rev-label">Featured restaurants</div>
+      <div class="rev-value" id="rev-featured">0</div>
+      <div class="rev-sub">× $29/mo each</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card highlight">
+      <div class="stat-label">Total listings</div>
+      <div class="stat-value" id="s-total">—</div>
+      <div class="stat-sub">Approved & active</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Food trucks</div>
+      <div class="stat-value" id="s-trucks">—</div>
+      <div class="stat-sub">In directory</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending review</div>
+      <div class="stat-value" id="s-pending">—</div>
+      <div class="stat-sub">Awaiting approval</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">SMS check-ins sent</div>
+      <div class="stat-value" id="s-sms">—</div>
+      <div class="stat-sub">Total outbound texts</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Listings by neighborhood</div>
+      <div class="chart-wrap"><canvas id="hood-chart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Listings by cuisine type</div>
+      <div class="chart-wrap"><canvas id="cuisine-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOP LISTINGS TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>All listings</h3>
+      <span id="listing-count" style="font-size:12px;color:var(--ink-muted)"></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Neighborhood</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Added</th>
+        </tr>
+      </thead>
+      <tbody id="listings-body"></tbody>
+    </table>
+  </div>
+
+  <!-- SMS LOG TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Recent SMS activity</h3>
+      <span style="font-size:12px;color:var(--ink-muted)">Last 20 messages</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Direction</th><th>Restaurant</th><th>Message</th><th>Phone</th><th>Time</th></tr>
+      </thead>
+      <tbody id="sms-body"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const ADMIN_PASSWORD = '559eats-admin-2024';
+
+  function checkPw() {
+    if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+      document.getElementById('pw-wall').style.display = 'none';
+      document.getElementById('analytics-main').style.display = 'block';
+      loadAnalytics();
+    } else {
+      document.getElementById('pw-error').style.display = 'block';
+    }
+  }
+
+  async function api(path) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.json();
+  }
+
+  async function loadAnalytics() {
+    const now = new Date();
+    document.getElementById('date-badge').textContent =
+      now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+    const [all, smsLogs] = await Promise.all([
+      api('restaurants?order=created_at.desc'),
+      api('sms_log?order=sent_at.desc&limit=20')
+    ]);
+
+    const approved = all.filter(r => r.status === 'approved' && r.is_active);
+    const trucks = approved.filter(r => r.is_food_truck);
+    const restaurants = approved.filter(r => !r.is_food_truck);
+    const pending = all.filter(r => r.status === 'pending');
+    const sponsored = trucks.filter(r => r.is_sponsored);
+    const featured = restaurants.filter(r => r.is_featured);
+    const smsOut = (smsLogs || []).filter(s => s.direction === 'outbound');
+
+    // Stats
+    document.getElementById('s-total').textContent = approved.length;
+    document.getElementById('s-trucks').textContent = trucks.length;
+    document.getElementById('s-pending').textContent = pending.length;
+    document.getElementById('s-sms').textContent = smsOut.length;
+
+    // Revenue
+    const mrr = (sponsored.length * 49) + (featured.length * 29);
+    document.getElementById('rev-mrr').textContent = '$' + mrr.toLocaleString();
+    document.getElementById('rev-trucks').textContent = sponsored.length;
+    document.getElementById('rev-featured').textContent = featured.length;
+
+    // Neighborhood chart
+    const hoodCounts = {};
+    approved.forEach(r => {
+      const h = r.neighborhood || 'Unknown';
+      hoodCounts[h] = (hoodCounts[h] || 0) + 1;
+    });
+    const hoodSorted = Object.entries(hoodCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    new Chart(document.getElementById('hood-chart'), {
+      type: 'bar',
+      data: {
+        labels: hoodSorted.map(h => h[0]),
+        datasets: [{
+          data: hoodSorted.map(h => h[1]),
+          backgroundColor: '#D85A30',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+          x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+        }
+      }
+    });
+
+    // Cuisine chart
+    const cuisineCounts = {};
+    approved.forEach(r => {
+      const c = r.cuisine_type || 'Other';
+      cuisineCounts[c] = (cuisineCounts[c] || 0) + 1;
+    });
+    const cuisineSorted = Object.entries(cuisineCounts).sort((a,b) => b[1]-a[1]).slice(0, 6);
+    const colors = ['#D85A30','#4A1B0C','#F0997B','#BA7517','#1D9E75','#378ADD'];
+    new Chart(document.getElementById('cuisine-chart'), {
+      type: 'doughnut',
+      data: {
+        labels: cuisineSorted.map(c => c[0]),
+        datasets: [{
+          data: cuisineSorted.map(c => c[1]),
+          backgroundColor: colors,
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 11 }, padding: 10, boxWidth: 12 } }
+        }
+      }
+    });
+
+    // Listings table
+    document.getElementById('listing-count').textContent = all.length + ' total';
+    document.getElementById('listings-body').innerHTML = all.map(r => `
+      <tr>
+        <td><strong>${r.name}</strong></td>
+        <td style="color:var(--ink-muted)">${r.neighborhood || '—'}</td>
+        <td>
+          ${r.is_food_truck ? '<span class="badge badge-truck">Truck</span>' : 'Restaurant'}
+          ${r.is_sponsored ? ' <span class="badge badge-sponsored">Sponsored</span>' : ''}
+          ${r.is_featured ? ' <span class="badge badge-featured">Featured</span>' : ''}
+        </td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td style="color:var(--ink-muted)">${new Date(r.created_at).toLocaleDateString()}</td>
+      </tr>`).join('');
+
+    // SMS log
+    document.getElementById('sms-body').innerHTML = (smsLogs || []).length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:2rem">No SMS activity yet</td></tr>'
+      : (smsLogs || []).map(s => `
+        <tr>
+          <td>
+            <span class="sms-status">
+              <span class="sms-dot ${s.direction === 'outbound' ? 'out' : 'in'}"></span>
+              ${s.direction === 'outbound' ? 'Sent' : 'Received'}
+            </span>
+          </td>
+          <td style="color:var(--ink-muted)">${s.restaurant_id ? '–' : '–'}</td>
+          <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.message || '—'}</td>
+          <td style="color:var(--ink-muted)">${s.phone || '—'}</td>
+          <td style="color:var(--ink-muted)">${new Date(s.sent_at).toLocaleDateString()}</td>
+        </tr>`).join('');
+  }
+</script>
+</body>
+</html>
