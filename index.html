@@ -366,9 +366,9 @@
 <nav>
   <a href="/" class="nav-logo">559eats</a>
   <div class="nav-links">
-    <a href="#">Browse</a>
+    <a href="#browse-anchor" onclick="document.getElementById('browse-anchor').scrollIntoView({behavior:'smooth'});return false;">Browse</a>
     <a href="map.html">Map</a>
-    <a href="#">Food trucks</a>
+    <a href="#browse-anchor" onclick="showTrucks(); return false;">Food trucks</a>
     <a href="pricing.html" class="nav-cta">List your spot</a>
   </div>
   <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
@@ -426,6 +426,7 @@
     </div>
   </div>
 
+  <div id="browse-anchor"></div>
   <!-- CUISINE FILTERS -->
   <div class="section-head">
     <span class="section-title">Find your craving</span>
@@ -724,6 +725,35 @@
 
   function openNearMe() {
     alert('Map view coming soon! We\'re building it next.');
+  }
+
+  function showTrucks() {
+    document.getElementById('browse-anchor').scrollIntoView({ behavior: 'smooth' });
+    currentFilter = '';
+    currentNeighborhood = '';
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    const grid = document.getElementById('restaurant-grid');
+    const btn = document.getElementById('load-more-btn');
+    const trucks = allTrucks;
+    if (trucks.length === 0) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No food trucks found.</div>';
+      btn.style.display = 'none';
+      return;
+    }
+    grid.innerHTML = trucks.map(r => `
+      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
+        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
+        <div class="r-card-body">
+          <div class="r-card-name">${r.name}</div>
+          <div class="r-card-meta">${r.cuisine_type || ''} · ${r.neighborhood || ''}</div>
+          <div class="r-card-footer">
+            <span class="stars">★★★★★</span>
+            <span class="badge" style="background:#FAEEDA;color:#633806">🚚 Truck</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+    btn.style.display = 'none';
   }
 
   init();
