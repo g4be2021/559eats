@@ -88,6 +88,19 @@
 </div>
 
 <main id="admin-main" class="locked">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700">Admin dashboard</h1>
+      <p style="font-size:13px;color:var(--ink-muted);margin-top:3px">Manage all 559eats listings</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="action-btn" style="padding:9px 18px;font-size:13px;" onclick="triggerSMSCheckin()">📱 Send SMS check-ins</button>
+      <button class="action-btn approve" style="padding:9px 18px;font-size:13px;" onclick="window.location.href='apply.html'">+ Add listing</button>
+    </div>
+  </div>
+
+  <div id="sms-result" style="display:none;background:#EAF3DE;border:1px solid #97C459;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#27500A;margin-bottom:1.5rem;"></div>
+
   <div class="stats-row">
     <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total listings</div></div>
     <div class="stat-card"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
@@ -119,7 +132,7 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 
   // CHANGE THIS PASSWORD to something only you know
-  const ADMIN_PASSWORD = '0b1806E3EA1959C2.';
+  const ADMIN_PASSWORD = '559eats-admin-2024';
 
   function checkPw() {
     const val = document.getElementById('pw-input').value;
@@ -142,6 +155,22 @@
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
     if (res.status === 204) return null;
     return res.json();
+  }
+
+  async function triggerSMSCheckin() {
+    const resultEl = document.getElementById('sms-result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = '📱 Sending check-in texts...';
+    try {
+      const res = await fetch('/api/sms-checkin', { method: 'POST' });
+      const data = await res.json();
+      resultEl.textContent = `✅ Done! Sent ${data.sent} of ${data.total} SMS check-ins.`;
+    } catch (e) {
+      resultEl.style.background = '#FCEBEB';
+      resultEl.style.borderColor = '#F09595';
+      resultEl.style.color = '#791F1F';
+      resultEl.textContent = '❌ SMS send failed. Check your Vercel function logs.';
+    }
   }
 
   async function loadData() {
