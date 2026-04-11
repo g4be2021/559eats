@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Discover Fresno's Best Food</title>
+  <meta name="description" content="The local food directory for Fresno and the 559. Discover restaurants, food trucks, hours, and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30;
+      --coral-dark: #4A1B0C;
+      --coral-light: #FAECE7;
+      --coral-mid: #F0997B;
+      --cream: #FBF7F2;
+      --ink: #1A1208;
+      --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8;
+      --white: #FFFFFF;
+      --card-border: rgba(26,18,8,0.08);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(251,247,242,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 900;
+      color: var(--coral); letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--ink-muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-cta {
+      background: var(--coral); color: var(--white) !important;
+      padding: 7px 16px; border-radius: 20px; font-size: 13px !important;
+      font-weight: 500 !important; transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--coral-dark) !important; }
+
+    /* HERO */
+    .hero {
+      background: var(--coral);
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.06) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%);
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.15em;
+      color: var(--coral-mid); text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 900; color: var(--white);
+      line-height: 1.05; letter-spacing: -1px;
+      margin-bottom: 1.25rem; position: relative;
+    }
+    .hero-title span { color: var(--coral-light); }
+    .hero-sub {
+      font-size: 16px; color: rgba(255,255,255,0.75);
+      margin-bottom: 2.5rem; font-weight: 300;
+    }
+
+    /* SEARCH */
+    .search-wrap {
+      max-width: 560px; margin: 0 auto;
+      display: flex; gap: 0;
+      background: var(--white);
+      border-radius: 50px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    .search-wrap input {
+      flex: 1; padding: 14px 20px;
+      border: none; outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--ink);
+      background: transparent;
+    }
+    .search-wrap input::placeholder { color: var(--ink-faint); }
+    .search-btn {
+      padding: 14px 24px;
+      background: var(--coral-dark); color: var(--white);
+      border: none; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      border-radius: 0 50px 50px 0;
+      transition: background 0.2s;
+    }
+    .search-btn:hover { background: #2d0d04; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 2.5rem;
+      margin-top: 2.5rem; position: relative;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; color: var(--white);
+    }
+    .stat-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+    /* MAIN CONTENT */
+    main { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+
+    /* SECTION HEADERS */
+    .section-head {
+      display: flex; align-items: baseline;
+      justify-content: space-between; margin-bottom: 1.25rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--ink);
+    }
+    .section-link {
+      font-size: 13px; color: var(--coral); text-decoration: none;
+      font-weight: 500;
+    }
+    .section-link:hover { text-decoration: underline; }
+
+    /* SPONSORED BADGE */
+    .sponsored-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 500; color: #633806;
+      background: #FAEEDA; border: 1px solid #EF9F27;
+      border-radius: 20px; padding: 3px 10px; margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    /* CAROUSEL */
+    .carousel-outer { overflow: hidden; margin: 0 -2rem; padding: 0 2rem; }
+    .carousel-track {
+      display: flex; gap: 14px;
+      transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+    }
+    .carousel-controls { display: flex; gap: 8px; }
+    .carousel-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background: var(--white); cursor: pointer;
+      font-size: 16px; display: flex; align-items: center;
+      justify-content: center; color: var(--ink);
+      transition: all 0.15s;
+    }
+    .carousel-btn:hover { background: var(--coral); color: var(--white); border-color: var(--coral); }
+
+    /* TRUCK CARD */
+    .truck-card {
+      min-width: 210px; flex-shrink: 0;
+      background: var(--white);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden;
+      cursor: pointer; transition: transform 0.2s;
+      position: relative;
+    }
+    .truck-card:hover { transform: translateY(-3px); }
+    .truck-card.is-sponsored { border-color: #EF9F27; }
+    .truck-sponsored-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: #FAEEDA; color: #633806;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 8px; border-radius: 10px;
+      border: 1px solid #EF9F27;
+    }
+    .truck-img {
+      height: 110px; background: var(--coral-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 42px;
+    }
+    .truck-body { padding: 12px 14px; }
+    .truck-name { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .truck-meta { font-size: 12px; color: var(--ink-muted); margin-bottom: 8px; }
+    .truck-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* FILTERS */
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.75rem; }
+    .filter-chip {
+      padding: 7px 16px; border-radius: 20px;
+      font-size: 13px; font-weight: 400;
+      border: 1px solid var(--card-border);
+      background: var(--white); color: var(--ink-muted);
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .filter-chip:hover { border-color: var(--coral); color: var(--coral); }
+    .filter-chip.active {
+      background: var(--coral); color: var(--white);
+      border-color: var(--coral);
+    }
+
+    /* RESTAURANT GRID */
+    .restaurant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px; margin-bottom: 2rem;
+    }
+    .r-card {
+      background: var(--white);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .r-card:hover { transform: translateY(-3px); }
+    .r-card-img {
+      height: 130px; background: var(--coral-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 46px;
+    }
+    .r-card-body { padding: 14px 16px; }
+    .r-card-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+    .r-card-meta { font-size: 12px; color: var(--ink-muted); margin-bottom: 10px; }
+    .r-card-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* BADGES */
+    .badge {
+      font-size: 11px; padding: 3px 9px; border-radius: 10px;
+      background: #F1EFE8; color: var(--ink-muted);
+      font-weight: 400;
+    }
+    .badge.open { background: #EAF3DE; color: #27500A; }
+    .stars { font-size: 12px; color: #BA7517; }
+
+    /* LOAD MORE */
+    .load-more-wrap { text-align: center; margin-bottom: 3rem; }
+    .load-more-btn {
+      padding: 11px 32px; border-radius: 25px;
+      border: 1px solid var(--card-border);
+      background: var(--white); color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; cursor: pointer; transition: all 0.15s;
+    }
+    .load-more-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+    /* MAP BANNER */
+    .map-banner {
+      background: var(--coral-dark);
+      border-radius: var(--radius);
+      padding: 2rem 2.5rem;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3rem; gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .map-banner-text h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700; color: var(--white);
+      margin-bottom: 4px;
+    }
+    .map-banner-text p { font-size: 13px; color: rgba(255,255,255,0.65); }
+    .map-btn {
+      padding: 11px 24px; border-radius: 25px;
+      background: var(--coral); color: var(--white);
+      border: none; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      white-space: nowrap; transition: background 0.2s;
+    }
+    .map-btn:hover { background: var(--coral-mid); }
+
+    /* NEIGHBORHOODS */
+    .hood-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 3rem;
+    }
+    .hood-card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm); padding: 16px 14px;
+      text-align: center; cursor: pointer; transition: all 0.15s;
+    }
+    .hood-card:hover { border-color: var(--coral); }
+    .hood-icon { font-size: 22px; margin-bottom: 6px; }
+    .hood-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .hood-count { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 2rem;
+      text-align: center;
+      font-size: 12px; color: var(--ink-muted);
+    }
+    footer a { color: var(--coral); text-decoration: none; }
+
+    /* LOADING STATE */
+    .skeleton {
+      background: linear-gradient(90deg, #f0ebe4 25%, #e8e1d8 50%, #f0ebe4 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--radius-sm);
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--ink-muted); font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 1rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      main { padding: 2rem 1rem; }
+      .stats-bar { gap: 1.5rem; }
+      .map-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">559eats</a>
+  <div class="nav-links">
+    <a href="#">Browse</a>
+    <a href="#">Map</a>
+    <a href="#">Food trucks</a>
+    <a href="#" class="nav-cta">List your spot</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">Fresno &amp; the Central Valley</p>
+  <h1 class="hero-title">Eat local.<br><span>Eat 559.</span></h1>
+  <p class="hero-sub">Discover the best restaurants, food trucks, and hidden gems in the 559.</p>
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="Search restaurants, cuisines, neighborhoods..." />
+    <button class="search-btn" onclick="handleSearch()">Search</button>
+  </div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="stat-restaurants">—</div>
+      <div class="stat-label">Restaurants</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-trucks">—</div>
+      <div class="stat-label">Food trucks</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-hoods">5</div>
+      <div class="stat-label">Neighborhoods</div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+  <!-- FOOD TRUCK CAROUSEL -->
+  <div class="section-head">
+    <div>
+      <span class="section-title">🚚 Food trucks near you</span>
+      <span class="sponsored-label">Sponsored</span>
+    </div>
+    <div class="carousel-controls">
+      <button class="carousel-btn" onclick="scrollCarousel(-1)">‹</button>
+      <button class="carousel-btn" onclick="scrollCarousel(1)">›</button>
+    </div>
+  </div>
+  <div class="carousel-outer" style="margin-bottom:2.5rem;">
+    <div class="carousel-track" id="carousel-track">
+      <div class="truck-card"><div class="truck-img skeleton" style="font-size:0"></div><div class="truck-body"><div class="skeleton" style="height:14px;width:70%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:50%"></div></div></div>
+      <div class="truck-card"><div class="truck-img skeleton" style="font-size:0"></div><div class="truck-body"><div class="skeleton" style="height:14px;width:70%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:50%"></div></div></div>
+      <div class="truck-card"><div class="truck-img skeleton" style="font-size:0"></div><div class="truck-body"><div class="skeleton" style="height:14px;width:70%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:50%"></div></div></div>
+    </div>
+  </div>
+
+  <!-- CUISINE FILTERS -->
+  <div class="section-head">
+    <span class="section-title">Find your craving</span>
+    <a href="#" class="section-link">View all →</a>
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter-chip active" onclick="filterBy(this,'')">All</button>
+    <button class="filter-chip" onclick="filterBy(this,'Mexican')">Mexican</button>
+    <button class="filter-chip" onclick="filterBy(this,'Vietnamese')">Vietnamese</button>
+    <button class="filter-chip" onclick="filterBy(this,'BBQ')">BBQ</button>
+    <button class="filter-chip" onclick="filterBy(this,'Pizza')">Pizza</button>
+    <button class="filter-chip" onclick="filterBy(this,'Hawaiian Fusion')">Hawaiian</button>
+    <button class="filter-chip" onclick="filterBy(this,'Asian Street Food')">Asian</button>
+    <button class="filter-chip" onclick="filterBy(this,'Mexican Street Food')">Street Food</button>
+  </div>
+
+  <!-- RESTAURANT GRID -->
+  <div class="restaurant-grid" id="restaurant-grid">
+    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
+    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
+    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
+    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
+  </div>
+  <div class="load-more-wrap">
+    <button class="load-more-btn" id="load-more-btn" onclick="loadMore()" style="display:none">Load more restaurants</button>
+  </div>
+
+  <!-- MAP BANNER -->
+  <div class="map-banner">
+    <div class="map-banner-text">
+      <h3>📍 What's near me?</h3>
+      <p>Find restaurants and food trucks within walking or driving distance right now.</p>
+    </div>
+    <button class="map-btn" onclick="openNearMe()">Open map view</button>
+  </div>
+
+  <!-- NEIGHBORHOODS -->
+  <div class="section-head">
+    <span class="section-title">Explore by neighborhood</span>
+  </div>
+  <div class="hood-grid">
+    <div class="hood-card" onclick="filterNeighborhood('Downtown Fresno')">
+      <div class="hood-icon">🏙️</div>
+      <div class="hood-name">Downtown</div>
+      <div class="hood-count" id="hood-downtown">— spots</div>
+    </div>
+    <div class="hood-card" onclick="filterNeighborhood('Tower District')">
+      <div class="hood-icon">🎭</div>
+      <div class="hood-name">Tower District</div>
+      <div class="hood-count" id="hood-tower">— spots</div>
+    </div>
+    <div class="hood-card" onclick="filterNeighborhood('Clovis')">
+      <div class="hood-icon">🌿</div>
+      <div class="hood-name">Clovis</div>
+      <div class="hood-count" id="hood-clovis">— spots</div>
+    </div>
+    <div class="hood-card" onclick="filterNeighborhood('Fig Garden')">
+      <div class="hood-icon">🌳</div>
+      <div class="hood-name">Fig Garden</div>
+      <div class="hood-count" id="hood-figgarden">— spots</div>
+    </div>
+    <div class="hood-card" onclick="filterNeighborhood('Fresno State')">
+      <div class="hood-icon">🏘️</div>
+      <div class="hood-name">Fresno State</div>
+      <div class="hood-count" id="hood-fresnostate">— spots</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>559eats · Celebrating local food in the Central Valley</p>
+  <p style="margin-top:6px"><a href="#">List your restaurant</a> · <a href="#">Contact</a> · <a href="#">About</a></p>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+  const CUISINE_ICONS = {
+    'Mexican': '🌮', 'Vietnamese': '🍜', 'BBQ': '🍖', 'Pizza': '🍕',
+    'Hawaiian Fusion': '🍱', 'Asian Street Food': '🥡',
+    'Mexican Street Food': '🌯', 'Comfort Food': '🧀', 'default': '🍽️'
+  };
+
+  let allRestaurants = [];
+  let allTrucks = [];
+  let currentFilter = '';
+  let currentNeighborhood = '';
+  let visibleCount = 8;
+  let carouselIndex = 0;
+
+  async function fetchData(table, filters = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${filters}&apikey=${SUPABASE_KEY}`;
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+    return res.json();
+  }
+
+  async function init() {
+    try {
+      const [restaurants, trucks] = await Promise.all([
+        fetchData('restaurants', 'status=eq.approved&is_active=eq.true&is_food_truck=eq.false&order=name'),
+        fetchData('restaurants', 'status=eq.approved&is_active=eq.true&is_food_truck=eq.true&order=is_sponsored.desc')
+      ]);
+
+      allRestaurants = restaurants;
+      allTrucks = trucks;
+
+      updateStats();
+      renderCarousel();
+      renderRestaurants();
+      updateNeighborhoodCounts();
+    } catch (e) {
+      console.error('Error loading data:', e);
+    }
+  }
+
+  function updateStats() {
+    document.getElementById('stat-restaurants').textContent = allRestaurants.length;
+    document.getElementById('stat-trucks').textContent = allTrucks.length;
+  }
+
+  function renderCarousel() {
+    const track = document.getElementById('carousel-track');
+    const shuffled = [...allTrucks].sort(() => Math.random() - 0.5);
+    track.innerHTML = shuffled.map(t => `
+      <div class="truck-card ${t.is_sponsored ? 'is-sponsored' : ''}">
+        ${t.is_sponsored ? '<div class="truck-sponsored-badge">Sponsored</div>' : ''}
+        <div class="truck-img">${CUISINE_ICONS[t.cuisine_type] || CUISINE_ICONS.default}</div>
+        <div class="truck-body">
+          <div class="truck-name">${t.name}</div>
+          <div class="truck-meta">${t.cuisine_type} · ${t.neighborhood}</div>
+          <div class="truck-footer">
+            <span class="stars">★★★★★</span>
+            <span class="badge open">Open now</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    carouselIndex = 0;
+  }
+
+  function scrollCarousel(dir) {
+    const track = document.getElementById('carousel-track');
+    const cardW = 224;
+    const maxIndex = Math.max(0, allTrucks.length - 3);
+    carouselIndex = Math.max(0, Math.min(carouselIndex + dir, maxIndex));
+    track.style.transform = `translateX(-${carouselIndex * cardW}px)`;
+  }
+
+  function getFilteredRestaurants() {
+    return allRestaurants.filter(r => {
+      const matchCuisine = !currentFilter || r.cuisine_type === currentFilter;
+      const matchHood = !currentNeighborhood || r.neighborhood === currentNeighborhood;
+      return matchCuisine && matchHood;
+    });
+  }
+
+  function renderRestaurants() {
+    const grid = document.getElementById('restaurant-grid');
+    const btn = document.getElementById('load-more-btn');
+    const filtered = getFilteredRestaurants();
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No restaurants found. Try a different filter.</div>';
+      btn.style.display = 'none';
+      return;
+    }
+
+    const visible = filtered.slice(0, visibleCount);
+    grid.innerHTML = visible.map(r => `
+      <div class="r-card">
+        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
+        <div class="r-card-body">
+          <div class="r-card-name">${r.name}</div>
+          <div class="r-card-meta">${r.cuisine_type} · ${r.neighborhood}</div>
+          <div class="r-card-footer">
+            <span class="stars">★★★★★</span>
+            <span class="badge open">Open now</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    btn.style.display = filtered.length > visibleCount ? 'inline-block' : 'none';
+  }
+
+  function filterBy(el, cuisine) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentFilter = cuisine;
+    currentNeighborhood = '';
+    visibleCount = 8;
+    renderRestaurants();
+  }
+
+  function filterNeighborhood(hood) {
+    currentNeighborhood = hood;
+    currentFilter = '';
+    visibleCount = 8;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('.filter-chip').classList.add('active');
+    renderRestaurants();
+    document.getElementById('restaurant-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function loadMore() {
+    visibleCount += 8;
+    renderRestaurants();
+  }
+
+  function handleSearch() {
+    const q = document.getElementById('search-input').value.toLowerCase().trim();
+    if (!q) { currentFilter = ''; currentNeighborhood = ''; renderRestaurants(); return; }
+    const grid = document.getElementById('restaurant-grid');
+    const results = allRestaurants.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      (r.cuisine_type || '').toLowerCase().includes(q) ||
+      (r.neighborhood || '').toLowerCase().includes(q)
+    );
+    if (results.length === 0) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No results for "' + q + '"</div>';
+    } else {
+      grid.innerHTML = results.map(r => `
+        <div class="r-card">
+          <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type] || CUISINE_ICONS.default}</div>
+          <div class="r-card-body">
+            <div class="r-card-name">${r.name}</div>
+            <div class="r-card-meta">${r.cuisine_type} · ${r.neighborhood}</div>
+            <div class="r-card-footer">
+              <span class="stars">★★★★★</span>
+              <span class="badge open">Open now</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSearch();
+  });
+
+  function updateNeighborhoodCounts() {
+    const all = [...allRestaurants, ...allTrucks];
+    const hoods = {
+      'downtown': 'Downtown Fresno',
+      'tower': 'Tower District',
+      'clovis': 'Clovis',
+      'figgarden': 'Fig Garden',
+      'fresnostate': 'Fresno State'
+    };
+    for (const [key, hood] of Object.entries(hoods)) {
+      const count = all.filter(r => r.neighborhood === hood).length;
+      const el = document.getElementById('hood-' + key);
+      if (el) el.textContent = count + (count === 1 ? ' spot' : ' spots');
+    }
+  }
+
+  function openNearMe() {
+    alert('Map view coming soon! We\'re building it next.');
+  }
+
+  init();
+</script>
+</body>
+</html>
