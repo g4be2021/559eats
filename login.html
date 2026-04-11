@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Owner Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--ink);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 900; color: var(--coral);
+      text-decoration: none; margin-bottom: 2rem; display: block; text-align: center;
+    }
+    .card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 2.5rem;
+      width: 100%; max-width: 420px;
+    }
+    h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--ink-muted); margin-bottom: 2rem; line-height: 1.5; }
+    label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+    input[type="email"] {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--ink); background: var(--cream); outline: none;
+      transition: border-color 0.2s; margin-bottom: 1rem;
+    }
+    input[type="email"]:focus { border-color: var(--coral); background: var(--white); }
+    .submit-btn {
+      width: 100%; padding: 12px;
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: var(--coral-dark); }
+    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .success-box {
+      background: #EAF3DE; border: 1px solid #97C459;
+      border-radius: var(--radius-sm); padding: 16px;
+      font-size: 14px; color: #27500A; display: none; margin-top: 1rem;
+      line-height: 1.5;
+    }
+    .error-box {
+      background: #FCEBEB; border: 1px solid #F09595;
+      border-radius: var(--radius-sm); padding: 12px;
+      font-size: 13px; color: #791F1F; display: none; margin-top: 1rem;
+    }
+    .divider { border: none; border-top: 1px solid var(--card-border); margin: 1.5rem 0; }
+    .footer-note { font-size: 12px; color: var(--ink-muted); text-align: center; line-height: 1.6; }
+    .footer-note a { color: var(--coral); text-decoration: none; }
+    .back-link { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--ink-muted); }
+    .back-link a { color: var(--coral); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="logo">559eats</a>
+
+<div class="card">
+  <h1>Owner login</h1>
+  <p class="subtitle">Enter your email and we'll send you a magic link — no password needed. Click the link in your email to access your dashboard.</p>
+
+  <label for="email">Your email address</label>
+  <input type="email" id="email" placeholder="you@yourrestaurant.com" />
+
+  <button class="submit-btn" id="login-btn" onclick="sendMagicLink()">Send magic link</button>
+
+  <div class="success-box" id="success-box">
+    ✅ Magic link sent! Check your inbox and click the link to log in.<br><br>
+    <strong>Didn't get it?</strong> Check your spam folder or try again.
+  </div>
+  <div class="error-box" id="error-box"></div>
+
+  <hr class="divider" />
+
+  <p class="footer-note">
+    Not listed yet? <a href="apply.html">Apply to list your restaurant →</a>
+  </p>
+</div>
+
+<div class="back-link"><a href="index.html">← Back to 559eats</a></div>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+  async function sendMagicLink() {
+    const email = document.getElementById('email').value.trim();
+    const btn = document.getElementById('login-btn');
+    const successBox = document.getElementById('success-box');
+    const errorBox = document.getElementById('error-box');
+
+    if (!email) { showError('Please enter your email address.'); return; }
+    if (!email.includes('@')) { showError('Please enter a valid email address.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    successBox.style.display = 'none';
+    errorBox.style.display = 'none';
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/magiclink`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY
+        },
+        body: JSON.stringify({
+          email,
+          options: { emailRedirectTo: window.location.origin + '/dashboard.html' }
+        })
+      });
+
+      if (res.ok) {
+        successBox.style.display = 'block';
+        btn.textContent = 'Sent!';
+      } else {
+        const data = await res.json();
+        showError(data.msg || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Send magic link';
+      }
+    } catch (e) {
+      showError('Network error. Please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Send magic link';
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  document.getElementById('email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMagicLink();
+  });
+</script>
+</body>
+</html>

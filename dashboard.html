@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Owner Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+    nav {
+      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-email { font-size: 13px; color: var(--ink-muted); }
+    .logout-btn {
+      font-size: 13px; color: var(--ink-muted); background: none;
+      border: 1px solid var(--card-border); border-radius: 20px;
+      padding: 6px 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .logout-btn:hover { border-color: var(--coral); color: var(--coral); }
+    main { max-width: 760px; margin: 0 auto; padding: 2.5rem 2rem; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub { font-size: 14px; color: var(--ink-muted); margin-bottom: 2rem; }
+    .card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem;
+    }
+    .card-title { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    input, select, textarea {
+      padding: 10px 12px; border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--ink); background: var(--cream);
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--coral); background: var(--white); }
+    textarea { resize: vertical; min-height: 90px; }
+    .hours-grid { display: grid; gap: 8px; }
+    .hour-row { display: grid; grid-template-columns: 100px 1fr 1fr 80px; gap: 10px; align-items: center; font-size: 13px; }
+    .hour-row .day { font-weight: 500; color: var(--ink-muted); }
+    .closed-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted); }
+    .save-btn {
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: var(--radius-sm);
+      padding: 11px 28px; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: background 0.2s; margin-top: 1rem;
+    }
+    .save-btn:hover { background: var(--coral-dark); }
+    .save-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: var(--white);
+      padding: 12px 24px; border-radius: 25px; font-size: 14px;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+    .status-badge {
+      display: inline-block; font-size: 11px; padding: 3px 10px;
+      border-radius: 10px; font-weight: 500; margin-left: 8px;
+    }
+    .status-approved { background: #EAF3DE; color: #27500A; }
+    .status-pending { background: #FAEEDA; color: #633806; }
+    .auth-check {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 60vh; text-align: center; gap: 1rem;
+    }
+    .auth-check p { color: var(--ink-muted); font-size: 14px; }
+    .auth-check a { color: var(--coral); text-decoration: none; font-weight: 500; }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .hour-row { grid-template-columns: 80px 1fr 1fr; }
+      .hour-row .closed-toggle { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <div class="nav-right">
+    <span class="nav-email" id="nav-email"></span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<main id="main-content" style="display:none">
+  <h1 class="page-title">Your listing <span class="status-badge status-approved" id="status-badge">Approved</span></h1>
+  <p class="page-sub">Changes save directly to 559eats. Visitors will see your updates immediately.</p>
+
+  <!-- BASIC INFO -->
+  <div class="card">
+    <div class="card-title">Basic information</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Restaurant name</label>
+        <input type="text" id="f-name" placeholder="Your restaurant name" />
+      </div>
+      <div class="form-group">
+        <label>Cuisine type</label>
+        <select id="f-cuisine">
+          <option value="">Select cuisine</option>
+          <option>Mexican</option><option>Vietnamese</option><option>BBQ</option>
+          <option>Pizza</option><option>Hawaiian Fusion</option><option>Asian Street Food</option>
+          <option>Mexican Street Food</option><option>Burgers</option><option>Breakfast</option>
+          <option>Thai</option><option>Italian</option><option>American</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Neighborhood</label>
+        <select id="f-neighborhood">
+          <option value="">Select neighborhood</option>
+          <option>Downtown Fresno</option><option>Tower District</option>
+          <option>Clovis</option><option>Fig Garden</option><option>Fresno State</option>
+          <option>North Fresno</option><option>Sunnyside</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone number</label>
+        <input type="tel" id="f-phone" placeholder="(559) 555-0100" />
+      </div>
+      <div class="form-group full">
+        <label>Address</label>
+        <input type="text" id="f-address" placeholder="123 Main St, Fresno CA 93721" />
+      </div>
+      <div class="form-group">
+        <label>Website (optional)</label>
+        <input type="url" id="f-website" placeholder="https://yourrestaurant.com" />
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea id="f-description" placeholder="Tell people what makes your spot special..."></textarea>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveBasicInfo()">Save changes</button>
+  </div>
+
+  <!-- HOURS -->
+  <div class="card">
+    <div class="card-title">Hours of operation</div>
+    <div class="hours-grid" id="hours-grid"></div>
+    <button class="save-btn" onclick="saveHours()">Save hours</button>
+  </div>
+
+  <!-- LOCATION -->
+  <div class="card">
+    <div class="card-title">Location coordinates</div>
+    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">These coordinates place your pin on the map. Use <a href="https://maps.google.com" target="_blank" style="color:var(--coral)">Google Maps</a> to find your exact lat/lng.</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Latitude</label>
+        <input type="number" id="f-lat" step="0.0001" placeholder="36.7783" />
+      </div>
+      <div class="form-group">
+        <label>Longitude</label>
+        <input type="number" id="f-lng" step="0.0001" placeholder="-119.7945" />
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveLocation()">Save location</button>
+  </div>
+
+</main>
+
+<div class="auth-check" id="auth-check" style="display:none">
+  <div style="font-size:48px">🔐</div>
+  <p>You need to be logged in to view your dashboard.</p>
+  <a href="login.html">Go to login →</a>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+  const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  let session = null;
+  let restaurant = null;
+
+  async function api(path, method='GET', body=null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method !== 'GET' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  async function getSession() {
+    const hash = window.location.hash;
+    if (hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token) {
+        session = { access_token, refresh_token };
+        localStorage.setItem('559eats_session', JSON.stringify(session));
+        window.history.replaceState(null, '', window.location.pathname);
+        return session;
+      }
+    }
+    const stored = localStorage.getItem('559eats_session');
+    if (stored) { session = JSON.parse(stored); return session; }
+    return null;
+  }
+
+  async function getUserEmail() {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` }
+    });
+    return res.json();
+  }
+
+  async function init() {
+    session = await getSession();
+    if (!session) {
+      document.getElementById('auth-check').style.display = 'flex';
+      return;
+    }
+
+    const user = await getUserEmail();
+    if (!user?.email) {
+      document.getElementById('auth-check').style.display = 'flex';
+      return;
+    }
+
+    document.getElementById('nav-email').textContent = user.email;
+    document.getElementById('main-content').style.display = 'block';
+
+    const owners = await api(`owners?email=eq.${encodeURIComponent(user.email)}&select=*,restaurants(*)`);
+    if (!owners || owners.length === 0) {
+      showToast('No listing found for this email. Contact 559eats support.');
+      return;
+    }
+
+    restaurant = owners[0];
+    const r = restaurant.restaurants;
+    if (!r) { showToast('No restaurant linked to your account yet.'); return; }
+
+    document.getElementById('f-name').value = r.name || '';
+    document.getElementById('f-cuisine').value = r.cuisine_type || '';
+    document.getElementById('f-neighborhood').value = r.neighborhood || '';
+    document.getElementById('f-phone').value = r.phone || '';
+    document.getElementById('f-address').value = r.address || '';
+    document.getElementById('f-website').value = r.website || '';
+    document.getElementById('f-description').value = r.description || '';
+    document.getElementById('f-lat').value = r.latitude || '';
+    document.getElementById('f-lng').value = r.longitude || '';
+
+    const badge = document.getElementById('status-badge');
+    badge.textContent = r.status;
+    badge.className = 'status-badge ' + (r.status === 'approved' ? 'status-approved' : 'status-pending');
+
+    buildHoursGrid(r.id);
+  }
+
+  async function buildHoursGrid(restaurantId) {
+    const grid = document.getElementById('hours-grid');
+    const existing = await api(`hours?restaurant_id=eq.${restaurantId}`);
+    const hoursMap = {};
+    (existing || []).forEach(h => hoursMap[h.day_of_week] = h);
+
+    grid.innerHTML = DAYS.map(day => {
+      const h = hoursMap[day] || {};
+      return `
+        <div class="hour-row">
+          <span class="day">${day}</span>
+          <input type="time" id="open-${day}" value="${h.open_time || '11:00'}" ${h.is_closed ? 'disabled' : ''} />
+          <input type="time" id="close-${day}" value="${h.close_time || '21:00'}" ${h.is_closed ? 'disabled' : ''} />
+          <label class="closed-toggle">
+            <input type="checkbox" id="closed-${day}" ${h.is_closed ? 'checked' : ''}
+              onchange="toggleClosed('${day}', this.checked)" />
+            Closed
+          </label>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleClosed(day, closed) {
+    document.getElementById('open-' + day).disabled = closed;
+    document.getElementById('close-' + day).disabled = closed;
+  }
+
+  async function saveBasicInfo() {
+    if (!restaurant?.restaurants?.id) return;
+    const body = {
+      name: document.getElementById('f-name').value,
+      cuisine_type: document.getElementById('f-cuisine').value,
+      neighborhood: document.getElementById('f-neighborhood').value,
+      phone: document.getElementById('f-phone').value,
+      address: document.getElementById('f-address').value,
+      website: document.getElementById('f-website').value,
+      description: document.getElementById('f-description').value,
+      updated_at: new Date().toISOString()
+    };
+    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', body);
+    showToast('✅ Basic info saved!');
+  }
+
+  async function saveHours() {
+    if (!restaurant?.restaurants?.id) return;
+    const rid = restaurant.restaurants.id;
+    await api(`hours?restaurant_id=eq.${rid}`, 'DELETE');
+    const rows = DAYS.map(day => ({
+      restaurant_id: rid,
+      day_of_week: day,
+      open_time: document.getElementById('open-' + day).value,
+      close_time: document.getElementById('close-' + day).value,
+      is_closed: document.getElementById('closed-' + day).checked
+    }));
+    await api('hours', 'POST', rows);
+    showToast('✅ Hours saved!');
+  }
+
+  async function saveLocation() {
+    if (!restaurant?.restaurants?.id) return;
+    const body = {
+      latitude: parseFloat(document.getElementById('f-lat').value),
+      longitude: parseFloat(document.getElementById('f-lng').value),
+      updated_at: new Date().toISOString()
+    };
+    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', body);
+    showToast('✅ Location saved! Your map pin has been updated.');
+  }
+
+  function logout() {
+    localStorage.removeItem('559eats_session');
+    window.location.href = 'login.html';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  init();
+</script>
+</body>
+</html>
