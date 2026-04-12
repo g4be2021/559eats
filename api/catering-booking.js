@@ -1,6 +1,7 @@
 // ============================================
 // 559eats · Catering Booking API
 // File: /api/catering-booking.js
+// Handles new requests + auto commission on confirm
 // ============================================
 
 const TWILIO_SID   = 'AC0311f54c34a54414ddd04c4e6b387b59';
@@ -8,6 +9,7 @@ const TWILIO_TOKEN = '525516f7020ffe6c2d30269212ebf7b7';
 const TWILIO_FROM  = '+15593773665';
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const COMMISSION_RATE = 0.15;
 
 async function supabase(path, method = 'GET', body = null) {
   const opts = {
@@ -41,6 +43,21 @@ async function sendSMS(to, message) {
   return res.json();
 }
 
+async function triggerCommission(bookingId) {
+  try {
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+    await fetch(`${baseUrl}/api/charge-commission`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ catering_booking_id: bookingId })
+    });
+  } catch (e) {
+    console.error('Commission trigger error:', e);
+  }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -57,15 +74,33 @@ module.exports = async (req, res) => {
     event_location,
     guest_count,
     budget,
-    notes
+    notes,
+    action,
+    booking_id
   } = req.body;
 
+  // ── STATUS UPDATE (confirm/decline from dashboard) ──
+  if (action && booking_id) {
+    try {
+      if (!['confirmed', 'declined'].includes(action)) {
+        return res.status(400).json({ error: 'Invalid action' });
+      }
+      await supabase(`catering_bookings?id=eq.${booking_id}`, 'PATCH', { status: action });
+      if (action === 'confirmed') {
+        await triggerCommission(booking_id);
+      }
+      return res.json({ success: true, status: action });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // ── NEW BOOKING REQUEST ──
   if (!restaurant_id || !customer_name || !customer_phone || !event_date || !event_location || !guest_count) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    // 1. Get restaurant + owner info
     const restaurants = await supabase(`restaurants?id=eq.${restaurant_id}`);
     const restaurant = restaurants?.[0];
     if (!restaurant) return res.status(404).json({ error: 'Restaurant not found' });
@@ -73,7 +108,6 @@ module.exports = async (req, res) => {
     const owners = await supabase(`owners?restaurant_id=eq.${restaurant_id}`);
     const owner = owners?.[0];
 
-    // 2. Save catering booking
     const bookingData = await supabase('catering_bookings', 'POST', [{
       restaurant_id,
       customer_name,
@@ -84,7 +118,8 @@ module.exports = async (req, res) => {
       guest_count: parseInt(guest_count),
       budget: budget || null,
       notes: notes || null,
-      status: 'pending'
+      status: 'pending',
+      commission_rate: COMMISSION_RATE
     }]);
 
     const booking = bookingData?.[0];
@@ -94,7 +129,6 @@ module.exports = async (req, res) => {
       weekday: 'long', month: 'long', day: 'numeric'
     });
 
-    // 3. SMS owner
     if (owner?.phone) {
       const ownerMsg =
         `🍽️ New catering request!\n\n` +
@@ -107,10 +141,9 @@ module.exports = async (req, res) => {
         `Guests: ${guest_count}\n` +
         `${budget ? 'Budget: ' + budget + '\n' : ''}` +
         `${notes ? 'Notes: ' + notes + '\n' : ''}` +
-        `\nReply to this customer directly to confirm.`;
+        `\nLog in to confirm or decline:\n559eats.com/dashboard.html`;
 
       await sendSMS(owner.phone, ownerMsg);
-
       await supabase('sms_log', 'POST', [{
         restaurant_id,
         direction: 'outbound',
@@ -120,23 +153,16 @@ module.exports = async (req, res) => {
       }]);
     }
 
-    // 4. SMS customer confirmation
     const customerMsg =
       `Hi ${customer_name}! Your catering request for ${restaurant.name} has been received. 🎉\n\n` +
       `📅 ${dateStr}\n` +
       `📍 ${event_location}\n` +
       `👥 ${guest_count} guests\n\n` +
-      `The truck owner will contact you directly to confirm details and pricing.\n\n` +
-      `Questions? Visit 559eats.com`;
+      `The owner will confirm shortly.\n\nQuestions? Visit 559eats.com`;
 
     await sendSMS(customer_phone, customerMsg);
 
-    return res.json({
-      success: true,
-      booking_id: booking.id,
-      status: 'pending',
-      message: 'Catering request sent! The truck will contact you directly.'
-    });
+    return res.json({ success: true, booking_id: booking.id, status: 'pending' });
 
   } catch (err) {
     console.error('Catering booking error:', err);
