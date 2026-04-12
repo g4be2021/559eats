@@ -24,25 +24,46 @@
     .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--white); text-decoration: none; }
     .admin-badge { font-size: 11px; background: var(--coral); color: var(--white); padding: 3px 10px; border-radius: 10px; margin-left: 10px; }
     .nav-right { display: flex; align-items: center; gap: 12px; }
-    .pw-input { padding: 7px 12px; border-radius: var(--radius-sm); border: none; font-size: 13px; font-family: 'DM Sans', sans-serif; }
-    .pw-btn { padding: 7px 16px; border-radius: var(--radius-sm); background: var(--coral); color: var(--white); border: none; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
     main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 2rem; border-bottom: 2px solid var(--card-border); }
+    .tab-btn {
+      padding: 10px 20px; font-size: 13px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; background: none; border: none;
+      color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { color: var(--coral); border-bottom-color: var(--coral); }
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--coral); color: var(--white); font-size: 10px;
+      width: 18px; height: 18px; border-radius: 50%; margin-left: 6px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
     .stat-card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
     .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--coral); }
     .stat-label { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
     .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
-    .table-wrap { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 2rem; }
+    .table-wrap { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 2rem; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { background: var(--cream); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--card-border); }
+    th { background: var(--cream); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
     td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--cream); }
+
     .badge { font-size: 10px; padding: 3px 8px; border-radius: 8px; font-weight: 500; }
-    .badge-approved { background: #EAF3DE; color: #27500A; }
+    .badge-approved, .badge-confirmed { background: #EAF3DE; color: #27500A; }
     .badge-pending { background: #FAEEDA; color: #633806; }
-    .badge-suspended { background: #FCEBEB; color: #791F1F; }
+    .badge-suspended, .badge-declined { background: #FCEBEB; color: #791F1F; }
     .badge-truck { background: #FAEEDA; color: #633806; }
+
     .action-btn {
       padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;
       border: 1px solid var(--card-border); background: var(--white);
@@ -54,8 +75,17 @@
     .action-btn.suspend:hover { background: #FCEBEB; }
     .action-btn.delete { border-color: #F09595; color: #791F1F; }
     .action-btn.delete:hover { background: #FCEBEB; }
+
+    /* CATERING DETAIL ROW */
+    .catering-detail { font-size: 12px; color: var(--ink-muted); margin-top: 3px; line-height: 1.5; }
+    .catering-detail strong { color: var(--ink); }
+
+    /* CATERING STATS */
+    .catering-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--white); padding: 12px 24px; border-radius: 25px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
     .toast.show { opacity: 1; }
+
     .locked { display: none; }
     #admin-pw-wall { display: flex; align-items: center; justify-content: center; min-height: 80vh; flex-direction: column; gap: 1rem; text-align: center; }
     #admin-pw-wall h2 { font-family: 'Playfair Display', serif; font-size: 24px; }
@@ -63,6 +93,12 @@
     .pw-form { display: flex; gap: 8px; }
     .pw-form input { padding: 10px 14px; border: 1px solid var(--card-border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
     .pw-form button { padding: 10px 20px; background: var(--coral); color: var(--white); border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; }
+
+    @media (max-width: 640px) {
+      main { padding: 1.5rem 1rem; }
+      .stats-row, .catering-stats { grid-template-columns: repeat(2, 1fr); }
+      .tabs { overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
@@ -101,27 +137,103 @@
 
   <div id="sms-result" style="display:none;background:#EAF3DE;border:1px solid #97C459;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#27500A;margin-bottom:1.5rem;"></div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total listings</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending review</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-trucks">—</div><div class="stat-label">Food trucks</div></div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('listings', this)">🏪 Listings</button>
+    <button class="tab-btn" onclick="switchTab('catering', this)" id="catering-tab-btn">🍽️ Catering requests</button>
+    <button class="tab-btn" onclick="switchTab('bookings', this)">📅 Reservations</button>
   </div>
 
-  <div class="section-title">Pending review</div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Name</th><th>Type</th><th>Neighborhood</th><th>Submitted</th><th>Actions</th></tr></thead>
-      <tbody id="pending-body"><tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr></tbody>
-    </table>
+  <!-- TAB: LISTINGS -->
+  <div class="tab-panel active" id="tab-listings">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total listings</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending review</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-trucks">—</div><div class="stat-label">Food trucks</div></div>
+    </div>
+
+    <div class="section-title">Pending review</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Neighborhood</th><th>Submitted</th><th>Actions</th></tr></thead>
+        <tbody id="pending-body"><tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="section-title">All listings</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Cuisine</th><th>Neighborhood</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="all-body"><tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="section-title">All listings</div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Name</th><th>Cuisine</th><th>Neighborhood</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="all-body"><tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr></tbody>
-    </table>
+  <!-- TAB: CATERING -->
+  <div class="tab-panel" id="tab-catering">
+    <div class="catering-stats">
+      <div class="stat-card"><div class="stat-num" id="c-total">—</div><div class="stat-label">Total requests</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-pending">—</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-declined">—</div><div class="stat-label">Declined</div></div>
+    </div>
+
+    <!-- Filter bar -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;">
+      <button class="action-btn active" id="cf-all" onclick="filterCatering('all')" style="border-color:var(--coral);color:var(--coral);">All</button>
+      <button class="action-btn" id="cf-pending" onclick="filterCatering('pending')">Pending</button>
+      <button class="action-btn" id="cf-confirmed" onclick="filterCatering('confirmed')">Confirmed</button>
+      <button class="action-btn" id="cf-declined" onclick="filterCatering('declined')">Declined</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Truck</th>
+            <th>Event date</th>
+            <th>Guests</th>
+            <th>Budget</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="catering-body">
+          <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: RESERVATIONS -->
+  <div class="tab-panel" id="tab-bookings">
+    <div class="catering-stats">
+      <div class="stat-card"><div class="stat-num" id="b-total">—</div><div class="stat-label">Total reservations</div></div>
+      <div class="stat-card"><div class="stat-num" id="b-pending">—</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="b-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat-card"><div class="stat-num" id="b-today">—</div><div class="stat-label">Today</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Restaurant</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Party</th>
+            <th>Status</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody id="bookings-body">
+          <tr><td colspan="7" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 
@@ -130,9 +242,10 @@
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-
-  // CHANGE THIS PASSWORD to something only you know
   const ADMIN_PASSWORD = '559eats-admin-2024';
+
+  let allCatering = [];
+  let restaurantMap = {};
 
   function checkPw() {
     const val = document.getElementById('pw-input').value;
@@ -140,7 +253,7 @@
       document.getElementById('admin-pw-wall').style.display = 'none';
       document.getElementById('admin-main').classList.remove('locked');
       document.getElementById('admin-main').style.display = 'block';
-      loadData();
+      loadAll();
     } else {
       document.getElementById('pw-error').style.display = 'block';
     }
@@ -149,7 +262,12 @@
   async function api(path, method='GET', body=null) {
     const opts = {
       method,
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      }
     };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
@@ -157,25 +275,28 @@
     return res.json();
   }
 
-  async function triggerSMSCheckin() {
-    const resultEl = document.getElementById('sms-result');
-    resultEl.style.display = 'block';
-    resultEl.textContent = '📱 Sending check-in texts...';
-    try {
-      const res = await fetch('/api/sms-checkin', { method: 'POST' });
-      const data = await res.json();
-      resultEl.textContent = `✅ Done! Sent ${data.sent} of ${data.total} SMS check-ins.`;
-    } catch (e) {
-      resultEl.style.background = '#FCEBEB';
-      resultEl.style.borderColor = '#F09595';
-      resultEl.style.color = '#791F1F';
-      resultEl.textContent = '❌ SMS send failed. Check your Vercel function logs.';
-    }
+  // ── Tab switching ──
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    btn.classList.add('active');
   }
 
-  async function loadData() {
+  // ── Load everything ──
+  async function loadAll() {
+    await loadListings();
+    await loadCatering();
+    await loadBookings();
+  }
+
+  // ── LISTINGS ──
+  async function loadListings() {
     const all = await api('restaurants?order=created_at.desc');
     if (!all) return;
+
+    // Build restaurant map for lookups
+    all.forEach(r => restaurantMap[r.id] = r.name);
 
     document.getElementById('s-total').textContent = all.length;
     document.getElementById('s-approved').textContent = all.filter(r => r.status === 'approved').length;
@@ -183,9 +304,8 @@
     document.getElementById('s-trucks').textContent = all.filter(r => r.is_food_truck).length;
 
     const pending = all.filter(r => r.status === 'pending');
-    const pendingBody = document.getElementById('pending-body');
-    pendingBody.innerHTML = pending.length === 0
-      ? '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:2rem">No pending listings</td></tr>'
+    document.getElementById('pending-body').innerHTML = pending.length === 0
+      ? '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:2rem">No pending listings 🎉</td></tr>'
       : pending.map(r => `
         <tr>
           <td><strong>${r.name}</strong></td>
@@ -198,8 +318,7 @@
           </td>
         </tr>`).join('');
 
-    const allBody = document.getElementById('all-body');
-    allBody.innerHTML = all.map(r => `
+    document.getElementById('all-body').innerHTML = all.map(r => `
       <tr>
         <td><strong>${r.name}</strong></td>
         <td>${r.cuisine_type || '—'}</td>
@@ -218,19 +337,166 @@
     const isActive = status === 'approved';
     await api(`restaurants?id=eq.${id}`, 'PATCH', { status, is_active: isActive });
     showToast(`✅ Listing ${status}`);
-    loadData();
+    loadListings();
   }
 
   async function deleteRestaurant(id) {
     if (!confirm('Are you sure? This cannot be undone.')) return;
     await api(`restaurants?id=eq.${id}`, 'DELETE');
     showToast('Listing deleted.');
-    loadData();
+    loadListings();
+  }
+
+  // ── CATERING ──
+  async function loadCatering() {
+    const data = await api('catering_bookings?order=created_at.desc');
+    if (!data) return;
+    allCatering = data;
+
+    // Update badge on tab
+    const pending = data.filter(c => c.status === 'pending');
+    const tabBtn = document.getElementById('catering-tab-btn');
+    if (pending.length > 0) {
+      tabBtn.innerHTML = `🍽️ Catering requests <span class="tab-badge">${pending.length}</span>`;
+    }
+
+    // Stats
+    document.getElementById('c-total').textContent = data.length;
+    document.getElementById('c-pending').textContent = pending.length;
+    document.getElementById('c-confirmed').textContent = data.filter(c => c.status === 'confirmed').length;
+    document.getElementById('c-declined').textContent = data.filter(c => c.status === 'declined').length;
+
+    renderCatering(data);
+  }
+
+  function renderCatering(data) {
+    const tbody = document.getElementById('catering-body');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No catering requests yet</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(c => {
+      const truckName = restaurantMap[c.restaurant_id] || '—';
+      const eventDate = c.event_date
+        ? new Date(c.event_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '—';
+      const submitted = new Date(c.created_at).toLocaleDateString();
+      return `
+        <tr>
+          <td>
+            <strong>${c.customer_name}</strong>
+            <div class="catering-detail">
+              📞 ${c.customer_phone}
+              ${c.customer_email ? `<br>✉️ ${c.customer_email}` : ''}
+            </div>
+          </td>
+          <td>${truckName}</td>
+          <td>${eventDate}</td>
+          <td>${c.guest_count || '—'}</td>
+          <td>${c.budget || '—'}</td>
+          <td>
+            <div style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.event_location || ''}">${c.event_location || '—'}</div>
+            ${c.notes ? `<div class="catering-detail" style="max-width:160px">📝 ${c.notes}</div>` : ''}
+          </td>
+          <td><span class="badge badge-${c.status}">${c.status}</span></td>
+          <td>
+            ${c.status !== 'confirmed' ? `<button class="action-btn approve" onclick="setCateringStatus('${c.id}','confirmed')">✓ Confirm</button>` : ''}
+            ${c.status !== 'declined' ? `<button class="action-btn suspend" onclick="setCateringStatus('${c.id}','declined')">✗ Decline</button>` : ''}
+            <button class="action-btn delete" onclick="deleteCatering('${c.id}')">Delete</button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filterCatering(status) {
+    document.querySelectorAll('[id^="cf-"]').forEach(b => {
+      b.style.borderColor = '';
+      b.style.color = '';
+    });
+    const activeBtn = document.getElementById(`cf-${status}`);
+    activeBtn.style.borderColor = 'var(--coral)';
+    activeBtn.style.color = 'var(--coral)';
+
+    if (status === 'all') {
+      renderCatering(allCatering);
+    } else {
+      renderCatering(allCatering.filter(c => c.status === status));
+    }
+  }
+
+  async function setCateringStatus(id, status) {
+    await api(`catering_bookings?id=eq.${id}`, 'PATCH', { status });
+    showToast(`✅ Catering request ${status}`);
+    loadCatering();
+  }
+
+  async function deleteCatering(id) {
+    if (!confirm('Delete this catering request? This cannot be undone.')) return;
+    await api(`catering_bookings?id=eq.${id}`, 'DELETE');
+    showToast('Catering request deleted.');
+    loadCatering();
+  }
+
+  // ── RESERVATIONS ──
+  async function loadBookings() {
+    const data = await api('bookings?order=created_at.desc');
+    if (!data) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('b-total').textContent = data.length;
+    document.getElementById('b-pending').textContent = data.filter(b => b.status === 'pending').length;
+    document.getElementById('b-confirmed').textContent = data.filter(b => b.status === 'confirmed').length;
+    document.getElementById('b-today').textContent = data.filter(b => b.booking_date === today).length;
+
+    const tbody = document.getElementById('bookings-body');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-muted);padding:2rem">No reservations yet</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(b => {
+      const restaurantName = restaurantMap[b.restaurant_id] || '—';
+      const bookingDate = b.booking_date
+        ? new Date(b.booking_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '—';
+      return `
+        <tr>
+          <td>
+            <strong>${b.customer_name}</strong>
+            <div class="catering-detail">📞 ${b.customer_phone}</div>
+          </td>
+          <td>${restaurantName}</td>
+          <td>${bookingDate}</td>
+          <td>${b.booking_time || '—'}</td>
+          <td>${b.party_size || '—'}</td>
+          <td><span class="badge badge-${b.status}">${b.status}</span></td>
+          <td style="color:var(--ink-muted)">${new Date(b.created_at).toLocaleDateString()}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── SMS ──
+  async function triggerSMSCheckin() {
+    const resultEl = document.getElementById('sms-result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = '📱 Sending check-in texts...';
+    try {
+      const res = await fetch('/api/sms-checkin', { method: 'POST' });
+      const data = await res.json();
+      resultEl.textContent = `✅ Done! Sent ${data.sent} of ${data.total} SMS check-ins.`;
+    } catch (e) {
+      resultEl.style.background = '#FCEBEB';
+      resultEl.style.borderColor = '#F09595';
+      resultEl.style.color = '#791F1F';
+      resultEl.textContent = '❌ SMS send failed. Check your Vercel function logs.';
+    }
   }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
+    t.textContent = msg;
+    t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 </script>
