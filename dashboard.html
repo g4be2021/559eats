@@ -33,14 +33,37 @@
       transition: all 0.15s;
     }
     .logout-btn:hover { border-color: var(--coral); color: var(--coral); }
-    main { max-width: 760px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    main { max-width: 820px; margin: 0 auto; padding: 2.5rem 2rem; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
     .page-sub { font-size: 14px; color: var(--ink-muted); margin-bottom: 2rem; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 2rem; border-bottom: 2px solid var(--card-border); }
+    .tab-btn {
+      padding: 10px 18px; font-size: 13px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; background: none; border: none;
+      color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.15s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { color: var(--coral); border-bottom-color: var(--coral); }
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--coral); color: var(--white); font-size: 10px;
+      width: 18px; height: 18px; border-radius: 50%; margin-left: 6px;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* CARDS */
     .card {
       background: var(--white); border: 1px solid var(--card-border);
       border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem;
     }
     .card-title { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); }
+
+    /* FORMS */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group.full { grid-column: 1 / -1; }
@@ -53,10 +76,13 @@
     }
     input:focus, select:focus, textarea:focus { border-color: var(--coral); background: var(--white); }
     textarea { resize: vertical; min-height: 90px; }
+
+    /* HOURS */
     .hours-grid { display: grid; gap: 8px; }
     .hour-row { display: grid; grid-template-columns: 100px 1fr 1fr 80px; gap: 10px; align-items: center; font-size: 13px; }
     .hour-row .day { font-weight: 500; color: var(--ink-muted); }
     .closed-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted); }
+
     .save-btn {
       background: var(--coral); color: var(--white);
       border: none; border-radius: var(--radius-sm);
@@ -66,6 +92,56 @@
     }
     .save-btn:hover { background: var(--coral-dark); }
     .save-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--coral); }
+    .stat-label { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* BOOKING TABLE */
+    .table-wrap { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: var(--cream); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--cream); }
+
+    .badge { font-size: 10px; padding: 3px 8px; border-radius: 8px; font-weight: 500; }
+    .badge-pending { background: #FAEEDA; color: #633806; }
+    .badge-confirmed { background: #EAF3DE; color: #27500A; }
+    .badge-declined { background: #FCEBEB; color: #791F1F; }
+    .badge-cancelled { background: #F0EDED; color: #6B5C4E; }
+
+    .action-btn {
+      padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;
+      border: 1px solid var(--card-border); background: var(--white);
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s; margin-right: 4px;
+    }
+    .action-btn.confirm { border-color: #97C459; color: #27500A; }
+    .action-btn.confirm:hover { background: #EAF3DE; }
+    .action-btn.decline { border-color: #F09595; color: #791F1F; }
+    .action-btn.decline:hover { background: #FCEBEB; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 3rem 1rem; }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+    .empty-state-sub { font-size: 13px; color: var(--ink-muted); }
+
+    /* FILTER PILLS */
+    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .pill {
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--card-border); background: var(--white);
+      color: var(--ink-muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .pill.active { background: var(--coral); color: var(--white); border-color: var(--coral); }
+
+    /* CATERING DETAIL */
+    .sub-detail { font-size: 12px; color: var(--ink-muted); margin-top: 3px; line-height: 1.5; }
+
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       background: var(--ink); color: var(--white);
@@ -73,25 +149,24 @@
       opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
     }
     .toast.show { opacity: 1; }
-    .status-badge {
-      display: inline-block; font-size: 11px; padding: 3px 10px;
-      border-radius: 10px; font-weight: 500; margin-left: 8px;
-    }
+
+    .status-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 500; margin-left: 8px; }
     .status-approved { background: #EAF3DE; color: #27500A; }
     .status-pending { background: #FAEEDA; color: #633806; }
-    .auth-check {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; min-height: 60vh; text-align: center; gap: 1rem;
-    }
+
+    .auth-check { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; gap: 1rem; }
     .auth-check p { color: var(--ink-muted); font-size: 14px; }
     .auth-check a { color: var(--coral); text-decoration: none; font-weight: 500; }
+
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
       .hour-row { grid-template-columns: 80px 1fr 1fr; }
       .hour-row .closed-toggle { display: none; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .tabs { overflow-x: auto; }
+      main { padding: 1.5rem 1rem; }
     }
   </style>
-  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -112,79 +187,156 @@
 
 <main id="main-content" style="display:none">
   <h1 class="page-title">Your listing <span class="status-badge status-approved" id="status-badge">Approved</span></h1>
-  <p class="page-sub">Changes save directly to 559eats. Visitors will see your updates immediately.</p>
+  <p class="page-sub">Manage your listing, hours, and incoming booking requests.</p>
 
-  <!-- BASIC INFO -->
-  <div class="card">
-    <div class="card-title">Basic information</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Restaurant name</label>
-        <input type="text" id="f-name" placeholder="Your restaurant name" />
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('listing', this)">📋 My listing</button>
+    <button class="tab-btn" onclick="switchTab('reservations', this)" id="res-tab-btn">📅 Reservations</button>
+    <button class="tab-btn" onclick="switchTab('catering', this)" id="cat-tab-btn">🍽️ Catering requests</button>
+  </div>
+
+  <!-- TAB: LISTING -->
+  <div class="tab-panel active" id="tab-listing">
+    <div class="card">
+      <div class="card-title">Basic information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Restaurant name</label>
+          <input type="text" id="f-name" placeholder="Your restaurant name" />
+        </div>
+        <div class="form-group">
+          <label>Cuisine type</label>
+          <select id="f-cuisine">
+            <option value="">Select cuisine</option>
+            <option>Mexican</option><option>Vietnamese</option><option>BBQ</option>
+            <option>Pizza</option><option>Hawaiian Fusion</option><option>Asian Street Food</option>
+            <option>Mexican Street Food</option><option>Burgers</option><option>Breakfast</option>
+            <option>Thai</option><option>Italian</option><option>American</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Neighborhood</label>
+          <select id="f-neighborhood">
+            <option value="">Select neighborhood</option>
+            <option>Downtown Fresno</option><option>Tower District</option>
+            <option>Clovis</option><option>Fig Garden</option><option>Fresno State</option>
+            <option>North Fresno</option><option>Sunnyside</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Phone number</label>
+          <input type="tel" id="f-phone" placeholder="(559) 555-0100" />
+        </div>
+        <div class="form-group full">
+          <label>Address</label>
+          <input type="text" id="f-address" placeholder="123 Main St, Fresno CA 93721" />
+        </div>
+        <div class="form-group">
+          <label>Website (optional)</label>
+          <input type="url" id="f-website" placeholder="https://yourrestaurant.com" />
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="f-description" placeholder="Tell people what makes your spot special..."></textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Cuisine type</label>
-        <select id="f-cuisine">
-          <option value="">Select cuisine</option>
-          <option>Mexican</option><option>Vietnamese</option><option>BBQ</option>
-          <option>Pizza</option><option>Hawaiian Fusion</option><option>Asian Street Food</option>
-          <option>Mexican Street Food</option><option>Burgers</option><option>Breakfast</option>
-          <option>Thai</option><option>Italian</option><option>American</option><option>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Neighborhood</label>
-        <select id="f-neighborhood">
-          <option value="">Select neighborhood</option>
-          <option>Downtown Fresno</option><option>Tower District</option>
-          <option>Clovis</option><option>Fig Garden</option><option>Fresno State</option>
-          <option>North Fresno</option><option>Sunnyside</option><option>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Phone number</label>
-        <input type="tel" id="f-phone" placeholder="(559) 555-0100" />
-      </div>
-      <div class="form-group full">
-        <label>Address</label>
-        <input type="text" id="f-address" placeholder="123 Main St, Fresno CA 93721" />
-      </div>
-      <div class="form-group">
-        <label>Website (optional)</label>
-        <input type="url" id="f-website" placeholder="https://yourrestaurant.com" />
-      </div>
-      <div class="form-group full">
-        <label>Description</label>
-        <textarea id="f-description" placeholder="Tell people what makes your spot special..."></textarea>
-      </div>
+      <button class="save-btn" onclick="saveBasicInfo()">Save changes</button>
     </div>
-    <button class="save-btn" onclick="saveBasicInfo()">Save changes</button>
-  </div>
 
-  <!-- HOURS -->
-  <div class="card">
-    <div class="card-title">Hours of operation</div>
-    <div class="hours-grid" id="hours-grid"></div>
-    <button class="save-btn" onclick="saveHours()">Save hours</button>
-  </div>
-
-  <!-- LOCATION -->
-  <div class="card">
-    <div class="card-title">Location coordinates</div>
-    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">These coordinates place your pin on the map. Use <a href="https://maps.google.com" target="_blank" style="color:var(--coral)">Google Maps</a> to find your exact lat/lng.</p>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Latitude</label>
-        <input type="number" id="f-lat" step="0.0001" placeholder="36.7783" />
-      </div>
-      <div class="form-group">
-        <label>Longitude</label>
-        <input type="number" id="f-lng" step="0.0001" placeholder="-119.7945" />
-      </div>
+    <div class="card">
+      <div class="card-title">Hours of operation</div>
+      <div class="hours-grid" id="hours-grid"></div>
+      <button class="save-btn" onclick="saveHours()">Save hours</button>
     </div>
-    <button class="save-btn" onclick="saveLocation()">Save location</button>
+
+    <div class="card">
+      <div class="card-title">Location coordinates</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">These coordinates place your pin on the map. Use <a href="https://maps.google.com" target="_blank" style="color:var(--coral)">Google Maps</a> to find your exact lat/lng.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Latitude</label>
+          <input type="number" id="f-lat" step="0.0001" placeholder="36.7783" />
+        </div>
+        <div class="form-group">
+          <label>Longitude</label>
+          <input type="number" id="f-lng" step="0.0001" placeholder="-119.7945" />
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveLocation()">Save location</button>
+    </div>
   </div>
 
+  <!-- TAB: RESERVATIONS -->
+  <div class="tab-panel" id="tab-reservations">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="r-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="r-pending">—</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="r-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat-card"><div class="stat-num" id="r-today">—</div><div class="stat-label">Today</div></div>
+    </div>
+
+    <div class="filter-pills">
+      <button class="pill active" id="rp-all" onclick="filterReservations('all')">All</button>
+      <button class="pill" id="rp-pending" onclick="filterReservations('pending')">Pending</button>
+      <button class="pill" id="rp-confirmed" onclick="filterReservations('confirmed')">Confirmed</button>
+      <button class="pill" id="rp-upcoming" onclick="filterReservations('upcoming')">Upcoming</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Guest</th>
+            <th>Date & time</th>
+            <th>Party</th>
+            <th>Notes</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reservations-body">
+          <tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: CATERING -->
+  <div class="tab-panel" id="tab-catering">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="c-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-pending">—</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-confirmed">—</div><div class="stat-label">Confirmed</div></div>
+      <div class="stat-card"><div class="stat-num" id="c-declined">—</div><div class="stat-label">Declined</div></div>
+    </div>
+
+    <div class="filter-pills">
+      <button class="pill active" id="cp-all" onclick="filterCatering('all')">All</button>
+      <button class="pill" id="cp-pending" onclick="filterCatering('pending')">Pending</button>
+      <button class="pill" id="cp-confirmed" onclick="filterCatering('confirmed')">Confirmed</button>
+      <button class="pill" id="cp-declined" onclick="filterCatering('declined')">Declined</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Event date</th>
+            <th>Guests</th>
+            <th>Location</th>
+            <th>Budget</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="catering-body">
+          <tr><td colspan="7" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </main>
 
 <div class="auth-check" id="auth-check" style="display:none">
@@ -198,27 +350,14 @@
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-
   const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
   let session = null;
   let restaurant = null;
+  let allReservations = [];
+  let allCatering = [];
 
-  async function api(path, method='GET', body=null) {
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${session?.access_token || SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method !== 'GET' ? 'return=representation' : ''
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
-    if (res.status === 204) return null;
-    return res.json();
-  }
-
+  // ── Auth ──
   async function getSession() {
     const hash = window.location.hash;
     if (hash.includes('access_token')) {
@@ -244,18 +383,43 @@
     return res.json();
   }
 
+  function logout() {
+    localStorage.removeItem('559eats_session');
+    window.location.href = 'login.html';
+  }
+
+  // ── API ──
+  async function api(path, method='GET', body=null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${session?.access_token || SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': method !== 'GET' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  // ── Tab switching ──
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Init ──
   async function init() {
     session = await getSession();
-    if (!session) {
-      document.getElementById('auth-check').style.display = 'flex';
-      return;
-    }
+    if (!session) { document.getElementById('auth-check').style.display = 'flex'; return; }
 
     const user = await getUserEmail();
-    if (!user?.email) {
-      document.getElementById('auth-check').style.display = 'flex';
-      return;
-    }
+    if (!user?.email) { document.getElementById('auth-check').style.display = 'flex'; return; }
 
     document.getElementById('nav-email').textContent = user.email;
     document.getElementById('main-content').style.display = 'block';
@@ -270,6 +434,7 @@
     const r = restaurant.restaurants;
     if (!r) { showToast('No restaurant linked to your account yet.'); return; }
 
+    // Populate listing form
     document.getElementById('f-name').value = r.name || '';
     document.getElementById('f-cuisine').value = r.cuisine_type || '';
     document.getElementById('f-neighborhood').value = r.neighborhood || '';
@@ -285,8 +450,11 @@
     badge.className = 'status-badge ' + (r.status === 'approved' ? 'status-approved' : 'status-pending');
 
     buildHoursGrid(r.id);
+    loadReservations(r.id);
+    loadCatering(r.id);
   }
 
+  // ── LISTING ──
   async function buildHoursGrid(restaurantId) {
     const grid = document.getElementById('hours-grid');
     const existing = await api(`hours?restaurant_id=eq.${restaurantId}`);
@@ -316,7 +484,7 @@
 
   async function saveBasicInfo() {
     if (!restaurant?.restaurants?.id) return;
-    const body = {
+    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', {
       name: document.getElementById('f-name').value,
       cuisine_type: document.getElementById('f-cuisine').value,
       neighborhood: document.getElementById('f-neighborhood').value,
@@ -325,8 +493,7 @@
       website: document.getElementById('f-website').value,
       description: document.getElementById('f-description').value,
       updated_at: new Date().toISOString()
-    };
-    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', body);
+    });
     showToast('✅ Basic info saved!');
   }
 
@@ -347,20 +514,168 @@
 
   async function saveLocation() {
     if (!restaurant?.restaurants?.id) return;
-    const body = {
+    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', {
       latitude: parseFloat(document.getElementById('f-lat').value),
       longitude: parseFloat(document.getElementById('f-lng').value),
       updated_at: new Date().toISOString()
-    };
-    await api(`restaurants?id=eq.${restaurant.restaurants.id}`, 'PATCH', body);
+    });
     showToast('✅ Location saved! Your map pin has been updated.');
   }
 
-  function logout() {
-    localStorage.removeItem('559eats_session');
-    window.location.href = 'login.html';
+  // ── RESERVATIONS ──
+  async function loadReservations(restaurantId) {
+    const data = await api(`bookings?restaurant_id=eq.${restaurantId}&order=booking_date.desc`);
+    allReservations = data || [];
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('r-total').textContent = allReservations.length;
+    document.getElementById('r-pending').textContent = allReservations.filter(b => b.status === 'pending').length;
+    document.getElementById('r-confirmed').textContent = allReservations.filter(b => b.status === 'confirmed').length;
+    document.getElementById('r-today').textContent = allReservations.filter(b => b.booking_date === today).length;
+
+    // Badge on tab
+    const pendingCount = allReservations.filter(b => b.status === 'pending').length;
+    if (pendingCount > 0) {
+      document.getElementById('res-tab-btn').innerHTML =
+        `📅 Reservations <span class="tab-badge">${pendingCount}</span>`;
+    }
+
+    renderReservations(allReservations);
   }
 
+  function renderReservations(data) {
+    const tbody = document.getElementById('reservations-body');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="6">
+          <div class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-title">No reservations yet</div>
+            <div class="empty-state-sub">When customers book a table, they'll show up here.</div>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(b => {
+      const dateStr = b.booking_date
+        ? new Date(b.booking_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '—';
+      return `
+        <tr>
+          <td>
+            <strong>${b.customer_name}</strong>
+            <div class="sub-detail">📞 ${b.customer_phone}</div>
+          </td>
+          <td>
+            ${dateStr}
+            <div class="sub-detail">${b.booking_time || ''}</div>
+          </td>
+          <td>${b.party_size || '—'}</td>
+          <td style="max-width:140px;color:var(--ink-muted);font-size:12px;">${b.notes || '—'}</td>
+          <td><span class="badge badge-${b.status}">${b.status}</span></td>
+          <td>
+            ${b.status === 'pending' ? `
+              <button class="action-btn confirm" onclick="setReservationStatus('${b.id}', 'confirmed')">✓ Confirm</button>
+              <button class="action-btn decline" onclick="setReservationStatus('${b.id}', 'declined')">✗ Decline</button>
+            ` : '—'}
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filterReservations(filter) {
+    document.querySelectorAll('[id^="rp-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById(`rp-${filter}`).classList.add('active');
+    const today = new Date().toISOString().split('T')[0];
+    if (filter === 'all') renderReservations(allReservations);
+    else if (filter === 'upcoming') renderReservations(allReservations.filter(b => b.booking_date >= today));
+    else renderReservations(allReservations.filter(b => b.status === filter));
+  }
+
+  async function setReservationStatus(id, status) {
+    await api(`bookings?id=eq.${id}`, 'PATCH', { status });
+    showToast(status === 'confirmed' ? '✅ Reservation confirmed!' : '❌ Reservation declined.');
+    loadReservations(restaurant.restaurants.id);
+  }
+
+  // ── CATERING ──
+  async function loadCatering(restaurantId) {
+    const data = await api(`catering_bookings?restaurant_id=eq.${restaurantId}&order=created_at.desc`);
+    allCatering = data || [];
+
+    document.getElementById('c-total').textContent = allCatering.length;
+    document.getElementById('c-pending').textContent = allCatering.filter(c => c.status === 'pending').length;
+    document.getElementById('c-confirmed').textContent = allCatering.filter(c => c.status === 'confirmed').length;
+    document.getElementById('c-declined').textContent = allCatering.filter(c => c.status === 'declined').length;
+
+    // Badge on tab
+    const pendingCount = allCatering.filter(c => c.status === 'pending').length;
+    if (pendingCount > 0) {
+      document.getElementById('cat-tab-btn').innerHTML =
+        `🍽️ Catering requests <span class="tab-badge">${pendingCount}</span>`;
+    }
+
+    renderCatering(allCatering);
+  }
+
+  function renderCatering(data) {
+    const tbody = document.getElementById('catering-body');
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <div class="empty-state-icon">🍽️</div>
+            <div class="empty-state-title">No catering requests yet</div>
+            <div class="empty-state-sub">When someone submits a catering request, it'll appear here.</div>
+          </div>
+        </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(c => {
+      const dateStr = c.event_date
+        ? new Date(c.event_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : '—';
+      return `
+        <tr>
+          <td>
+            <strong>${c.customer_name}</strong>
+            <div class="sub-detail">📞 ${c.customer_phone}</div>
+            ${c.customer_email ? `<div class="sub-detail">✉️ ${c.customer_email}</div>` : ''}
+          </td>
+          <td>${dateStr}</td>
+          <td>${c.guest_count || '—'}</td>
+          <td style="max-width:140px;">
+            <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;" title="${c.event_location || ''}">${c.event_location || '—'}</div>
+            ${c.notes ? `<div class="sub-detail">${c.notes}</div>` : ''}
+          </td>
+          <td>${c.budget || '—'}</td>
+          <td><span class="badge badge-${c.status}">${c.status}</span></td>
+          <td>
+            ${c.status === 'pending' ? `
+              <button class="action-btn confirm" onclick="setCateringStatus('${c.id}', 'confirmed')">✓ Confirm</button>
+              <button class="action-btn decline" onclick="setCateringStatus('${c.id}', 'declined')">✗ Decline</button>
+            ` : '—'}
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filterCatering(filter) {
+    document.querySelectorAll('[id^="cp-"]').forEach(b => b.classList.remove('active'));
+    document.getElementById(`cp-${filter}`).classList.add('active');
+    if (filter === 'all') renderCatering(allCatering);
+    else renderCatering(allCatering.filter(c => c.status === filter));
+  }
+
+  async function setCateringStatus(id, status) {
+    await api(`catering_bookings?id=eq.${id}`, 'PATCH', { status });
+    showToast(status === 'confirmed' ? '✅ Catering request confirmed!' : '❌ Catering request declined.');
+    loadCatering(restaurant.restaurants.id);
+  }
+
+  // ── Helpers ──
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
