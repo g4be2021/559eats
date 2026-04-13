@@ -188,7 +188,7 @@
     <a href="#browse-anchor" onclick="document.getElementById('browse-anchor').scrollIntoView({behavior:'smooth'});return false;">Browse</a>
     <a href="map.html">Map</a>
     <a href="catering.html">Catering</a>
-    <a href="#browse-anchor" onclick="showTrucks();return false;">Food trucks</a>
+    <a href="map.html">Food trucks</a>
     <a href="pricing.html" class="nav-cta">List your spot</a>
   </div>
   <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
@@ -241,33 +241,6 @@
 
   <div id="browse-anchor"></div>
 
-  <!-- CUISINE FILTERS -->
-  <div class="section-head">
-    <span class="section-title">Find your craving</span>
-    <a href="#" class="section-link">View all →</a>
-  </div>
-  <div class="filters" id="filters">
-    <button class="filter-chip active" onclick="filterBy(this,'')">All</button>
-    <button class="filter-chip" onclick="filterBy(this,'Mexican')">Mexican</button>
-    <button class="filter-chip" onclick="filterBy(this,'Vietnamese')">Vietnamese</button>
-    <button class="filter-chip" onclick="filterBy(this,'BBQ')">BBQ</button>
-    <button class="filter-chip" onclick="filterBy(this,'Pizza')">Pizza</button>
-    <button class="filter-chip" onclick="filterBy(this,'Hawaiian Fusion')">Hawaiian</button>
-    <button class="filter-chip" onclick="filterBy(this,'Asian Street Food')">Asian</button>
-    <button class="filter-chip" onclick="filterBy(this,'Mexican Street Food')">Street Food</button>
-  </div>
-
-  <!-- RESTAURANT GRID -->
-  <div class="restaurant-grid" id="restaurant-grid">
-    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
-    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
-    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
-    <div class="r-card"><div class="r-card-img skeleton" style="font-size:0"></div><div class="r-card-body"><div class="skeleton" style="height:15px;width:65%;margin-bottom:6px"></div><div class="skeleton" style="height:11px;width:45%"></div></div></div>
-  </div>
-  <div class="load-more-wrap">
-    <button class="load-more-btn" id="load-more-btn" onclick="loadMore()" style="display:none">Load more restaurants</button>
-  </div>
-
   <!-- MAP BANNER -->
   <div class="map-banner">
     <div class="map-banner-text">
@@ -293,7 +266,7 @@
 
 <footer>
   <p>559eats · Celebrating local food in the Central Valley</p>
-  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="contact.html">Contact</a> · <a href="about.html">About</a>
+  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="#">Contact</a> · <a href="#">About</a></p>
 </footer>
 
 <script>
@@ -308,9 +281,6 @@
 
   let allRestaurants = [];
   let allTrucks = [];
-  let currentFilter = '';
-  let currentNeighborhood = '';
-  let visibleCount = 8;
 
   async function fetchData(table, filters='') {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}`, {
@@ -417,102 +387,14 @@
   }
 
   // ── RESTAURANTS ──
-  function getFilteredRestaurants() {
-    return allRestaurants.filter(r => {
-      const matchCuisine = !currentFilter || r.cuisine_type === currentFilter;
-      const matchHood = !currentNeighborhood || r.neighborhood === currentNeighborhood;
-      return matchCuisine && matchHood;
-    });
-  }
-
-  function renderRestaurants() {
-    const grid = document.getElementById('restaurant-grid');
-    const btn = document.getElementById('load-more-btn');
-    const filtered = getFilteredRestaurants();
-
-    if (filtered.length === 0) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">No restaurants found. Try a different filter.</div>';
-      btn.style.display = 'none';
-      return;
-    }
-
-    grid.innerHTML = filtered.slice(0, visibleCount).map(r => `
-      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
-        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type]||CUISINE_ICONS.default}</div>
-        <div class="r-card-body">
-          <div class="r-card-name">${r.name}</div>
-          <div class="r-card-meta">${r.cuisine_type} · ${r.neighborhood}</div>
-          <div class="r-card-footer">
-            <span class="stars">★★★★★</span>
-            <span class="badge open">Open now</span>
-          </div>
-        </div>
-      </a>
-    `).join('');
-
-    btn.style.display = filtered.length > visibleCount ? 'inline-block' : 'none';
-  }
-
-  function filterBy(el, cuisine) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    currentFilter = cuisine;
-    currentNeighborhood = '';
-    visibleCount = 8;
-    renderRestaurants();
-  }
-
   function filterNeighborhood(hood) {
-    currentNeighborhood = hood;
-    currentFilter = '';
-    visibleCount = 8;
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('.filter-chip').classList.add('active');
-    renderRestaurants();
-    document.getElementById('restaurant-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.location.href = `map.html?neighborhood=${encodeURIComponent(hood)}`;
   }
-
-  function loadMore() { visibleCount += 8; renderRestaurants(); }
 
   function handleSearch() {
-    const q = document.getElementById('search-input').value.toLowerCase().trim();
-    currentFilter = ''; currentNeighborhood = ''; visibleCount = 8;
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('.filter-chip').classList.add('active');
-
-    if (!q) { renderRestaurants(); return; }
-
-    const results = [...allRestaurants, ...allTrucks].filter(r =>
-      r.name.toLowerCase().includes(q) ||
-      (r.cuisine_type||'').toLowerCase().includes(q) ||
-      (r.neighborhood||'').toLowerCase().includes(q) ||
-      (r.address||'').toLowerCase().includes(q)
-    );
-
-    const grid = document.getElementById('restaurant-grid');
-    const btn = document.getElementById('load-more-btn');
-
-    if (!results.length) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">No results for "<strong>${q}</strong>" — try a cuisine or neighborhood.</div>`;
-      btn.style.display = 'none';
-      return;
-    }
-
-    grid.innerHTML = results.map(r => `
-      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
-        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type]||CUISINE_ICONS.default}</div>
-        <div class="r-card-body">
-          <div class="r-card-name">${r.name}</div>
-          <div class="r-card-meta">${r.cuisine_type||''} · ${r.neighborhood||''}</div>
-          <div class="r-card-footer">
-            <span class="stars">★★★★★</span>
-            ${r.is_food_truck ? '<span class="badge" style="background:#FAEEDA;color:#633806">🚚 Truck</span>' : '<span class="badge open">Open now</span>'}
-          </div>
-        </div>
-      </a>
-    `).join('');
-    btn.style.display = 'none';
-    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) return;
+    window.location.href = `map.html?search=${encodeURIComponent(q)}`;
   }
 
   document.getElementById('search-input').addEventListener('keydown', e => {
@@ -527,29 +409,6 @@
       const el = document.getElementById('hood-' + key);
       if (el) el.textContent = count + (count === 1 ? ' spot' : ' spots');
     }
-  }
-
-  function showTrucks() {
-    document.getElementById('browse-anchor').scrollIntoView({ behavior: 'smooth' });
-    currentFilter = ''; currentNeighborhood = '';
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    const grid = document.getElementById('restaurant-grid');
-    const btn = document.getElementById('load-more-btn');
-    if (!allTrucks.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">No food trucks found.</div>'; btn.style.display='none'; return; }
-    grid.innerHTML = allTrucks.map(r => `
-      <a class="r-card" href="restaurant.html?id=${r.id}" style="text-decoration:none;color:inherit;">
-        <div class="r-card-img">${CUISINE_ICONS[r.cuisine_type]||CUISINE_ICONS.default}</div>
-        <div class="r-card-body">
-          <div class="r-card-name">${r.name}</div>
-          <div class="r-card-meta">${r.cuisine_type||''} · ${r.neighborhood||''}</div>
-          <div class="r-card-footer">
-            <span class="stars">★★★★★</span>
-            <span class="badge" style="background:#FAEEDA;color:#633806">🚚 Truck</span>
-          </div>
-        </div>
-      </a>
-    `).join('');
-    btn.style.display = 'none';
   }
 
   function toggleMobileNav() {
