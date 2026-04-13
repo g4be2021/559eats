@@ -60,10 +60,8 @@
     .hero-desc { font-size: 14px; color: var(--ink-muted); line-height: 1.7; margin-bottom: 1.25rem; }
     .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag { font-size: 12px; padding: 4px 12px; border-radius: 15px; background: var(--cream); color: var(--ink-muted); border: 1px solid var(--card-border); }
-    .tag.open { background: #EAF3DE; color: #27500A; border-color: #97C459; }
     .tag.truck { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
 
-    /* CATERING BANNER */
     .catering-banner { background: linear-gradient(135deg, #1A1208 0%, #4A1B0C 100%); border-radius: var(--radius); padding: 1.5rem 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
     .catering-banner-left { display: flex; align-items: center; gap: 14px; }
     .catering-banner-icon { font-size: 36px; }
@@ -105,13 +103,7 @@
     .nearby-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; color: var(--ink); }
     .nearby-meta { font-size: 11px; color: var(--ink-muted); }
 
-    /* CLAIM STRIP */
-    .claim-strip {
-      border: 1px dashed var(--ink-faint); border-radius: var(--radius);
-      padding: 1.25rem 1.5rem; display: flex; align-items: center;
-      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-      margin-bottom: 1.5rem; background: var(--white);
-    }
+    .claim-strip { border: 1px dashed var(--ink-faint); border-radius: var(--radius); padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; background: var(--white); }
     .claim-strip-text { font-size: 13px; color: var(--ink-muted); }
     .claim-strip-text strong { color: var(--ink); }
     .claim-strip-btn { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; background: var(--white); color: var(--ink-muted); border: 1px solid var(--card-border); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
@@ -122,9 +114,6 @@
     .share-text strong { color: var(--white); }
     .share-btn { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; background: var(--coral); color: var(--white); border: none; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 
-    /* SHARED MODAL STYLES */
-    .book-btn { background: var(--coral); color: var(--white); border: none; border-radius: 25px; padding: 11px 24px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-    .book-btn:hover { background: var(--coral-dark); }
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,18,8,0.55); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .modal { background: var(--white); border-radius: var(--radius); padding: 2rem; width: 100%; max-width: 460px; position: relative; max-height: 90vh; overflow-y: auto; }
@@ -264,7 +253,6 @@
       `restaurants?neighborhood=eq.${encodeURIComponent(restaurant.neighborhood)}&status=eq.approved&is_active=eq.true&id=neq.${restaurant.id}&limit=3`
     );
 
-    // Check if this listing has an owner
     const owners = await api(`owners?restaurant_id=eq.${restaurant.id}`);
     currentHasOwner = owners && owners.length > 0;
 
@@ -287,12 +275,10 @@
               ${restaurant.phone ? `<a href="tel:${restaurant.phone}" class="action-btn primary">📞 Call</a>` : ''}
               ${restaurant.website ? `<a href="${restaurant.website}" target="_blank" class="action-btn secondary">Visit website →</a>` : ''}
               <a href="map.html" class="action-btn secondary">📍 Map</a>
-              <button class="book-btn" onclick="openBooking()">Reserve a table</button>
             </div>
           </div>
           ${restaurant.description ? `<p class="hero-desc">${restaurant.description}</p>` : ''}
           <div class="hero-tags">
-            <span class="tag open">Open now</span>
             ${restaurant.is_food_truck ? '<span class="tag truck">🚚 Food truck</span>' : ''}
             ${restaurant.cuisine_type ? `<span class="tag">${restaurant.cuisine_type}</span>` : ''}
             ${restaurant.neighborhood ? `<span class="tag">${restaurant.neighborhood}</span>` : ''}
@@ -390,51 +376,6 @@
   init();
 </script>
 
-<!-- RESERVATION MODAL -->
-<div class="modal-overlay" id="booking-overlay" onclick="closeOnOverlay(event,'booking-overlay')">
-  <div class="modal">
-    <button class="modal-close" onclick="closeBooking()">✕</button>
-    <div id="booking-form-wrap">
-      <h2>Reserve a table</h2>
-      <p class="modal-sub" id="booking-restaurant-name">Loading...</p>
-      <div class="bform-row">
-        <div class="bform-group"><label>Your name *</label><input type="text" id="b-name" placeholder="Full name" /></div>
-        <div class="bform-group">
-          <label>Party size *</label>
-          <select id="b-party">
-            <option value="1">1 person</option><option value="2" selected>2 people</option>
-            <option value="3">3 people</option><option value="4">4 people</option>
-            <option value="5">5 people</option><option value="6">6 people</option><option value="7">7+ people</option>
-          </select>
-        </div>
-      </div>
-      <div class="bform-row">
-        <div class="bform-group"><label>Date *</label><input type="date" id="b-date" /></div>
-        <div class="bform-group">
-          <label>Time *</label>
-          <select id="b-time">
-            <option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option>
-            <option>12:30 PM</option><option>1:00 PM</option><option>1:30 PM</option>
-            <option>5:00 PM</option><option>5:30 PM</option><option>6:00 PM</option>
-            <option>6:30 PM</option><option>7:00 PM</option><option>7:30 PM</option><option>8:00 PM</option>
-          </select>
-        </div>
-      </div>
-      <div class="bform-group"><label>Phone number * (for confirmation)</label><input type="tel" id="b-phone" placeholder="(559) 555-0100" /></div>
-      <div class="bform-group"><label>Email (optional)</label><input type="email" id="b-email" placeholder="you@email.com" /></div>
-      <div class="bform-group"><label>Special requests</label><input type="text" id="b-notes" placeholder="Allergies, celebrations, seating preferences..." /></div>
-      <div class="form-error" id="booking-error"></div>
-      <button class="submit-btn" id="book-submit-btn" onclick="submitBooking()">Request reservation</button>
-      <p style="font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px">The restaurant will confirm via SMS · Powered by 559eats</p>
-    </div>
-    <div class="form-success" id="booking-success">
-      <div class="sicon">🎉</div>
-      <h3>Request sent!</h3>
-      <p>You'll get a text confirmation once the restaurant accepts your booking.</p>
-    </div>
-  </div>
-</div>
-
 <!-- CATERING MODAL -->
 <div class="modal-overlay" id="catering-overlay" onclick="closeOnOverlay(event,'catering-overlay')">
   <div class="modal">
@@ -461,9 +402,12 @@
       <div class="bform-group">
         <label>Budget (optional)</label>
         <select id="c-budget">
-          <option value="">Prefer not to say</option><option value="Under $500">Under $500</option>
-          <option value="$500 – $1,000">$500 – $1,000</option><option value="$1,000 – $2,500">$1,000 – $2,500</option>
-          <option value="$2,500 – $5,000">$2,500 – $5,000</option><option value="$5,000+">$5,000+</option>
+          <option value="">Prefer not to say</option>
+          <option value="Under $500">Under $500</option>
+          <option value="$500 – $1,000">$500 – $1,000</option>
+          <option value="$1,000 – $2,500">$1,000 – $2,500</option>
+          <option value="$2,500 – $5,000">$2,500 – $5,000</option>
+          <option value="$5,000+">$5,000+</option>
         </select>
       </div>
       <div class="bform-group"><label>Notes (optional)</label><textarea id="c-notes" placeholder="Type of event, dietary needs, setup requirements..."></textarea></div>
@@ -503,7 +447,7 @@
       </div>
       <div class="bform-group">
         <label>How can you prove ownership? *</label>
-        <textarea id="cl-proof" placeholder="E.g. business license number, health permit, website URL, social media handle, or any other verifiable info about your business..."></textarea>
+        <textarea id="cl-proof" placeholder="E.g. business license number, health permit, website URL, social media handle..."></textarea>
       </div>
       <div class="form-error" id="claim-error"></div>
       <button class="submit-btn" id="claim-submit-btn" onclick="submitClaim()">Submit claim request</button>
@@ -512,56 +456,12 @@
     <div class="form-success" id="claim-success">
       <div class="sicon">📬</div>
       <h3>Request received!</h3>
-      <p>We'll review your info and get back to you within 24–48 hours. Keep an eye on your phone — we may reach out with follow-up questions.</p>
+      <p>We'll review your info and get back to you within 24–48 hours.</p>
     </div>
   </div>
 </div>
 
 <script>
-  // ── Reservation modal ──
-  function openBooking() {
-    if (!currentRestaurantId) return;
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('b-date').value = tomorrow.toISOString().split('T')[0];
-    document.getElementById('b-date').min = tomorrow.toISOString().split('T')[0];
-    document.getElementById('booking-restaurant-name').textContent = currentRestaurantName;
-    document.getElementById('booking-form-wrap').style.display = 'block';
-    document.getElementById('booking-success').style.display = 'none';
-    document.getElementById('booking-error').style.display = 'none';
-    document.getElementById('booking-overlay').classList.add('open');
-  }
-  function closeBooking() { document.getElementById('booking-overlay').classList.remove('open'); }
-
-  async function submitBooking() {
-    const name = document.getElementById('b-name').value.trim();
-    const phone = document.getElementById('b-phone').value.trim();
-    const date = document.getElementById('b-date').value;
-    const time = document.getElementById('b-time').value;
-    const party = document.getElementById('b-party').value;
-    const email = document.getElementById('b-email').value.trim();
-    const notes = document.getElementById('b-notes').value.trim();
-    const btn = document.getElementById('book-submit-btn');
-
-    if (!name) { showError('booking-error','Please enter your name.'); return; }
-    if (!phone) { showError('booking-error','Please enter your phone number.'); return; }
-    if (!date) { showError('booking-error','Please select a date.'); return; }
-
-    btn.disabled = true; btn.textContent = 'Sending...';
-    document.getElementById('booking-error').style.display = 'none';
-
-    try {
-      const res = await fetch('/api/booking', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurant_id: currentRestaurantId, customer_name: name, customer_phone: phone, customer_email: email||null, party_size: parseInt(party), booking_date: date, booking_time: time, notes: notes||null })
-      });
-      const data = await res.json();
-      if (data.success) { document.getElementById('booking-form-wrap').style.display='none'; document.getElementById('booking-success').style.display='block'; }
-      else { showError('booking-error', data.error||'Something went wrong.'); btn.disabled=false; btn.textContent='Request reservation'; }
-    } catch(e) { showError('booking-error','Network error. Please try again.'); btn.disabled=false; btn.textContent='Request reservation'; }
-  }
-
-  // ── Catering modal ──
   function openCatering() {
     if (!currentRestaurantId) return;
     const nextWeek = new Date(); nextWeek.setDate(nextWeek.getDate()+7);
@@ -605,7 +505,6 @@
     } catch(e){showError('catering-error','Network error.');btn.disabled=false;btn.textContent='Send catering request';}
   }
 
-  // ── Claim modal ──
   function openClaim() {
     document.getElementById('claim-form-wrap').style.display='block';
     document.getElementById('claim-success').style.display='none';
@@ -638,11 +537,10 @@
       const res=await fetch('/api/claim-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({restaurant_id:currentRestaurantId,owner_name:name,owner_email:email,owner_phone:phone,years_operating:years,business_proof:proof})});
       const data=await res.json();
       if(data.success){document.getElementById('claim-form-wrap').style.display='none';document.getElementById('claim-success').style.display='block';}
-      else{showError('claim-error',data.error||'Something went wrong. Please try again.');btn.disabled=false;btn.textContent='Submit claim request';}
-    } catch(e){showError('claim-error','Network error. Please try again.');btn.disabled=false;btn.textContent='Submit claim request';}
+      else{showError('claim-error',data.error||'Something went wrong.');btn.disabled=false;btn.textContent='Submit claim request';}
+    } catch(e){showError('claim-error','Network error.');btn.disabled=false;btn.textContent='Submit claim request';}
   }
 
-  // ── Shared helpers ──
   function showError(id, msg) {
     const el=document.getElementById(id); el.textContent=msg; el.style.display='block';
   }
