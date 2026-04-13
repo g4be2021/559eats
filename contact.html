@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Contact</title>
+  <meta name="description" content="Get in touch with the 559eats team. We'd love to hear from you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    nav {
+      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-cta { background: var(--coral); color: var(--white) !important; padding: 7px 16px; border-radius: 20px; }
+    .nav-cta:hover { background: var(--coral-dark) !important; }
+    .nav-mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--ink); }
+    .nav-drawer { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--card-border); padding: 1rem 2rem; z-index: 99; flex-direction: column; gap: 16px; }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { font-size: 15px; color: var(--ink-muted); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
+    .nav-drawer a:last-child { border-bottom: none; }
+
+    .hero {
+      background: var(--coral-dark); padding: 4rem 2rem 3rem; text-align: center;
+    }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px,5vw,44px); font-weight: 900; color: var(--white); margin-bottom: 12px; }
+    .hero p { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+    main { max-width: 560px; margin: 0 auto; padding: 3rem 2rem; }
+
+    .card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    input, select, textarea {
+      padding: 10px 12px; border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--ink); background: var(--cream);
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--coral); background: var(--white); }
+    textarea { resize: vertical; min-height: 130px; }
+
+    .submit-btn {
+      width: 100%; padding: 13px; background: var(--coral); color: var(--white);
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; margin-top: 4px;
+    }
+    .submit-btn:hover { background: var(--coral-dark); }
+    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+
+    .error-box { background: #FCEBEB; border: 1px solid #F09595; border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: #791F1F; margin-top: 10px; display: none; }
+
+    .success-card { text-align: center; padding: 2rem 1rem; display: none; }
+    .success-card .icon { font-size: 48px; margin-bottom: 1rem; }
+    .success-card h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+    .success-card p { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
+    .back-link { display: inline-block; margin-top: 1.5rem; color: var(--coral); font-size: 14px; font-weight: 500; text-decoration: none; }
+
+    footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; font-size: 12px; color: var(--ink-muted); margin-top: 4rem; }
+    footer a { color: var(--coral); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .nav-mobile-btn { display: block; }
+      main { padding: 2rem 1rem; }
+    }
+  </style>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-SM0VBC86SK');</script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="map.html">Map</a>
+    <a href="catering.html">Catering</a>
+    <a href="pricing.html" class="nav-cta">List your spot</a>
+  </div>
+  <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="index.html">Home</a>
+  <a href="map.html">Map</a>
+  <a href="catering.html">Catering</a>
+  <a href="pricing.html">Get listed</a>
+  <a href="login.html">Owner login</a>
+</div>
+
+<div class="hero">
+  <h1>Get in touch</h1>
+  <p>Have a question, a restaurant tip, or just want to say hi? We'd love to hear from you.</p>
+</div>
+
+<main>
+  <div class="card">
+    <div id="form-wrap">
+      <div class="form-group">
+        <label>Your name *</label>
+        <input type="text" id="c-name" placeholder="Full name" />
+      </div>
+      <div class="form-group">
+        <label>Email address *</label>
+        <input type="email" id="c-email" placeholder="you@email.com" />
+      </div>
+      <div class="form-group">
+        <label>Topic</label>
+        <select id="c-topic">
+          <option value="General question">General question</option>
+          <option value="List my restaurant">List my restaurant</option>
+          <option value="Report an issue">Report an issue</option>
+          <option value="Partnership">Partnership</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message *</label>
+        <textarea id="c-message" placeholder="Tell us what's on your mind..."></textarea>
+      </div>
+      <div class="error-box" id="error-box"></div>
+      <button class="submit-btn" id="submit-btn" onclick="submitContact()">Send message</button>
+    </div>
+
+    <div class="success-card" id="success-card">
+      <div class="icon">📬</div>
+      <h3>Message sent!</h3>
+      <p>Thanks for reaching out. We'll get back to you within 1–2 business days.</p>
+      <a href="index.html" class="back-link">← Back to 559eats</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>559eats · Celebrating local food in the Central Valley</p>
+  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="contact.html">Contact</a> · <a href="about.html">About</a></p>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+  async function submitContact() {
+    const name = document.getElementById('c-name').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const topic = document.getElementById('c-topic').value;
+    const message = document.getElementById('c-message').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const errEl = document.getElementById('error-box');
+
+    if (!name) { showError('Please enter your name.'); return; }
+    if (!email || !email.includes('@')) { showError('Please enter a valid email address.'); return; }
+    if (!message) { showError('Please enter a message.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    errEl.style.display = 'none';
+
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/contact_messages`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ name, email, topic, message })
+      });
+
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success-card').style.display = 'block';
+    } catch(e) {
+      showError('Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Send message';
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function toggleMobileNav() {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('mobile-btn');
+    const open = drawer.classList.toggle('open');
+    btn.textContent = open ? '✕' : '☰';
+  }
+</script>
+</body>
+</html>
