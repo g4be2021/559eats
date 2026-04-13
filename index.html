@@ -154,6 +154,26 @@
     .hood-name { font-size: 13px; font-weight: 500; color: var(--ink); }
     .hood-count { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
 
+    /* CATERING CALLOUT */
+    .catering-callout {
+      background: var(--coral-light);
+      border: 1px solid rgba(216,90,48,0.15);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 3rem;
+    }
+    .catering-callout-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .catering-callout-pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: var(--white); color: var(--ink-muted); border: 1px solid var(--card-border); }
+    .catering-callout h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .catering-callout p { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
+    .catering-callout-btn { background: var(--coral); color: var(--white); border: none; border-radius: 25px; padding: 13px 26px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s; text-decoration: none; display: inline-block; }
+    .catering-callout-btn:hover { background: var(--coral-dark); }
+    @media (max-width: 600px) { .catering-callout { grid-template-columns: 1fr; } }
+
     footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; font-size: 12px; color: var(--ink-muted); }
     footer a { color: var(--coral); text-decoration: none; }
 
@@ -250,6 +270,21 @@
     <button class="map-btn" onclick="window.location.href='map.html'">Open map view</button>
   </div>
 
+  <!-- CATERING CALLOUT -->
+  <div class="catering-callout">
+    <div>
+      <h2>🍽️ Need catering for your next event?</h2>
+      <p>Book a local food truck for weddings, corporate lunches, birthday parties, and more. Tell us about your event and we'll connect you with the right truck.</p>
+      <div class="catering-callout-pills">
+        <span class="catering-callout-pill">🎊 Weddings</span>
+        <span class="catering-callout-pill">🏢 Corporate</span>
+        <span class="catering-callout-pill">🎂 Birthdays</span>
+        <span class="catering-callout-pill">🎓 Graduations</span>
+      </div>
+    </div>
+    <a href="catering.html" class="catering-callout-btn">Browse catering trucks →</a>
+  </div>
+
   <!-- NEIGHBORHOODS -->
   <div class="section-head">
     <span class="section-title">Explore by neighborhood</span>
@@ -266,7 +301,7 @@
 
 <footer>
   <p>559eats · Celebrating local food in the Central Valley</p>
-  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="#">Contact</a> · <a href="#">About</a></p>
+  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="contact.html">Contact</a> · <a href="about.html">About</a></p>
 </footer>
 
 <script>
@@ -320,8 +355,7 @@
           <div class="truck-name">${t.name}</div>
           <div class="truck-meta">${t.cuisine_type} · ${t.neighborhood}</div>
           <div class="truck-footer">
-            <span class="stars">★★★★★</span>
-            <span class="badge open">Open now</span>
+            <span class="badge ${t.is_food_truck ? 'truck' : 'open'}" style="${t.is_food_truck ? 'background:#FAEEDA;color:#633806' : ''}">🚚 Food truck</span>
           </div>
         </div>
       </div>
