@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats · Catering</title>
+  <meta name="description" content="Book a food truck or restaurant for your next catering event in Fresno. Weddings, corporate events, parties and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+
+    nav {
+      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 2rem; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+    .nav-cta { background: var(--coral); color: var(--white) !important; padding: 7px 16px; border-radius: 20px; }
+    .nav-cta:hover { background: var(--coral-dark) !important; }
+    .nav-mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--ink); }
+    .nav-drawer {
+      display: none; position: fixed; top: 60px; left: 0; right: 0;
+      background: var(--white); border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem; z-index: 99; flex-direction: column; gap: 16px;
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { font-size: 15px; color: var(--ink-muted); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
+    .nav-drawer a:last-child { border-bottom: none; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1A1208 0%, #4A1B0C 100%);
+      padding: 4rem 2rem; text-align: center;
+    }
+    .hero-eyebrow { font-size: 12px; font-weight: 500; color: var(--coral); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; color: var(--white); line-height: 1.15; margin-bottom: 14px; }
+    .hero p { font-size: 16px; color: rgba(255,255,255,0.65); max-width: 500px; margin: 0 auto 2rem; line-height: 1.6; }
+    .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .hero-pill { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 6px 14px; font-size: 13px; }
+
+    /* HOW IT WORKS */
+    .how-section { background: var(--white); border-bottom: 1px solid var(--card-border); padding: 2.5rem 2rem; }
+    .how-inner { max-width: 860px; margin: 0 auto; }
+    .how-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 1.75rem; }
+    .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .how-step { text-align: center; }
+    .how-step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--coral-light); color: var(--coral); font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+    .how-step-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    .how-step-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.5; }
+
+    /* MAIN */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+    .section-count { font-size: 13px; color: var(--ink-muted); }
+
+    /* FILTERS */
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-btn { padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1px solid var(--card-border); background: var(--white); color: var(--ink-muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .filter-btn:hover { border-color: var(--coral); color: var(--coral); }
+    .filter-btn.active { background: var(--coral); color: var(--white); border-color: var(--coral); }
+
+    /* TRUCK GRID */
+    .truck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-bottom: 3rem; }
+    .truck-card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column;
+    }
+    .truck-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(26,18,8,0.08); }
+    .truck-card-img { height: 110px; background: var(--coral-light); display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; }
+    .truck-card-sponsored { position: absolute; top: 10px; right: 10px; background: #FAEEDA; color: #633806; font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 12px; border: 1px solid #EF9F27; }
+    .truck-card-body { padding: 1.1rem; flex: 1; display: flex; flex-direction: column; }
+    .truck-card-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+    .truck-card-meta { font-size: 12px; color: var(--ink-muted); margin-bottom: 10px; }
+    .truck-card-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 12px; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .truck-card-footer { display: flex; gap: 8px; }
+    .truck-card-btn {
+      flex: 1; padding: 9px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; text-align: center;
+      text-decoration: none; display: inline-block; border: none;
+    }
+    .truck-card-btn.primary { background: var(--coral); color: var(--white); }
+    .truck-card-btn.primary:hover { background: var(--coral-dark); }
+    .truck-card-btn.secondary { background: var(--white); color: var(--ink-muted); border: 1px solid var(--card-border); }
+    .truck-card-btn.secondary:hover { border-color: var(--coral); color: var(--coral); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 4rem 1rem; }
+    .empty-state-icon { font-size: 48px; margin-bottom: 1rem; }
+    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; color: var(--ink-muted); }
+
+    /* SKELETON */
+    .skeleton { background: linear-gradient(90deg,#f0ebe4 25%,#e8e1d8 50%,#f0ebe4 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--radius-sm); }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* CTA STRIP */
+    .cta-strip {
+      background: var(--coral-light); border: 1px solid rgba(216,90,48,0.15);
+      border-radius: var(--radius); padding: 1.75rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;
+    }
+    .cta-strip-text h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .cta-strip-text p { font-size: 13px; color: var(--ink-muted); }
+    .cta-strip-btn { background: var(--coral); color: var(--white); border: none; border-radius: 25px; padding: 11px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; }
+    .cta-strip-btn:hover { background: var(--coral-dark); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,18,8,0.55); z-index: 500;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius);
+      padding: 2rem; width: 100%; max-width: 480px;
+      position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-muted); }
+    .modal h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 1.5rem; }
+    .bform-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .bform-group label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .bform-group input, .bform-group select, .bform-group textarea {
+      padding: 10px 12px; border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--ink); background: var(--cream);
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .bform-group textarea { resize: vertical; min-height: 80px; }
+    .bform-group input:focus, .bform-group select:focus, .bform-group textarea:focus { border-color: var(--coral); background: var(--white); }
+    .bform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .submit-btn { width: 100%; padding: 12px; background: var(--coral); color: var(--white); border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+    .submit-btn:hover { background: var(--coral-dark); }
+    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .form-error { font-size: 13px; color: #791F1F; margin-top: 8px; display: none; }
+    .form-success { text-align: center; padding: 1rem 0; display: none; }
+    .form-success .sicon { font-size: 48px; margin-bottom: 12px; }
+    .form-success h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+    .form-success p { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .nav-mobile-btn { display: block; }
+      .hero h1 { font-size: 30px; }
+      .how-steps { grid-template-columns: 1fr; gap: 16px; }
+      main { padding: 1.5rem 1rem; }
+    }
+  </style>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SM0VBC86SK');
+  </script>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="map.html">Map</a>
+    <a href="catering.html" class="active">Catering</a>
+    <a href="pricing.html">Get listed</a>
+    <a href="pricing.html" class="nav-cta">List your spot</a>
+  </div>
+  <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <a href="index.html">Home</a>
+  <a href="map.html">Map</a>
+  <a href="catering.html">Catering</a>
+  <a href="pricing.html">Get listed</a>
+  <a href="login.html">Owner login</a>
+  <a href="apply.html">Apply for free</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">559eats Catering</div>
+  <h1>Book a food truck<br>for your next event</h1>
+  <p>Fresno's best food trucks available for weddings, corporate lunches, birthday parties, and more.</p>
+  <div class="hero-pills">
+    <span class="hero-pill">🎊 Weddings</span>
+    <span class="hero-pill">🏢 Corporate events</span>
+    <span class="hero-pill">🎂 Birthday parties</span>
+    <span class="hero-pill">🎓 Graduations</span>
+    <span class="hero-pill">🎉 Any occasion</span>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="how-inner">
+    <div class="how-title">How it works</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div class="how-step-title">Pick a truck</div>
+        <div class="how-step-desc">Browse available food trucks below and find one that fits your event vibe.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div class="how-step-title">Send a request</div>
+        <div class="how-step-desc">Tell us your event date, location, guest count, and budget. Takes 60 seconds.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div class="how-step-title">Get confirmed</div>
+        <div class="how-step-desc">The truck owner contacts you directly to confirm details and finalize pricing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- FILTERS -->
+  <div class="filters" id="filters">
+    <button class="filter-btn active" onclick="filterBy('all', this)">All trucks</button>
+    <button class="filter-btn" onclick="filterBy('Mexican', this)">🌮 Mexican</button>
+    <button class="filter-btn" onclick="filterBy('BBQ', this)">🍖 BBQ</button>
+    <button class="filter-btn" onclick="filterBy('Pizza', this)">🍕 Pizza</button>
+    <button class="filter-btn" onclick="filterBy('Asian Street Food', this)">🥡 Asian</button>
+    <button class="filter-btn" onclick="filterBy('Hawaiian Fusion', this)">🍱 Hawaiian</button>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Available for catering</div>
+    <div class="section-count" id="truck-count"></div>
+  </div>
+
+  <div class="truck-grid" id="truck-grid">
+    <!-- skeletons -->
+    ${[1,2,3,4,5,6].map(() => `
+      <div class="truck-card">
+        <div class="truck-card-img skeleton" style="font-size:0"></div>
+        <div class="truck-card-body">
+          <div class="skeleton" style="height:18px;width:70%;margin-bottom:8px"></div>
+          <div class="skeleton" style="height:12px;width:45%;margin-bottom:12px"></div>
+          <div class="skeleton" style="height:12px;width:90%;margin-bottom:4px"></div>
+          <div class="skeleton" style="height:12px;width:75%;margin-bottom:16px"></div>
+          <div class="skeleton" style="height:36px;border-radius:20px"></div>
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <div class="cta-strip">
+    <div class="cta-strip-text">
+      <h3>Don't see what you're looking for?</h3>
+      <p>Tell us about your event and we'll match you with the right truck.</p>
+    </div>
+    <button class="cta-strip-btn" onclick="openGeneralInquiry()">Submit a general inquiry</button>
+  </div>
+
+</main>
+
+<!-- CATERING MODAL -->
+<div class="modal-overlay" id="catering-overlay" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCatering()">✕</button>
+    <div id="catering-form-wrap">
+      <h2>🍽️ Book for catering</h2>
+      <p class="modal-sub" id="catering-truck-name">Tell us about your event</p>
+      <div class="bform-row">
+        <div class="bform-group">
+          <label>Your name *</label>
+          <input type="text" id="c-name" placeholder="Full name" />
+        </div>
+        <div class="bform-group">
+          <label>Phone number *</label>
+          <input type="tel" id="c-phone" placeholder="(559) 555-0100" />
+        </div>
+      </div>
+      <div class="bform-group">
+        <label>Email (optional)</label>
+        <input type="email" id="c-email" placeholder="you@email.com" />
+      </div>
+      <div class="bform-row">
+        <div class="bform-group">
+          <label>Event date *</label>
+          <input type="date" id="c-date" />
+        </div>
+        <div class="bform-group">
+          <label>Number of guests *</label>
+          <select id="c-guests">
+            <option value="25">Up to 25</option>
+            <option value="50">25 – 50</option>
+            <option value="100">50 – 100</option>
+            <option value="200">100 – 200</option>
+            <option value="201">200+</option>
+          </select>
+        </div>
+      </div>
+      <div class="bform-group">
+        <label>Event location / address *</label>
+        <input type="text" id="c-location" placeholder="123 Main St, Fresno, CA" />
+      </div>
+      <div class="bform-group">
+        <label>Budget (optional)</label>
+        <select id="c-budget">
+          <option value="">Prefer not to say</option>
+          <option value="Under $500">Under $500</option>
+          <option value="$500 – $1,000">$500 – $1,000</option>
+          <option value="$1,000 – $2,500">$1,000 – $2,500</option>
+          <option value="$2,500 – $5,000">$2,500 – $5,000</option>
+          <option value="$5,000+">$5,000+</option>
+        </select>
+      </div>
+      <div class="bform-group">
+        <label>Notes (optional)</label>
+        <textarea id="c-notes" placeholder="Type of event, dietary needs, setup requirements..."></textarea>
+      </div>
+      <div class="form-error" id="catering-error"></div>
+      <button class="submit-btn" id="catering-submit-btn" onclick="submitCatering()">Send catering request</button>
+      <p style="font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px">
+        The truck owner will contact you directly · Powered by 559eats
+      </p>
+    </div>
+    <div class="form-success" id="catering-success">
+      <div class="sicon">🎉</div>
+      <h3>Request sent!</h3>
+      <p>The truck owner will reach out to confirm details and pricing. Keep an eye on your phone and email!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+  const ICONS = {
+    'Mexican':'🌮','Vietnamese':'🍜','BBQ':'🍖','Pizza':'🍕',
+    'Hawaiian Fusion':'🍱','Asian Street Food':'🥡',
+    'Mexican Street Food':'🌯','default':'🍽️'
+  };
+
+  let allTrucks = [];
+  let activeFilter = 'all';
+  let selectedRestaurantId = null;
+  let selectedRestaurantName = null;
+
+  async function init() {
+    // Check if a specific truck was pre-selected from URL
+    const params = new URLSearchParams(window.location.search);
+    const preId = params.get('id');
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/restaurants?status=eq.approved&is_active=eq.true&order=is_sponsored.desc,name.asc`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    allTrucks = await res.json();
+
+    renderTrucks(allTrucks);
+
+    // If pre-selected, auto-open modal
+    if (preId) {
+      const truck = allTrucks.find(t => t.id === preId);
+      if (truck) openCatering(truck.id, truck.name);
+    }
+  }
+
+  function renderTrucks(trucks) {
+    const grid = document.getElementById('truck-grid');
+    const count = document.getElementById('truck-count');
+
+    if (!trucks || trucks.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-icon">🚚</div>
+          <h3>No trucks found</h3>
+          <p>Try a different filter or check back soon.</p>
+        </div>`;
+      count.textContent = '';
+      return;
+    }
+
+    count.textContent = `${trucks.length} truck${trucks.length !== 1 ? 's' : ''} available`;
+
+    grid.innerHTML = trucks.map(t => `
+      <div class="truck-card">
+        <div class="truck-card-img">
+          ${ICONS[t.cuisine_type] || ICONS.default}
+          ${t.is_sponsored ? '<div class="truck-card-sponsored">⭐ Sponsored</div>' : ''}
+        </div>
+        <div class="truck-card-body">
+          <div class="truck-card-name">${t.name}</div>
+          <div class="truck-card-meta">${t.cuisine_type || ''} · ${t.neighborhood || 'Fresno'}</div>
+          <div class="truck-card-desc">${t.description || 'Available for catering events in the Fresno area.'}</div>
+          <div class="truck-card-footer">
+            <a href="restaurant.html?id=${t.id}" class="truck-card-btn secondary">View profile</a>
+            <button class="truck-card-btn primary" onclick="openCatering('${t.id}', '${t.name.replace(/'/g, "\\'")}')">Book catering</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterBy(cuisine, btn) {
+    activeFilter = cuisine;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (cuisine === 'all') {
+      renderTrucks(allTrucks);
+    } else {
+      renderTrucks(allTrucks.filter(t =>
+        (t.cuisine_type || '').toLowerCase().includes(cuisine.toLowerCase())
+      ));
+    }
+  }
+
+  function openCatering(id, name) {
+    selectedRestaurantId = id;
+    selectedRestaurantName = name;
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    document.getElementById('c-date').value = nextWeek.toISOString().split('T')[0];
+    document.getElementById('c-date').min = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    document.getElementById('catering-truck-name').textContent = name;
+    document.getElementById('catering-form-wrap').style.display = 'block';
+    document.getElementById('catering-success').style.display = 'none';
+    document.getElementById('catering-error').style.display = 'none';
+    document.getElementById('catering-submit-btn').disabled = false;
+    document.getElementById('catering-submit-btn').textContent = 'Send catering request';
+    // Clear fields
+    ['c-name','c-phone','c-email','c-location','c-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('catering-overlay').classList.add('open');
+  }
+
+  function openGeneralInquiry() {
+    selectedRestaurantId = null;
+    selectedRestaurantName = null;
+    document.getElementById('catering-truck-name').textContent = 'Tell us about your event';
+    document.getElementById('catering-form-wrap').style.display = 'block';
+    document.getElementById('catering-success').style.display = 'none';
+    document.getElementById('catering-error').style.display = 'none';
+    document.getElementById('catering-overlay').classList.add('open');
+  }
+
+  function closeCatering() {
+    document.getElementById('catering-overlay').classList.remove('open');
+  }
+
+  function closeOnOverlay(e) {
+    if (e.target === document.getElementById('catering-overlay')) closeCatering();
+  }
+
+  async function submitCatering() {
+    const name = document.getElementById('c-name').value.trim();
+    const phone = document.getElementById('c-phone').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const date = document.getElementById('c-date').value;
+    const guests = document.getElementById('c-guests').value;
+    const location = document.getElementById('c-location').value.trim();
+    const budget = document.getElementById('c-budget').value;
+    const notes = document.getElementById('c-notes').value.trim();
+    const btn = document.getElementById('catering-submit-btn');
+    const errEl = document.getElementById('catering-error');
+
+    if (!name) { showError('Please enter your name.'); return; }
+    if (!phone) { showError('Please enter your phone number.'); return; }
+    if (!date) { showError('Please select an event date.'); return; }
+    if (!location) { showError('Please enter the event location.'); return; }
+    if (!selectedRestaurantId) { showError('Please select a truck from the list first.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    errEl.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/catering-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant_id: selectedRestaurantId,
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || null,
+          event_date: date,
+          event_location: location,
+          guest_count: parseInt(guests),
+          budget: budget || null,
+          notes: notes || null
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('catering-form-wrap').style.display = 'none';
+        document.getElementById('catering-success').style.display = 'block';
+      } else {
+        showError(data.error || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Send catering request';
+      }
+    } catch (e) {
+      showError('Network error. Please check your connection.');
+      btn.disabled = false;
+      btn.textContent = 'Send catering request';
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('catering-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function toggleMobileNav() {
+    const drawer = document.getElementById('nav-drawer');
+    const btn = document.getElementById('mobile-btn');
+    const open = drawer.classList.toggle('open');
+    btn.textContent = open ? '✕' : '☰';
+  }
+
+  init();
+</script>
+
+</body>
+</html>
