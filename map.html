@@ -121,11 +121,22 @@
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
     @media (max-width: 700px) {
-      .app { flex-direction: column; }
-      .panel { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid var(--card-border); }
-      .map-container { height: 55vh; }
-      .nav-links a:not(.nav-cta) { display: none; }
-      .map-info-card { bottom: 10px; min-width: 240px; }
+  .app { flex-direction: column; }
+  .panel { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid var(--card-border); }
+  .map-container { height: 55vh; }
+  .nav-links a:not(.nav-cta) { display: none; }
+
+  .map-info-card {
+    bottom: 0; left: 0; right: 0;
+    transform: none;
+    max-width: 100%;
+    min-width: 100%;
+    border-radius: 14px 14px 0 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 20px 18px 32px;
+  }
+}
     }
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
