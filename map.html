@@ -79,7 +79,7 @@
     .map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* Desktop: floating card */
+    /* ── DESKTOP: floating card ── */
     .map-info-card {
       position: absolute; bottom: 24px; left: 50%;
       transform: translateX(-50%);
@@ -109,47 +109,59 @@
     .skeleton { background: linear-gradient(90deg,#f0ebe4 25%,#e8e1d8 50%,#f0ebe4 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--radius-sm); }
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* Mobile: bottom drawer */
+    /* ── MOBILE: bottom drawer ── */
     @media (max-width: 700px) {
       .app { flex-direction: column; }
       .panel { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid var(--card-border); }
       .map-container { height: 60vh; }
       .nav-links a:not(.nav-cta) { display: none; }
 
+      /* Always in DOM, hidden off-screen below */
       .map-info-card {
+        display: block !important;
         position: absolute;
         bottom: 0; left: 0; right: 0;
-        transform: translateY(100%);
+        transform: translateY(105%);
         max-width: 100%; min-width: 100%;
         border-radius: var(--radius) var(--radius) 0 0;
-        padding: 6px 18px 40px;
-        max-height: 72vh;
+        padding: 0 18px 40px;
+        max-height: 75vh;
         overflow-y: auto;
-        box-shadow: 0 -6px 30px rgba(26,18,8,0.15);
-        display: block;
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.3s cubic-bezier(0.32,0.72,0,1), opacity 0.25s ease;
+        box-shadow: 0 -6px 30px rgba(26,18,8,0.18);
+        transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+        will-change: transform;
+        z-index: 20;
+        /* hide close btn on mobile — handle does the job */
       }
       .map-info-card.visible {
         transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
       }
+      .map-info-card-close { display: none; }
       .drawer-handle {
         display: block;
-        width: 36px; height: 4px;
+        width: 40px; height: 5px;
         background: var(--ink-faint);
-        border-radius: 2px;
-        margin: 10px auto 14px;
+        border-radius: 3px;
+        margin: 14px auto 16px;
+        cursor: grab;
+        touch-action: none;
+        flex-shrink: 0;
       }
-      .map-info-card-close { top: 16px; right: 16px; font-size: 18px; }
-      .map-info-name { font-size: 19px; padding-right: 28px; }
+      .map-info-name { font-size: 19px; padding-right: 0; }
       .map-info-meta { font-size: 13px; margin-bottom: 12px; }
-      .map-info-row { font-size: 13px; margin-bottom: 8px; }
-      .map-info-actions { gap: 10px; margin-top: 18px; }
-      .map-info-btn { padding: 13px 18px; font-size: 14px; border-radius: 25px; }
-      .radius-label { top: 8px; right: 8px; bottom: auto; }
+      .map-info-row { font-size: 14px; margin-bottom: 9px; }
+      .map-info-actions { gap: 10px; margin-top: 20px; flex-direction: column; }
+      .map-info-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+        border-radius: 25px;
+        text-align: center;
+        flex: none;
+        width: 100%;
+      }
+      .map-info-btn.primary { width: 100%; }
+      .map-info-btn.secondary { width: 100%; background: var(--white); border: 1.5px solid var(--card-border); }
+      .radius-label { top: 8px; right: 8px; bottom: auto; z-index: 5; }
     }
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
@@ -196,7 +208,7 @@
   <div class="map-container">
     <div id="map"></div>
     <div class="map-info-card" id="map-info-card">
-      <div class="drawer-handle"></div>
+      <div class="drawer-handle" id="drawer-handle"></div>
       <button class="map-info-card-close" onclick="closeInfoCard()">✕</button>
       <div class="map-info-name" id="info-name"></div>
       <div class="map-info-meta" id="info-meta"></div>
@@ -226,6 +238,48 @@
   let activeFilter = '';
   let userLocation = null;
   let activeItemId = null;
+
+  // ── Drawer drag-to-dismiss ──
+  function initDrawerDrag() {
+    const card = document.getElementById('map-info-card');
+    const handle = document.getElementById('drawer-handle');
+    let startY = 0;
+    let currentY = 0;
+    let dragging = false;
+
+    function onStart(e) {
+      if (!card.classList.contains('visible')) return;
+      dragging = true;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
+      card.style.transition = 'none';
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      currentY = (e.touches ? e.touches[0].clientY : e.clientY) - startY;
+      if (currentY < 0) currentY = 0;
+      card.style.transform = `translateY(${currentY}px)`;
+    }
+
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      card.style.transition = '';
+      if (currentY > 80) {
+        closeInfoCard();
+      } else {
+        card.style.transform = 'translateY(0)';
+      }
+      currentY = 0;
+    }
+
+    handle.addEventListener('touchstart', onStart, { passive: true });
+    handle.addEventListener('touchmove', onMove, { passive: true });
+    handle.addEventListener('touchend', onEnd);
+    handle.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+  }
 
   async function fetchPlaces() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/restaurants?status=eq.approved&is_active=eq.true&order=name`, {
@@ -279,6 +333,8 @@
       renderMarkers(places);
       renderList(places);
     });
+
+    initDrawerDrag();
   }
 
   function makeMarkerIcon(isTruck, isActive) {
@@ -317,7 +373,10 @@
     activeItemId = place.id;
     document.querySelectorAll('.r-item').forEach(el => el.classList.toggle('active', el.dataset.id === place.id));
     const activeEl = document.querySelector(`.r-item[data-id="${place.id}"]`);
-    if (activeEl) { activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); await expandListItem(place.id); }
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      await expandListItem(place.id);
+    }
     showInfoCard(place);
   }
 
@@ -336,14 +395,19 @@
 
     let actions = `<a href="restaurant.html?id=${place.id}" class="map-info-btn primary">View listing →</a>`;
     if (place.phone) actions += `<a href="tel:${place.phone}" class="map-info-btn secondary">📞 Call</a>`;
-    actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Cater</a>`;
+    actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Book catering</a>`;
     document.getElementById('info-actions').innerHTML = actions;
 
-    document.getElementById('map-info-card').classList.add('visible');
+    // Reset any drag offset then add visible
+    const card = document.getElementById('map-info-card');
+    card.style.transform = '';
+    card.classList.add('visible');
   }
 
   function closeInfoCard() {
-    document.getElementById('map-info-card').classList.remove('visible');
+    const card = document.getElementById('map-info-card');
+    card.style.transform = '';
+    card.classList.remove('visible');
     markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
     activeItemId = null;
     document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
