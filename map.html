@@ -19,7 +19,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); overflow: hidden; }
 
-    /* NAV */
     nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: rgba(251,247,242,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
     .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); letter-spacing: -0.5px; text-decoration: none; }
     .nav-links { display: flex; align-items: center; gap: 20px; }
@@ -29,10 +28,8 @@
     .nav-cta { background: var(--coral); color: var(--white) !important; padding: 7px 16px; border-radius: 20px; }
     .nav-cta:hover { background: var(--coral-dark) !important; }
 
-    /* LAYOUT */
     .app { display: flex; height: 100vh; padding-top: 60px; }
 
-    /* SIDE PANEL */
     .panel { width: var(--panel-width); flex-shrink: 0; background: var(--cream); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; overflow: hidden; }
     .panel-header { padding: 16px 16px 12px; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
     .panel-search { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -49,7 +46,6 @@
     .panel-results { flex: 1; overflow-y: auto; padding: 10px 12px; }
     .results-count { font-size: 11px; color: var(--ink-muted); padding: 4px 4px 10px; font-weight: 500; }
 
-    /* LIST ITEM */
     .r-item { border-radius: var(--radius-sm); cursor: pointer; transition: background 0.15s; border: 1px solid transparent; margin-bottom: 6px; overflow: hidden; }
     .r-item-top { display: flex; gap: 12px; align-items: flex-start; padding: 12px; }
     .r-item:hover { background: var(--white); border-color: var(--card-border); }
@@ -64,20 +60,13 @@
     .badge.truck-badge { background: #FAEEDA; color: #633806; }
     .distance { font-size: 11px; color: var(--coral); font-weight: 500; }
 
-    /* EXPANDED DETAIL */
-    .r-item-detail {
-      display: none; padding: 0 12px 14px 12px;
-      border-top: 1px solid var(--card-border);
-      margin-top: 0;
-    }
+    .r-item-detail { display: none; padding: 0 12px 14px 12px; border-top: 1px solid var(--card-border); }
     .r-item.active .r-item-detail { display: block; }
     .detail-row { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--ink-muted); margin-bottom: 7px; margin-top: 10px; }
     .detail-row:first-child { margin-top: 12px; }
     .detail-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
     .detail-text { line-height: 1.4; }
     .detail-text a { color: var(--coral); text-decoration: none; }
-    .detail-hours-today { font-size: 12px; color: var(--ink-muted); }
-    .detail-hours-today strong { color: var(--ink); }
     .detail-actions { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
     .detail-btn { padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.15s; border: none; }
     .detail-btn.primary { background: var(--coral); color: var(--white); }
@@ -87,11 +76,10 @@
 
     .empty-state { text-align: center; padding: 2rem 1rem; color: var(--ink-muted); font-size: 13px; }
 
-    /* MAP */
     .map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* MAP INFO CARD */
+    /* Desktop: floating card */
     .map-info-card {
       position: absolute; bottom: 24px; left: 50%;
       transform: translateX(-50%);
@@ -99,16 +87,17 @@
       border-radius: var(--radius); padding: 16px 18px;
       min-width: 260px; max-width: 320px;
       z-index: 10; box-shadow: 0 4px 20px rgba(26,18,8,0.12);
-      display: none; transition: all 0.2s;
+      display: none;
     }
     .map-info-card.visible { display: block; }
+    .drawer-handle { display: none; }
     .map-info-card-close { position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--ink-muted); line-height: 1; }
     .map-info-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; margin-bottom: 3px; padding-right: 20px; }
     .map-info-meta { font-size: 12px; color: var(--ink-muted); margin-bottom: 10px; }
     .map-info-row { display: flex; gap: 7px; align-items: flex-start; font-size: 12px; color: var(--ink-muted); margin-bottom: 6px; }
     .map-info-row a { color: var(--coral); text-decoration: none; }
     .map-info-actions { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
-    .map-info-btn { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.15s; border: none; }
+    .map-info-btn { padding: 9px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.15s; border: none; }
     .map-info-btn.primary { background: var(--coral); color: var(--white); flex: 1; text-align: center; }
     .map-info-btn.primary:hover { background: var(--coral-dark); }
     .map-info-btn.secondary { background: var(--cream); color: var(--ink-muted); border: 1px solid var(--card-border); }
@@ -120,23 +109,47 @@
     .skeleton { background: linear-gradient(90deg,#f0ebe4 25%,#e8e1d8 50%,#f0ebe4 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--radius-sm); }
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
+    /* Mobile: bottom drawer */
     @media (max-width: 700px) {
-  .app { flex-direction: column; }
-  .panel { width: 100%; height: 45vh; border-right: none; border-bottom: 1px solid var(--card-border); }
-  .map-container { height: 55vh; }
-  .nav-links a:not(.nav-cta) { display: none; }
+      .app { flex-direction: column; }
+      .panel { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid var(--card-border); }
+      .map-container { height: 60vh; }
+      .nav-links a:not(.nav-cta) { display: none; }
 
-  .map-info-card {
-    bottom: 0; left: 0; right: 0;
-    transform: none;
-    max-width: 100%;
-    min-width: 100%;
-    border-radius: 14px 14px 0 0;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding: 20px 18px 32px;
-  }
-}
+      .map-info-card {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        transform: translateY(100%);
+        max-width: 100%; min-width: 100%;
+        border-radius: var(--radius) var(--radius) 0 0;
+        padding: 6px 18px 40px;
+        max-height: 72vh;
+        overflow-y: auto;
+        box-shadow: 0 -6px 30px rgba(26,18,8,0.15);
+        display: block;
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s cubic-bezier(0.32,0.72,0,1), opacity 0.25s ease;
+      }
+      .map-info-card.visible {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .drawer-handle {
+        display: block;
+        width: 36px; height: 4px;
+        background: var(--ink-faint);
+        border-radius: 2px;
+        margin: 10px auto 14px;
+      }
+      .map-info-card-close { top: 16px; right: 16px; font-size: 18px; }
+      .map-info-name { font-size: 19px; padding-right: 28px; }
+      .map-info-meta { font-size: 13px; margin-bottom: 12px; }
+      .map-info-row { font-size: 13px; margin-bottom: 8px; }
+      .map-info-actions { gap: 10px; margin-top: 18px; }
+      .map-info-btn { padding: 13px 18px; font-size: 14px; border-radius: 25px; }
+      .radius-label { top: 8px; right: 8px; bottom: auto; }
     }
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
@@ -155,7 +168,6 @@
 </nav>
 
 <div class="app">
-  <!-- SIDE PANEL -->
   <div class="panel">
     <div class="panel-header">
       <div class="panel-search">
@@ -181,19 +193,16 @@
     </div>
   </div>
 
-  <!-- MAP -->
   <div class="map-container">
     <div id="map"></div>
-
-    <!-- MAP INFO CARD (shows on pin click) -->
     <div class="map-info-card" id="map-info-card">
+      <div class="drawer-handle"></div>
       <button class="map-info-card-close" onclick="closeInfoCard()">✕</button>
       <div class="map-info-name" id="info-name"></div>
       <div class="map-info-meta" id="info-meta"></div>
       <div id="info-rows"></div>
       <div class="map-info-actions" id="info-actions"></div>
     </div>
-
     <div class="radius-label" id="radius-label">Showing within 5 miles</div>
   </div>
 </div>
@@ -231,10 +240,10 @@
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
     const data = await res.json();
-    const map = {};
-    (data || []).forEach(h => map[h.day_of_week] = h);
-    allHours[restaurantId] = map;
-    return map;
+    const hoursMap = {};
+    (data || []).forEach(h => hoursMap[h.day_of_week] = h);
+    allHours[restaurantId] = hoursMap;
+    return hoursMap;
   }
 
   function getTodayHours(hoursMap) {
@@ -259,12 +268,10 @@
         { featureType:'landscape', elementType:'geometry', stylers:[{color:'#fbf7f2'}] },
         { featureType:'administrative', elementType:'geometry.stroke', stylers:[{color:'#d4c9bc'}] }
       ],
-      mapTypeControl: false, streetViewControl: false,
-      fullscreenControl: false,
+      mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
       zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }
     });
 
-    // Close info card when clicking map background
     map.addListener('click', () => closeInfoCard());
 
     fetchPlaces().then(places => {
@@ -278,10 +285,8 @@
     const color = isActive ? '#D85A30' : (isTruck ? '#BA7517' : '#4A1B0C');
     return {
       path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z',
-      fillColor: color, fillOpacity: 1,
-      strokeColor: '#fff', strokeWeight: 2,
-      scale: isActive ? 1.4 : 1.1,
-      anchor: new google.maps.Point(12, 22),
+      fillColor: color, fillOpacity: 1, strokeColor: '#fff', strokeWeight: 2,
+      scale: isActive ? 1.4 : 1.1, anchor: new google.maps.Point(12, 22),
     };
   }
 
@@ -303,26 +308,16 @@
   }
 
   async function selectPlace(place, marker) {
-    // Reset all markers
     markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
     marker.setIcon(makeMarkerIcon(place.is_food_truck, true));
     marker.setAnimation(google.maps.Animation.BOUNCE);
     setTimeout(() => marker.setAnimation(null), 700);
-
     map.panTo({ lat: place.latitude, lng: place.longitude });
 
-    // Highlight list item
     activeItemId = place.id;
-    document.querySelectorAll('.r-item').forEach(el => {
-      el.classList.toggle('active', el.dataset.id === place.id);
-    });
+    document.querySelectorAll('.r-item').forEach(el => el.classList.toggle('active', el.dataset.id === place.id));
     const activeEl = document.querySelector(`.r-item[data-id="${place.id}"]`);
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      await expandListItem(place.id);
-    }
-
-    // Show map info card
+    if (activeEl) { activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); await expandListItem(place.id); }
     showInfoCard(place);
   }
 
@@ -331,18 +326,14 @@
     document.getElementById('info-meta').textContent =
       `${place.cuisine_type || ''}${place.neighborhood ? ' · ' + place.neighborhood : ''}${place.is_food_truck ? ' · 🚚 Food truck' : ''}`;
 
-    // Build detail rows
     const hoursMap = await fetchHours(place.id);
     const today = getTodayHours(hoursMap);
     let rows = '';
     if (place.address) rows += `<div class="map-info-row">📍 <span>${place.address}</span></div>`;
     if (place.phone) rows += `<div class="map-info-row">📞 <a href="tel:${place.phone}">${place.phone}</a></div>`;
-    if (today) {
-      rows += `<div class="map-info-row">🕐 <span>${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
-    }
+    if (today) rows += `<div class="map-info-row">🕐 <span>${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
     document.getElementById('info-rows').innerHTML = rows;
 
-    // Action buttons
     let actions = `<a href="restaurant.html?id=${place.id}" class="map-info-btn primary">View listing →</a>`;
     if (place.phone) actions += `<a href="tel:${place.phone}" class="map-info-btn secondary">📞 Call</a>`;
     actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Cater</a>`;
@@ -358,7 +349,6 @@
     document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
   }
 
-  // ── LIST ──
   function renderList(places) {
     const container = document.getElementById('list-container');
     const countEl = document.getElementById('results-count');
@@ -372,8 +362,7 @@
 
     container.innerHTML = filtered.map(r => {
       const dist = userLocation && r.latitude
-        ? `<span class="distance">${getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude)} mi</span>`
-        : '';
+        ? `<span class="distance">${getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude)} mi</span>` : '';
       return `
         <div class="r-item ${r.id === activeItemId ? 'active' : ''}" data-id="${r.id}">
           <div class="r-item-top" onclick="clickListItem('${r.id}')">
@@ -388,7 +377,7 @@
             </div>
           </div>
           <div class="r-item-detail" id="detail-${r.id}">
-            <div class="detail-loading" style="font-size:12px;color:var(--ink-faint);padding:8px 0;">Loading...</div>
+            <div style="font-size:12px;color:var(--ink-faint);padding:8px 0;">Loading...</div>
           </div>
         </div>`;
     }).join('');
@@ -402,48 +391,35 @@
 
     const hoursMap = await fetchHours(id);
     const today = getTodayHours(hoursMap);
-
     let html = '';
     if (place.address) html += `<div class="detail-row"><span class="detail-icon">📍</span><span class="detail-text">${place.address}</span></div>`;
     if (place.phone) html += `<div class="detail-row"><span class="detail-icon">📞</span><span class="detail-text"><a href="tel:${place.phone}">${place.phone}</a></span></div>`;
     if (place.website) html += `<div class="detail-row"><span class="detail-icon">🌐</span><span class="detail-text"><a href="${place.website}" target="_blank">${place.website.replace('https://','').replace('http://','')}</a></span></div>`;
-    if (today) {
-      html += `<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-text">${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
-    }
-
+    if (today) html += `<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-text">${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
     html += `<div class="detail-actions">
       <a href="restaurant.html?id=${place.id}" class="detail-btn primary">View full listing →</a>
       ${place.phone ? `<a href="tel:${place.phone}" class="detail-btn secondary">📞 Call</a>` : ''}
       <a href="catering.html?id=${place.id}" class="detail-btn secondary">🍽️ Catering</a>
     </div>`;
-
     detailEl.innerHTML = html;
   }
 
   async function clickListItem(id) {
     const place = allPlaces.find(p => p.id === id);
     if (!place) return;
-
     const wasActive = activeItemId === id;
 
-    // Deactivate all
     document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
     markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
     closeInfoCard();
 
-    if (wasActive) {
-      activeItemId = null;
-      return;
-    }
+    if (wasActive) { activeItemId = null; return; }
 
-    // Activate this one
     activeItemId = id;
     const el = document.querySelector(`.r-item[data-id="${id}"]`);
     if (el) el.classList.add('active');
-
     await expandListItem(id);
 
-    // Pan map if has coords
     if (place.latitude && place.longitude) {
       map.panTo({ lat: place.latitude, lng: place.longitude });
       map.setZoom(15);
@@ -513,7 +489,6 @@
 
       map.setCenter(userLocation);
       map.setZoom(13);
-
       const nearby = allPlaces.filter(r => r.latitude && getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude) <= 5);
       renderMarkers(nearby);
       renderList(allPlaces);
