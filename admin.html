@@ -13,16 +13,14 @@
       --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
       --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
       --radius: 14px; --radius-sm: 8px;
+      --green: #3B6D11; --green-light: #EAF3DE;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
     nav { background: var(--coral-dark); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--white); text-decoration: none; }
     .admin-badge { font-size: 11px; background: var(--coral); color: var(--white); padding: 3px 10px; border-radius: 10px; margin-left: 10px; }
-
     main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
-
-    /* TABS */
     .tabs { display: flex; gap: 4px; margin-bottom: 2rem; border-bottom: 2px solid var(--card-border); overflow-x: auto; }
     .tab-btn { padding: 10px 20px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: none; border: none; color: var(--ink-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; white-space: nowrap; }
     .tab-btn:hover { color: var(--ink); }
@@ -30,12 +28,10 @@
     .tab-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--coral); color: var(--white); font-size: 10px; width: 18px; height: 18px; border-radius: 50%; margin-left: 6px; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
-
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
     .stat-card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 1rem; text-align: center; }
     .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--coral); }
     .stat-label { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
-
     .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
     .table-wrap { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 2rem; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -43,7 +39,6 @@
     td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--cream); }
-
     .badge { font-size: 10px; padding: 3px 8px; border-radius: 8px; font-weight: 500; }
     .badge-approved, .badge-confirmed { background: #EAF3DE; color: #27500A; }
     .badge-pending { background: #FAEEDA; color: #633806; }
@@ -51,7 +46,6 @@
     .badge-truck { background: #FAEEDA; color: #633806; }
     .badge-paid { background: #EAF3DE; color: #27500A; }
     .badge-unpaid { background: #FAEEDA; color: #633806; }
-
     .action-btn { padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; border: 1px solid var(--card-border); background: var(--white); font-family: 'DM Sans', sans-serif; transition: all 0.15s; margin-right: 4px; }
     .action-btn.approve { border-color: #97C459; color: #27500A; }
     .action-btn.approve:hover { background: #EAF3DE; }
@@ -59,10 +53,10 @@
     .action-btn.suspend:hover { background: #FCEBEB; }
     .action-btn.delete { border-color: #F09595; color: #791F1F; }
     .action-btn.delete:hover { background: #FCEBEB; }
-
+    .action-btn.edit { border-color: var(--coral); color: var(--coral); }
+    .action-btn.edit:hover { background: var(--coral-light); }
     .sub-detail { font-size: 12px; color: var(--ink-muted); margin-top: 3px; line-height: 1.5; }
     .proof-text { font-size: 12px; color: var(--ink-muted); max-width: 200px; white-space: normal; line-height: 1.4; }
-
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--white); padding: 12px 24px; border-radius: 25px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
     .toast.show { opacity: 1; }
     .locked { display: none; }
@@ -73,9 +67,48 @@
     .pw-form input { padding: 10px 14px; border: 1px solid var(--card-border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
     .pw-form button { padding: 10px 20px; background: var(--coral); color: var(--white); border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; }
 
+    /* ── EDIT MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(26,18,8,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.22s; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal { background: var(--white); border-radius: 18px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.28s cubic-bezier(0.34,1.3,0.64,1); box-shadow: 0 24px 64px rgba(26,18,8,0.22); }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { padding: 22px 24px 16px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--white); border-radius: 18px 18px 0 0; z-index: 1; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
+    .modal-subtitle { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+    .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-muted); line-height: 1; padding: 4px 8px; border-radius: 8px; }
+    .modal-close:hover { background: var(--cream); color: var(--ink); }
+    .modal-body { padding: 20px 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--white); border-radius: 0 0 18px 18px; }
+    .form-section { font-size: 11px; font-weight: 500; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.07em; margin: 18px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+    .form-section:first-child { margin-top: 0; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+    .form-input, .form-select { padding: 9px 12px; border: 1px solid var(--card-border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--cream); outline: none; transition: border-color 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus { border-color: var(--coral); background: var(--white); }
+    .coords-row { display: flex; gap: 8px; align-items: center; }
+    .coords-row .form-input { flex: 1; min-width: 0; }
+    .lookup-btn { padding: 9px 14px; border-radius: 8px; background: var(--ink); color: white; border: none; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+    .lookup-btn:hover { background: var(--coral); }
+    .lookup-btn:disabled { background: var(--ink-faint); cursor: wait; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+    .toggle { width: 42px; height: 24px; background: var(--card-border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; border: none; outline: none; flex-shrink: 0; }
+    .toggle.on { background: var(--coral); }
+    .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: left 0.18s; box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
+    .toggle.on::after { left: 21px; }
+    .toggle-lbl { font-size: 13px; color: var(--ink); }
+    .btn-save { padding: 10px 26px; background: var(--coral); color: white; border: none; border-radius: 25px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .btn-save:hover { background: var(--coral-dark); }
+    .btn-save:disabled { background: var(--ink-faint); cursor: wait; }
+    .btn-cancel { padding: 10px 20px; background: var(--white); color: var(--ink-muted); border: 1px solid var(--card-border); border-radius: 25px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .btn-cancel:hover { border-color: var(--coral); color: var(--coral); }
+
     @media (max-width: 640px) {
       main { padding: 1.5rem 1rem; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
     }
   </style>
 </head>
@@ -107,7 +140,7 @@
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="action-btn" style="padding:9px 18px;font-size:13px;" onclick="triggerSMSCheckin()">📱 Send SMS check-ins</button>
-      <button class="action-btn approve" style="padding:9px 18px;font-size:13px;" onclick="window.location.href='apply.html'">+ Add listing</button>
+      <button class="action-btn approve" style="padding:9px 18px;font-size:13px;" onclick="window.location.href='add-restaurants.html'">+ Add listings</button>
     </div>
   </div>
 
@@ -199,15 +232,122 @@
   </div>
 </main>
 
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="edit-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Edit listing</div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+
+      <div class="form-section">Basic info</div>
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Name</label>
+          <input class="form-input" id="edit-name" type="text" placeholder="Restaurant or truck name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cuisine type</label>
+          <select class="form-select" id="edit-cuisine">
+            <option value="">Select cuisine...</option>
+            <option>American</option><option>Asian</option><option>BBQ</option>
+            <option>Breakfast</option><option>Burgers</option><option>Chinese</option>
+            <option>Coffee</option><option>Filipino</option><option>Greek</option>
+            <option>Hawaiian Fusion</option><option>Indian</option><option>Italian</option>
+            <option>Japanese</option><option>Korean</option><option>Mediterranean</option>
+            <option>Mexican</option><option>Mexican Street Food</option>
+            <option>Middle Eastern</option><option>Pizza</option><option>Salvadoran</option>
+            <option>Sandwiches</option><option>Seafood</option><option>Soul Food</option>
+            <option>Sushi</option><option>Thai</option><option>Vegan</option>
+            <option>Vietnamese</option><option>Wings</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Neighborhood</label>
+          <select class="form-select" id="edit-neighborhood">
+            <option value="">Select neighborhood...</option>
+            <option>North Fresno</option><option>South Fresno</option>
+            <option>East Fresno</option><option>West Fresno</option>
+            <option>Central Fresno</option><option>Fig Garden</option>
+            <option>Tower District</option><option>Clovis</option>
+            <option>Sunnyside</option><option>Woodward Park</option>
+            <option>Bullard</option><option>Southeast Fresno</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="edit-status">
+            <option value="approved">✅ Approved</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="suspended">🚫 Suspended</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Listing type</label>
+          <div class="toggle-row">
+            <button class="toggle" id="edit-truck-toggle" onclick="toggleEditTruck()"></button>
+            <span class="toggle-lbl" id="edit-truck-label">🍽️ Restaurant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">Contact & web</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="edit-phone" type="text" placeholder="(559) 000-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website</label>
+          <input class="form-input" id="edit-website" type="text" placeholder="https://..."/>
+        </div>
+      </div>
+
+      <div class="form-section">Location</div>
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Address</label>
+          <input class="form-input" id="edit-address" type="text" placeholder="Full street address"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Coordinates <span style="color:var(--ink-faint);font-weight:400">— used for map pin</span></label>
+          <div class="coords-row">
+            <input class="form-input" id="edit-lat" type="text" placeholder="Latitude e.g. 36.7783"/>
+            <input class="form-input" id="edit-lng" type="text" placeholder="Longitude e.g. -119.7945"/>
+            <button class="lookup-btn" id="edit-lookup-btn" onclick="lookupEditCoords()">📍 Look up</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">Description</div>
+      <div class="form-group">
+        <label class="form-label">Short description</label>
+        <textarea class="form-input" id="edit-description" rows="3" placeholder="Brief description shown on the listing page..." style="resize:vertical;line-height:1.5"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" id="edit-save-btn" onclick="saveEdit()">Save changes →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
   const ADMIN_PASSWORD = '559eats-admin-2024';
 
   let allCatering = [];
   let restaurantMap = {};
+  let editIsTruck = false;
 
   function checkPw() {
     if (document.getElementById('pw-input').value === ADMIN_PASSWORD) {
@@ -261,22 +401,134 @@
           <td>${r.is_food_truck?'<span class="badge badge-truck">Food truck</span>':'Restaurant'}</td>
           <td>${r.neighborhood||'—'}</td>
           <td style="color:var(--ink-muted)">${new Date(r.created_at).toLocaleDateString()}</td>
-          <td><button class="action-btn approve" onclick="setStatus('${r.id}','approved')">✓ Approve</button><button class="action-btn suspend" onclick="setStatus('${r.id}','suspended')">✗ Reject</button></td>
+          <td>
+            <button class="action-btn approve" onclick="setStatus('${r.id}','approved')">✓ Approve</button>
+            <button class="action-btn suspend" onclick="setStatus('${r.id}','suspended')">✗ Reject</button>
+            <button class="action-btn edit" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button>
+          </td>
         </tr>`).join('');
 
     document.getElementById('all-body').innerHTML = all.map(r=>`<tr>
-      <td><strong>${r.name}</strong></td>
-      <td>${r.cuisine_type||'—'}</td>
+      <td>
+        <strong>${r.name}</strong>
+        ${r.address?`<div class="sub-detail">${r.address}</div>`:''}
+      </td>
+      <td>${r.cuisine_type||'<span style="color:var(--ink-faint)">—</span>'}</td>
       <td>${r.neighborhood||'—'}</td>
       <td>${r.is_food_truck?'<span class="badge badge-truck">Truck</span>':'Restaurant'}</td>
       <td><span class="badge badge-${r.status}">${r.status}</span></td>
       <td>
+        <button class="action-btn edit" onclick='openEdit(${JSON.stringify(r).replace(/'/g,"&#39;")})'>✏️ Edit</button>
         ${r.status!=='approved'?`<button class="action-btn approve" onclick="setStatus('${r.id}','approved')">Approve</button>`:''}
         ${r.status!=='suspended'?`<button class="action-btn suspend" onclick="setStatus('${r.id}','suspended')">Suspend</button>`:''}
         <button class="action-btn delete" onclick="deleteRestaurant('${r.id}')">Delete</button>
       </td>
     </tr>`).join('');
   }
+
+  // ── EDIT MODAL ──
+  function openEdit(r) {
+    document.getElementById('edit-id').value = r.id;
+    document.getElementById('edit-name').value = r.name || '';
+    document.getElementById('modal-subtitle').textContent = r.address || '';
+    document.getElementById('edit-cuisine').value = r.cuisine_type || '';
+    document.getElementById('edit-neighborhood').value = r.neighborhood || '';
+    document.getElementById('edit-status').value = r.status || 'approved';
+    document.getElementById('edit-phone').value = r.phone || '';
+    document.getElementById('edit-website').value = r.website || '';
+    document.getElementById('edit-address').value = r.address || '';
+    document.getElementById('edit-lat').value = r.latitude || '';
+    document.getElementById('edit-lng').value = r.longitude || '';
+    document.getElementById('edit-description').value = r.description || '';
+
+    editIsTruck = !!r.is_food_truck;
+    document.getElementById('edit-truck-toggle').classList.toggle('on', editIsTruck);
+    document.getElementById('edit-truck-label').textContent = editIsTruck ? '🚚 Food truck' : '🍽️ Restaurant';
+
+    const lb = document.getElementById('edit-lookup-btn');
+    lb.textContent = '📍 Look up'; lb.style.background = ''; lb.disabled = false;
+
+    document.getElementById('edit-save-btn').textContent = 'Save changes →';
+    document.getElementById('edit-save-btn').disabled = false;
+
+    document.getElementById('edit-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('edit-name').focus(), 120);
+  }
+
+  function closeEdit() {
+    document.getElementById('edit-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('edit-overlay')) closeEdit();
+  }
+
+  function toggleEditTruck() {
+    editIsTruck = !editIsTruck;
+    document.getElementById('edit-truck-toggle').classList.toggle('on', editIsTruck);
+    document.getElementById('edit-truck-label').textContent = editIsTruck ? '🚚 Food truck' : '🍽️ Restaurant';
+  }
+
+  async function lookupEditCoords() {
+    const address = document.getElementById('edit-address').value.trim();
+    if (!address) { showToast('Enter an address first'); return; }
+    const btn = document.getElementById('edit-lookup-btn');
+    btn.textContent = 'Looking up...'; btn.disabled = true;
+    try {
+      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`);
+      const data = await res.json();
+      if (data.results && data.results[0]) {
+        const loc = data.results[0].geometry.location;
+        document.getElementById('edit-lat').value = loc.lat;
+        document.getElementById('edit-lng').value = loc.lng;
+        btn.textContent = '✓ Found'; btn.style.background = 'var(--green)';
+        showToast('📍 Coordinates updated');
+      } else {
+        btn.textContent = '⚠ Not found'; btn.style.background = '#A32D2D';
+      }
+    } catch(e) { btn.textContent = '⚠ Error'; }
+    btn.disabled = false;
+  }
+
+  async function saveEdit() {
+    const id = document.getElementById('edit-id').value;
+    const name = document.getElementById('edit-name').value.trim();
+    if (!name) { showToast('Name is required'); return; }
+
+    const saveBtn = document.getElementById('edit-save-btn');
+    saveBtn.textContent = 'Saving...'; saveBtn.disabled = true;
+
+    const status = document.getElementById('edit-status').value;
+    const lat = parseFloat(document.getElementById('edit-lat').value) || null;
+    const lng = parseFloat(document.getElementById('edit-lng').value) || null;
+
+    try {
+      await api(`restaurants?id=eq.${id}`, 'PATCH', {
+        name,
+        cuisine_type: document.getElementById('edit-cuisine').value || null,
+        neighborhood: document.getElementById('edit-neighborhood').value || null,
+        status,
+        is_active: status === 'approved',
+        is_food_truck: editIsTruck,
+        phone: document.getElementById('edit-phone').value.trim() || null,
+        website: document.getElementById('edit-website').value.trim() || null,
+        address: document.getElementById('edit-address').value.trim() || null,
+        latitude: lat,
+        longitude: lng,
+        description: document.getElementById('edit-description').value.trim() || null,
+      });
+      showToast(`✅ ${name} saved`);
+      closeEdit();
+      loadListings();
+    } catch(e) {
+      showToast('❌ Save failed — try again');
+      saveBtn.textContent = 'Save changes →'; saveBtn.disabled = false;
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEdit(); });
 
   async function setStatus(id, status) {
     await api(`restaurants?id=eq.${id}`, 'PATCH', { status, is_active: status==='approved' });
@@ -295,90 +547,41 @@
   async function loadClaims() {
     const data = await api('claim_requests?order=created_at.desc');
     if (!data) return;
-
     document.getElementById('cl-total').textContent = data.length;
     document.getElementById('cl-pending').textContent = data.filter(c=>c.status==='pending').length;
     document.getElementById('cl-approved').textContent = data.filter(c=>c.status==='approved').length;
     document.getElementById('cl-rejected').textContent = data.filter(c=>c.status==='rejected').length;
-
     const pendingCount = data.filter(c=>c.status==='pending').length;
-    if (pendingCount > 0) {
-      document.getElementById('claims-tab-btn').innerHTML = `🏷️ Claim requests <span class="tab-badge">${pendingCount}</span>`;
-    }
-
+    if (pendingCount > 0) document.getElementById('claims-tab-btn').innerHTML = `🏷️ Claim requests <span class="tab-badge">${pendingCount}</span>`;
     const tbody = document.getElementById('claims-body');
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No claim requests yet</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = data.map(c => {
-      const restaurantName = restaurantMap[c.restaurant_id] || '—';
-      const submitted = new Date(c.created_at).toLocaleDateString();
-      return `<tr>
-        <td>
-          <strong>${restaurantName}</strong>
-          <div class="sub-detail"><a href="restaurant.html?id=${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div>
-        </td>
-        <td><strong>${c.owner_name}</strong></td>
-        <td>
-          <div class="sub-detail">📞 ${c.owner_phone}</div>
-          <div class="sub-detail">✉️ ${c.owner_email}</div>
-        </td>
-        <td>${c.years_operating||'—'}</td>
-        <td><div class="proof-text">${c.business_proof||'—'}</div></td>
-        <td style="color:var(--ink-muted)">${submitted}</td>
-        <td><span class="badge badge-${c.status}">${c.status}</span></td>
-        <td>
-          ${c.status==='pending' ? `
-            <button class="action-btn approve" onclick="approveClaim('${c.id}','${c.restaurant_id}','${c.owner_name}','${c.owner_email}','${c.owner_phone}')">✓ Approve</button>
-            <button class="action-btn suspend" onclick="rejectClaim('${c.id}')">✗ Reject</button>
-          ` : '—'}
-        </td>
-      </tr>`;
-    }).join('');
+    if (!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No claim requests yet</td></tr>'; return; }
+    tbody.innerHTML = data.map(c => `<tr>
+      <td><strong>${restaurantMap[c.restaurant_id]||'—'}</strong><div class="sub-detail"><a href="restaurant.html?id=${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div></td>
+      <td><strong>${c.owner_name}</strong></td>
+      <td><div class="sub-detail">📞 ${c.owner_phone}</div><div class="sub-detail">✉️ ${c.owner_email}</div></td>
+      <td>${c.years_operating||'—'}</td>
+      <td><div class="proof-text">${c.business_proof||'—'}</div></td>
+      <td style="color:var(--ink-muted)">${new Date(c.created_at).toLocaleDateString()}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>${c.status==='pending'?`<button class="action-btn approve" onclick="approveClaim('${c.id}','${c.restaurant_id}','${c.owner_name}','${c.owner_email}','${c.owner_phone}')">✓ Approve</button><button class="action-btn suspend" onclick="rejectClaim('${c.id}')">✗ Reject</button>`:'—'}</td>
+    </tr>`).join('');
   }
 
   async function approveClaim(claimId, restaurantId, ownerName, ownerEmail, ownerPhone) {
     if (!confirm(`Approve claim for ${ownerName}? This will create their owner account and send them a login link.`)) return;
-
     try {
-      // 1. Update claim status
       await api(`claim_requests?id=eq.${claimId}`, 'PATCH', { status: 'approved' });
-
-      // 2. Create owner record
-      await api('owners', 'POST', [{
-        restaurant_id: restaurantId,
-        name: ownerName,
-        email: ownerEmail,
-        phone: ownerPhone || null,
-        auth_method: 'portal'
-      }]);
-
-      // 3. Send magic login link via Supabase Auth
-      await fetch(`${SUPABASE_URL}/auth/v1/magiclink`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: ownerEmail })
-      });
-
+      await api('owners', 'POST', [{ restaurant_id: restaurantId, name: ownerName, email: ownerEmail, phone: ownerPhone||null, auth_method: 'portal' }]);
+      await fetch(`${SUPABASE_URL}/auth/v1/magiclink`, { method:'POST', headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'}, body:JSON.stringify({email:ownerEmail}) });
       showToast(`✅ Approved! Magic login link sent to ${ownerEmail}`);
-      loadClaims();
-      loadListings();
-    } catch (err) {
-      showToast('Something went wrong. Please try again.');
-      console.error(err);
-    }
+      loadClaims(); loadListings();
+    } catch(err) { showToast('Something went wrong. Please try again.'); }
   }
 
   async function rejectClaim(claimId) {
     if (!confirm('Reject this claim request?')) return;
     await api(`claim_requests?id=eq.${claimId}`, 'PATCH', { status: 'rejected' });
-    showToast('Claim rejected.');
-    loadClaims();
+    showToast('Claim rejected.'); loadClaims();
   }
 
   // ── CATERING ──
@@ -386,44 +589,28 @@
     const data = await api('catering_bookings?order=created_at.desc');
     if (!data) return;
     allCatering = data;
-
     const pending = data.filter(c=>c.status==='pending');
-    if (pending.length > 0) {
-      document.getElementById('catering-tab-btn').innerHTML = `🍽️ Catering requests <span class="tab-badge">${pending.length}</span>`;
-    }
-
+    if (pending.length > 0) document.getElementById('catering-tab-btn').innerHTML = `🍽️ Catering requests <span class="tab-badge">${pending.length}</span>`;
     document.getElementById('c-total').textContent = data.length;
     document.getElementById('c-pending').textContent = pending.length;
     document.getElementById('c-confirmed').textContent = data.filter(c=>c.status==='confirmed').length;
     document.getElementById('c-declined').textContent = data.filter(c=>c.status==='declined').length;
-
     renderCatering(data);
   }
 
   function renderCatering(data) {
     const tbody = document.getElementById('catering-body');
-    if (!data || data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No catering requests yet</td></tr>';
-      return;
-    }
+    if (!data||!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No catering requests yet</td></tr>'; return; }
     tbody.innerHTML = data.map(c => {
-      const truckName = restaurantMap[c.restaurant_id] || '—';
       const eventDate = c.event_date ? new Date(c.event_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—';
-      let commissionCell = '—';
-      if (c.status==='confirmed') {
-        commissionCell = c.commission_paid
-          ? `<span class="badge badge-paid">✓ $${parseFloat(c.commission_amount||0).toFixed(2)}</span>`
-          : `<span class="badge badge-unpaid">Unpaid</span>`;
-      }
+      let commCell = '—';
+      if (c.status==='confirmed') commCell = c.commission_paid ? `<span class="badge badge-paid">✓ $${parseFloat(c.commission_amount||0).toFixed(2)}</span>` : `<span class="badge badge-unpaid">Unpaid</span>`;
       return `<tr>
         <td><strong>${c.customer_name}</strong><div class="sub-detail">📞 ${c.customer_phone}${c.customer_email?'<br>✉️ '+c.customer_email:''}</div></td>
-        <td>${truckName}</td>
-        <td>${eventDate}</td>
-        <td>${c.guest_count||'—'}</td>
-        <td>${c.budget||'—'}</td>
+        <td>${restaurantMap[c.restaurant_id]||'—'}</td><td>${eventDate}</td>
+        <td>${c.guest_count||'—'}</td><td>${c.budget||'—'}</td>
         <td><div style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.event_location||'—'}</div>${c.notes?`<div class="sub-detail">${c.notes}</div>`:''}</td>
-        <td>${commissionCell}</td>
-        <td><span class="badge badge-${c.status}">${c.status}</span></td>
+        <td>${commCell}</td><td><span class="badge badge-${c.status}">${c.status}</span></td>
       </tr>`;
     }).join('');
   }
@@ -432,7 +619,7 @@
     document.querySelectorAll('[id^="cf-"]').forEach(b=>{b.style.borderColor='';b.style.color='';});
     document.getElementById(`cf-${status}`).style.borderColor='var(--coral)';
     document.getElementById(`cf-${status}`).style.color='var(--coral)';
-    renderCatering(status==='all' ? allCatering : allCatering.filter(c=>c.status===status));
+    renderCatering(status==='all'?allCatering:allCatering.filter(c=>c.status===status));
   }
 
   // ── RESERVATIONS ──
@@ -444,19 +631,14 @@
     document.getElementById('b-pending').textContent = data.filter(b=>b.status==='pending').length;
     document.getElementById('b-confirmed').textContent = data.filter(b=>b.status==='confirmed').length;
     document.getElementById('b-today').textContent = data.filter(b=>b.booking_date===today).length;
-
     const tbody = document.getElementById('bookings-body');
     if (!data.length) { tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--ink-muted);padding:2rem">No reservations yet</td></tr>'; return; }
-
     tbody.innerHTML = data.map(b => {
-      const restaurantName = restaurantMap[b.restaurant_id]||'—';
       const bookingDate = b.booking_date ? new Date(b.booking_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—';
       return `<tr>
         <td><strong>${b.customer_name}</strong><div class="sub-detail">📞 ${b.customer_phone}</div></td>
-        <td>${restaurantName}</td>
-        <td>${bookingDate}</td>
-        <td>${b.booking_time||'—'}</td>
-        <td>${b.party_size||'—'}</td>
+        <td>${restaurantMap[b.restaurant_id]||'—'}</td><td>${bookingDate}</td>
+        <td>${b.booking_time||'—'}</td><td>${b.party_size||'—'}</td>
         <td><span class="badge badge-${b.status}">${b.status}</span></td>
         <td style="color:var(--ink-muted)">${new Date(b.created_at).toLocaleDateString()}</td>
       </tr>`;
