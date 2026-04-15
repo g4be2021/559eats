@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>559eats · Add Restaurants</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF;
+      --border: rgba(26,18,8,0.09); --radius: 12px;
+      --green: #3B6D11; --green-light: #EAF3DE;
+      --red: #A32D2D; --red-light: #FCEBEB;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    /* NAV */
+    nav { background: var(--coral-dark); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--white); text-decoration: none; }
+    .nav-back { font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; }
+    .nav-back:hover { color: white; }
+
+    /* LAYOUT */
+    .page { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: var(--ink-muted); margin-bottom: 28px; }
+
+    /* STEP INDICATOR */
+    .steps { display: flex; gap: 8px; margin-bottom: 32px; align-items: center; }
+    .step { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--ink-faint); }
+    .step.active { color: var(--coral); }
+    .step.done { color: var(--green); }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+    .step-divider { flex: 1; height: 1px; background: var(--border); }
+
+    /* CARDS */
+    .card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
+    .card-title { font-size: 15px; font-weight: 500; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .card-title .badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 8px; background: var(--coral-light); color: var(--coral); }
+
+    /* PASTE AREA */
+    .paste-area { width: 100%; min-height: 120px; padding: 14px; border: 1.5px dashed var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--cream); resize: vertical; outline: none; line-height: 1.7; }
+    .paste-area:focus { border-color: var(--coral); background: var(--white); }
+    .paste-hint { font-size: 12px; color: var(--ink-faint); margin-top: 8px; }
+    .paste-hint code { background: var(--cream); padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+    /* PARSE BTN */
+    .btn { padding: 10px 22px; border-radius: 25px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--coral); color: var(--white); }
+    .btn-primary:hover { background: var(--coral-dark); }
+    .btn-primary:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .btn-secondary { background: var(--white); color: var(--ink-muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--coral); color: var(--coral); }
+    .btn-success { background: var(--green); color: var(--white); }
+    .btn-row { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+
+    /* RESTAURANT CARDS */
+    .r-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; transition: border-color 0.15s; }
+    .r-card.saved { border-color: var(--green); background: #f8fef4; }
+    .r-card.error { border-color: var(--red); background: var(--red-light); }
+    .r-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .r-num { width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: white; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .r-num.saved { background: var(--green); }
+    .r-name-display { font-size: 15px; font-weight: 500; flex: 1; }
+    .r-status { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 8px; }
+    .r-status.saved { background: var(--green-light); color: var(--green); }
+    .r-status.error { background: var(--red-light); color: var(--red); }
+    .r-status.pending { background: var(--coral-light); color: var(--coral); }
+
+    /* FORM GRID */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    label { font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+    input, select, textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--cream); outline: none; transition: border-color 0.15s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--coral); background: var(--white); }
+    input.autofilled { background: #f0fdf4; border-color: #86efac; }
+    .coords-row { display: flex; gap: 8px; align-items: flex-end; }
+    .coords-row input { flex: 1; }
+    .lookup-btn { padding: 8px 14px; border-radius: 8px; background: var(--ink); color: white; border: none; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+    .lookup-btn:hover { background: var(--coral); }
+    .lookup-btn:disabled { background: var(--ink-faint); cursor: wait; }
+
+    /* TOGGLE */
+    .toggle-row { display: flex; align-items: center; gap: 10px; }
+    .toggle { width: 40px; height: 22px; background: var(--border); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; border: none; outline: none; }
+    .toggle.on { background: var(--coral); }
+    .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: left 0.2s; }
+    .toggle.on::after { left: 21px; }
+    .toggle-label { font-size: 13px; color: var(--ink-muted); }
+
+    /* SAVE ROW */
+    .save-row { display: flex; gap: 8px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .save-msg { font-size: 12px; color: var(--ink-muted); }
+    .save-msg.ok { color: var(--green); }
+    .save-msg.err { color: var(--red); }
+
+    /* SUMMARY BAR */
+    .summary-bar { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; gap: 24px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .summary-stat { display: flex; flex-direction: column; }
+    .summary-num { font-size: 22px; font-weight: 500; line-height: 1; }
+    .summary-lbl { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+    .summary-num.green { color: var(--green); }
+    .summary-num.coral { color: var(--coral); }
+
+    /* CUISINE CHIPS -->  */
+    .cuisine-select { width: 100%; }
+
+    /* HIDDEN */
+    #step2 { display: none; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+    }
+
+    /* PASSWORD GATE */
+    #auth-gate {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--cream);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .auth-box {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; padding: 36px 32px;
+      width: 100%; max-width: 360px;
+      text-align: center;
+    }
+    .auth-logo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--coral); margin-bottom: 6px; }
+    .auth-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+    .auth-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 24px; }
+    .auth-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 2px; }
+    .auth-input:focus { border-color: var(--coral); }
+    .auth-input.shake { animation: shake 0.4s; border-color: var(--red); }
+    .auth-btn { width: 100%; padding: 12px; background: var(--coral); color: white; border: none; border-radius: 25px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    .auth-btn:hover { background: var(--coral-dark); }
+    .auth-error { font-size: 12px; color: var(--red); margin-top: 10px; min-height: 18px; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-6px)}
+      80%{transform:translateX(6px)}
+    }
+  </style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-logo">559eats</div>
+    <div class="auth-title">Admin access required</div>
+    <div class="auth-sub">Enter your admin password to continue</div>
+    <input class="auth-input" type="password" id="auth-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAuth()"/>
+    <button class="auth-btn" onclick="checkAuth()">Enter →</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <a href="admin.html" class="nav-back">← Admin panel</a>
+</nav>
+
+<div class="page">
+  <h1>Add restaurants</h1>
+  <p class="subtitle">Paste a list of names and addresses — we'll look up coordinates and let you fill in the details before saving.</p>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="step-1-indicator">
+      <div class="step-num">1</div> Paste list
+    </div>
+    <div class="step-divider"></div>
+    <div class="step" id="step-2-indicator">
+      <div class="step-num">2</div> Fill details &amp; save
+    </div>
+  </div>
+
+  <!-- STEP 1: PASTE -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title">Paste your restaurant list <span class="badge">Step 1</span></div>
+      <textarea class="paste-area" id="paste-input" placeholder="Taco Bell, 1234 Shaw Ave, Fresno CA&#10;El Pollo Loco, 5678 Blackstone Ave, Fresno CA&#10;In-N-Out Burger, 910 Herndon Ave, Fresno CA"></textarea>
+      <p class="paste-hint">One restaurant per line. Format: <code>Name, Address</code> — or just a name, you can add the address manually.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="parseList()">Parse list →</button>
+        <button class="btn btn-secondary" onclick="loadExample()">Load example</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: CARDS -->
+  <div id="step2">
+    <div class="summary-bar" id="summary-bar">
+      <div class="summary-stat"><div class="summary-num coral" id="stat-total">0</div><div class="summary-lbl">Total</div></div>
+      <div class="summary-stat"><div class="summary-num green" id="stat-saved">0</div><div class="summary-lbl">Saved</div></div>
+      <div class="summary-stat"><div class="summary-num" id="stat-remaining" style="color:var(--ink-muted)">0</div><div class="summary-lbl">Remaining</div></div>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary" onclick="saveAll()" id="save-all-btn">Save all →</button>
+      <button class="btn btn-secondary" onclick="goBack()">← Start over</button>
+    </div>
+    <div id="cards-container"></div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
+
+  const CUISINES = [
+    'American','BBQ','Breakfast','Burgers','Chinese','Coffee',
+    'Filipino','Greek','Hawaiian Fusion','Indian','Italian','Japanese',
+    'Korean','Mediterranean','Mexican','Mexican Street Food',
+    'Middle Eastern','Pizza','Salvadoran','Sandwiches','Seafood',
+    'Soul Food','Sushi','Thai','Vegan','Vietnamese','Wings','Other'
+  ];
+
+  const NEIGHBORHOODS = [
+    'North Fresno','South Fresno','East Fresno','West Fresno',
+    'Central Fresno','Fig Garden','Tower District','Clovis',
+    'Sunnyside','Woodward Park','Bullard','Southeast Fresno','Other'
+  ];
+
+  let restaurants = [];
+  let savedCount = 0;
+
+  function loadExample() {
+    document.getElementById('paste-input').value =
+`Taco Bell, 1234 Shaw Ave, Fresno CA 93710
+El Pollo Loco, 5678 Blackstone Ave, Fresno CA 93710
+In-N-Out Burger, 910 N Herndon Ave, Fresno CA 93720`;
+  }
+
+  function parseList() {
+    const raw = document.getElementById('paste-input').value.trim();
+    if (!raw) return;
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    restaurants = lines.map((line, i) => {
+      const parts = line.split(',');
+      const name = parts[0].trim();
+      const address = parts.slice(1).join(',').trim();
+      return { id: i, name, address, lat: '', lng: '', cuisine: '', neighborhood: '', phone: '', website: '', isTruck: false, status: 'pending', saved: false, error: null };
+    });
+
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('step-1-indicator').classList.remove('active');
+    document.getElementById('step-1-indicator').classList.add('done');
+    document.getElementById('step-2-indicator').classList.add('active');
+
+    updateStats();
+    renderCards();
+  }
+
+  function renderCards() {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = restaurants.map(r => buildCard(r)).join('');
+    // Auto-lookup coords for entries that have an address
+    restaurants.forEach(r => {
+      if (r.address && !r.lat) lookupCoords(r.id);
+    });
+  }
+
+  function buildCard(r) {
+    const cuisineOpts = CUISINES.map(c => `<option value="${c}" ${r.cuisine===c?'selected':''}>${c}</option>`).join('');
+    const neighborhoodOpts = NEIGHBORHOODS.map(n => `<option value="${n}" ${r.neighborhood===n?'selected':''}>${n}</option>`).join('');
+    const statusClass = r.saved ? 'saved' : r.error ? 'error' : 'pending';
+    const statusText = r.saved ? '✓ Saved' : r.error ? '✗ Error' : 'Pending';
+
+    return `
+    <div class="r-card ${r.saved?'saved':r.error?'error':''}" id="rcard-${r.id}">
+      <div class="r-card-header">
+        <div class="r-num ${r.saved?'saved':''}">${r.id+1}</div>
+        <div class="r-name-display">${r.name}</div>
+        <span class="r-status ${statusClass}">${statusText}</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label>Restaurant name</label>
+          <input type="text" id="name-${r.id}" value="${r.name}" placeholder="Name" oninput="update(${r.id},'name',this.value)"/>
+        </div>
+
+        <div class="form-group form-full">
+          <label>Address</label>
+          <input type="text" id="address-${r.id}" value="${r.address}" placeholder="Full street address" oninput="update(${r.id},'address',this.value)"/>
+        </div>
+
+        <div class="form-group form-full">
+          <label>Coordinates (auto-filled from address)</label>
+          <div class="coords-row">
+            <input type="text" id="lat-${r.id}" value="${r.lat}" placeholder="Latitude" oninput="update(${r.id},'lat',this.value)" class="${r.lat?'autofilled':''}"/>
+            <input type="text" id="lng-${r.id}" value="${r.lng}" placeholder="Longitude" oninput="update(${r.id},'lng',this.value)" class="${r.lng?'autofilled':''}"/>
+            <button class="lookup-btn" id="lookup-btn-${r.id}" onclick="lookupCoords(${r.id})">📍 Look up</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cuisine type</label>
+          <select class="cuisine-select" id="cuisine-${r.id}" onchange="update(${r.id},'cuisine',this.value)">
+            <option value="">Select cuisine...</option>
+            ${cuisineOpts}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Neighborhood</label>
+          <select id="neighborhood-${r.id}" onchange="update(${r.id},'neighborhood',this.value)">
+            <option value="">Select neighborhood...</option>
+            ${neighborhoodOpts}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" id="phone-${r.id}" value="${r.phone}" placeholder="(559) 000-0000" oninput="update(${r.id},'phone',this.value)"/>
+        </div>
+
+        <div class="form-group">
+          <label>Website</label>
+          <input type="text" id="website-${r.id}" value="${r.website}" placeholder="https://..." oninput="update(${r.id},'website',this.value)"/>
+        </div>
+
+        <div class="form-group form-full">
+          <label>Type</label>
+          <div class="toggle-row">
+            <button class="toggle ${r.isTruck?'on':''}" id="truck-toggle-${r.id}" onclick="toggleTruck(${r.id})"></button>
+            <span class="toggle-label" id="truck-label-${r.id}">${r.isTruck ? '🚚 Food truck' : '🍽️ Restaurant'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-row">
+        <button class="btn btn-primary" onclick="saveOne(${r.id})" id="save-btn-${r.id}" ${r.saved?'disabled':''}>
+          ${r.saved ? '✓ Saved' : 'Save to Supabase →'}
+        </button>
+        <span class="save-msg ${r.saved?'ok':r.error?'err':''}" id="save-msg-${r.id}">
+          ${r.saved ? 'Added to your directory' : r.error ? r.error : ''}
+        </span>
+      </div>
+    </div>`;
+  }
+
+  function update(id, field, value) {
+    restaurants[id][field] = value;
+  }
+
+  function toggleTruck(id) {
+    restaurants[id].isTruck = !restaurants[id].isTruck;
+    const btn = document.getElementById(`truck-toggle-${id}`);
+    const lbl = document.getElementById(`truck-label-${id}`);
+    btn.classList.toggle('on', restaurants[id].isTruck);
+    lbl.textContent = restaurants[id].isTruck ? '🚚 Food truck' : '🍽️ Restaurant';
+  }
+
+  async function lookupCoords(id) {
+    const address = document.getElementById(`address-${id}`).value.trim();
+    if (!address) return;
+    const btn = document.getElementById(`lookup-btn-${id}`);
+    btn.textContent = 'Looking up...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`
+      );
+      const data = await res.json();
+      if (data.results && data.results[0]) {
+        const loc = data.results[0].geometry.location;
+        restaurants[id].lat = loc.lat;
+        restaurants[id].lng = loc.lng;
+        const latEl = document.getElementById(`lat-${id}`);
+        const lngEl = document.getElementById(`lng-${id}`);
+        latEl.value = loc.lat;
+        lngEl.value = loc.lng;
+        latEl.classList.add('autofilled');
+        lngEl.classList.add('autofilled');
+        btn.textContent = '✓ Found';
+        btn.style.background = 'var(--green)';
+      } else {
+        btn.textContent = '⚠ Not found';
+        btn.style.background = 'var(--red)';
+      }
+    } catch(e) {
+      btn.textContent = '⚠ Error';
+    }
+    btn.disabled = false;
+  }
+
+  async function saveOne(id) {
+    const r = restaurants[id];
+    const name = document.getElementById(`name-${id}`).value.trim();
+    const address = document.getElementById(`address-${id}`).value.trim();
+    const cuisine = document.getElementById(`cuisine-${id}`).value;
+    const neighborhood = document.getElementById(`neighborhood-${id}`).value;
+    const phone = document.getElementById(`phone-${id}`).value.trim();
+    const website = document.getElementById(`website-${id}`).value.trim();
+    const lat = parseFloat(document.getElementById(`lat-${id}`).value) || null;
+    const lng = parseFloat(document.getElementById(`lng-${id}`).value) || null;
+
+    if (!name) { showMsg(id, 'Name is required', true); return; }
+
+    const btn = document.getElementById(`save-btn-${id}`);
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/restaurants`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          name,
+          address: address || null,
+          latitude: lat,
+          longitude: lng,
+          cuisine_type: cuisine || null,
+          neighborhood: neighborhood || null,
+          phone: phone || null,
+          website: website || null,
+          is_food_truck: r.isTruck,
+          status: 'approved',
+          is_active: true
+        })
+      });
+
+      if (res.ok) {
+        restaurants[id].saved = true;
+        restaurants[id].error = null;
+        savedCount++;
+        updateStats();
+        // Update card appearance
+        const card = document.getElementById(`rcard-${id}`);
+        card.classList.add('saved');
+        btn.textContent = '✓ Saved';
+        btn.style.background = 'var(--green)';
+        document.getElementById(`rcard-${id}`).querySelector('.r-num').classList.add('saved');
+        document.getElementById(`rcard-${id}`).querySelector('.r-status').textContent = '✓ Saved';
+        document.getElementById(`rcard-${id}`).querySelector('.r-status').className = 'r-status saved';
+        showMsg(id, 'Added to your directory', false);
+      } else {
+        const err = await res.text();
+        throw new Error(err);
+      }
+    } catch(e) {
+      restaurants[id].error = 'Save failed';
+      btn.textContent = 'Retry →';
+      btn.disabled = false;
+      showMsg(id, 'Error: ' + (e.message || 'Save failed'), true);
+    }
+  }
+
+  function showMsg(id, msg, isErr) {
+    const el = document.getElementById(`save-msg-${id}`);
+    el.textContent = msg;
+    el.className = 'save-msg ' + (isErr ? 'err' : 'ok');
+  }
+
+  async function saveAll() {
+    const btn = document.getElementById('save-all-btn');
+    btn.textContent = 'Saving all...';
+    btn.disabled = true;
+    for (let i = 0; i < restaurants.length; i++) {
+      if (!restaurants[i].saved) await saveOne(i);
+      await new Promise(r => setTimeout(r, 200)); // small delay to avoid rate limiting
+    }
+    btn.textContent = 'All saved ✓';
+    btn.style.background = 'var(--green)';
+  }
+
+  function updateStats() {
+    const total = restaurants.length;
+    const saved = restaurants.filter(r => r.saved).length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-saved').textContent = saved;
+    document.getElementById('stat-remaining').textContent = total - saved;
+  }
+
+  function goBack() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step-1-indicator').classList.add('active');
+    document.getElementById('step-1-indicator').classList.remove('done');
+    document.getElementById('step-2-indicator').classList.remove('active');
+    restaurants = [];
+    savedCount = 0;
+  }
+
+  // ── Auth gate ──
+  const ADMIN_PASS = '559eats-admin-2024';
+
+  function checkAuth() {
+    const input = document.getElementById('auth-input');
+    const error = document.getElementById('auth-error');
+    if (input.value === ADMIN_PASS) {
+      document.getElementById('auth-gate').style.display = 'none';
+      sessionStorage.setItem('559eats-auth', '1');
+    } else {
+      error.textContent = 'Incorrect password. Try again.';
+      input.classList.add('shake');
+      input.value = '';
+      setTimeout(() => input.classList.remove('shake'), 400);
+    }
+  }
+
+  // Auto-unlock if already authenticated this session
+  if (sessionStorage.getItem('559eats-auth') === '1') {
+    document.getElementById('auth-gate').style.display = 'none';
+  }
+</script>
+</body>
+</html>
