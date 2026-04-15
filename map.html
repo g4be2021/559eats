@@ -108,6 +108,15 @@
 
     .radius-label { position: absolute; bottom: 16px; right: 16px; background: var(--white); border: 1px solid var(--card-border); border-radius: 25px; padding: 6px 14px; font-size: 12px; color: var(--ink-muted); z-index: 5; display: none; }
     .radius-label.visible { display: block; }
+    .radius-picker { position: absolute; bottom: 16px; left: 16px; display: none; gap: 6px; z-index: 5; align-items: center; }
+    .radius-picker.visible { display: flex; }
+    .radius-picker-label { font-size: 11px; color: var(--ink-muted); font-weight: 500; white-space: nowrap; background: var(--white); padding: 5px 10px; border-radius: 12px; border: 1px solid var(--card-border); }
+    .radius-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid var(--card-border); background: var(--white); color: var(--ink-muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .radius-chip:hover { border-color: var(--coral); color: var(--coral); }
+    .radius-chip.active { background: var(--coral); color: var(--white); border-color: var(--coral); }
+
+    /* MOBILE NEAR ME BUTTON — hidden on desktop */
+    .map-near-me-btn { display: none; }
 
     /* MOBILE TOGGLE BUTTON — hidden on desktop */
     .view-toggle-btn { display: none; }
@@ -144,6 +153,29 @@
       /* LIST VIEW active */
       body.list-view .panel { transform: translateX(0); }
       body.list-view .map-container { transform: translateX(-30px); }
+
+      /* Near me button — top right of map */
+      .map-near-me-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: absolute;
+        top: 14px; right: 14px;
+        z-index: 10;
+        background: var(--white);
+        color: var(--ink);
+        border: 1px solid var(--card-border);
+        border-radius: 25px;
+        padding: 10px 16px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(26,18,8,0.12);
+        transition: background 0.2s;
+      }
+      .map-near-me-btn:active { background: var(--coral-light); }
+      .map-near-me-btn.locating { color: var(--ink-muted); }
 
       /* Toggle button — floats over map */
       .view-toggle-btn {
@@ -272,6 +304,16 @@
     </div>
 
     <div class="radius-label" id="radius-label">Showing within 5 miles</div>
+    <div class="radius-picker" id="radius-picker">
+      <span class="radius-picker-label">Radius:</span>
+      <button class="radius-chip" onclick="setRadius(this, 1)">1 mi</button>
+      <button class="radius-chip" onclick="setRadius(this, 3)">3 mi</button>
+      <button class="radius-chip active" onclick="setRadius(this, 5)">5 mi</button>
+      <button class="radius-chip" onclick="setRadius(this, 10)">10 mi</button>
+      <button class="radius-chip" onclick="setRadius(this, 25)">25 mi</button>
+    </div>
+    <!-- Mobile Near Me button — floats top-right over map -->
+    <button class="map-near-me-btn" id="map-near-me-btn" onclick="findNearMe()">📍 Near me</button>
   </div>
 
 </div>
@@ -295,6 +337,7 @@
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
   let map, userMarker, radiusCircle;
+  let nearbyRadius = 5;
   let allPlaces = [];
   let allHours = {};
   let markers = [];
@@ -454,9 +497,12 @@
     setTimeout(() => marker.setAnimation(null), 700);
     map.panTo({ lat: place.latitude, lng: place.longitude });
     activeItemId = place.id;
-    document.querySelectorAll('.r-item').forEach(el => el.classList.toggle('active', el.dataset.id === place.id));
-    const activeEl = document.querySelector(`.r-item[data-id="${place.id}"]`);
-    if (activeEl) { activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); await expandListItem(place.id); }
+    // Only scroll/expand list on desktop — on mobile just show the bottom card
+    if (window.innerWidth > 700) {
+      document.querySelectorAll('.r-item').forEach(el => el.classList.toggle('active', el.dataset.id === place.id));
+      const activeEl = document.querySelector(`.r-item[data-id="${place.id}"]`);
+      if (activeEl) { activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); await expandListItem(place.id); }
+    }
     showInfoCard(place);
   }
 
@@ -640,15 +686,37 @@
     renderList(allPlaces);
   }
 
+  function setRadius(el, miles) {
+    nearbyRadius = miles;
+    document.querySelectorAll('.radius-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    // Update label
+    document.getElementById('radius-label').textContent = `Showing within ${miles} mile${miles === 1 ? '' : 's'}`;
+    // Re-apply filter if we have a location
+    if (userLocation) {
+      const metersPerMile = 1609.34;
+      if (radiusCircle) radiusCircle.setRadius(miles * metersPerMile);
+      const nearby = allPlaces.filter(r => r.latitude && getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude) <= miles);
+      renderMarkers(nearby);
+      renderList(allPlaces);
+      // Adjust zoom to fit radius
+      const zoomMap = { 1: 14, 3: 13, 5: 12, 10: 11, 25: 10 };
+      map.setZoom(zoomMap[miles] || 12);
+    }
+  }
+
   function findNearMe() {
     const btn = document.getElementById('near-me-btn');
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
     btn.textContent = 'Locating...';
     btn.classList.add('locating');
+    const mapBtn = document.getElementById('map-near-me-btn');
+    if (mapBtn) { mapBtn.textContent = '📍 Locating...'; mapBtn.classList.add('locating'); }
     navigator.geolocation.getCurrentPosition(pos => {
       userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       btn.textContent = '📍 Near me';
       btn.classList.remove('locating');
+      if (mapBtn) { mapBtn.textContent = '📍 Near me'; mapBtn.classList.remove('locating'); }
       if (userMarker) userMarker.setMap(null);
       if (radiusCircle) radiusCircle.setMap(null);
       userMarker = new google.maps.Marker({
@@ -656,17 +724,21 @@
         icon: { path: google.maps.SymbolPath.CIRCLE, fillColor: '#4285F4', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3, scale: 10 },
         zIndex: 999,
       });
+      const metersPerMile = 1609.34;
       radiusCircle = new google.maps.Circle({
-        map, center: userLocation, radius: 8047,
+        map, center: userLocation, radius: nearbyRadius * metersPerMile,
         fillColor: '#D85A30', fillOpacity: 0.06,
         strokeColor: '#D85A30', strokeOpacity: 0.3, strokeWeight: 1.5,
       });
       map.setCenter(userLocation);
-      map.setZoom(13);
-      const nearby = allPlaces.filter(r => r.latitude && getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude) <= 5);
+      const zoomMap = { 1: 14, 3: 13, 5: 12, 10: 11, 25: 10 };
+      map.setZoom(zoomMap[nearbyRadius] || 12);
+      const nearby = allPlaces.filter(r => r.latitude && getDistance(userLocation.lat, userLocation.lng, r.latitude, r.longitude) <= nearbyRadius);
       renderMarkers(nearby);
       renderList(allPlaces);
+      document.getElementById('radius-label').textContent = `Showing within ${nearbyRadius} mile${nearbyRadius === 1 ? '' : 's'}`;
       document.getElementById('radius-label').classList.add('visible');
+      document.getElementById('radius-picker').classList.add('visible');
       // Switch to map view when locating
       if (isListView) {
         isListView = false;
@@ -677,6 +749,8 @@
     }, () => {
       btn.textContent = '📍 Near me';
       btn.classList.remove('locating');
+      const mapBtnE = document.getElementById('map-near-me-btn');
+      if (mapBtnE) { mapBtnE.textContent = '📍 Near me'; mapBtnE.classList.remove('locating'); }
       alert('Could not get your location. Please allow location access and try again.');
     });
   }
