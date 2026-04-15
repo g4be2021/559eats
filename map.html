@@ -177,13 +177,14 @@
       .map-near-me-btn:active { background: var(--coral-light); }
       .map-near-me-btn.locating { color: var(--ink-muted); }
 
-      /* Toggle button — floats over map */
+      /* Toggle button — sits well above Safari bottom bar */
       .view-toggle-btn {
         display: flex;
         align-items: center;
         gap: 7px;
         position: fixed;
-        bottom: 28px;
+        bottom: env(safe-area-inset-bottom, 24px);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
         left: 50%;
         transform: translateX(-50%);
         z-index: 100;
@@ -238,7 +239,20 @@
       .map-info-btn { padding: 15px 20px; font-size: 15px; border-radius: 25px; text-align: center; width: 100%; }
       .map-info-btn.secondary { background: var(--white); border: 1.5px solid var(--card-border); }
 
-      .radius-label { top: 8px; right: 8px; bottom: auto; z-index: 5; }
+      .radius-label { top: 14px; left: 14px; right: auto; bottom: auto; z-index: 5; }
+
+      /* Radius picker on mobile — below near-me button on right side */
+      .radius-picker {
+        position: absolute;
+        top: 58px; right: 14px; left: auto; bottom: auto;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+      }
+      .radius-picker-label { display: none; }
+
+      /* List view extra padding so toggle btn doesn't cover last item */
+      body.list-view .panel-results { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); }
     }
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
