@@ -245,14 +245,27 @@
   function initDrawer() {
     const card = document.getElementById('map-info-card');
     let touchStartY = 0;
-    let touchStartScrollTop = 0;
+    let lastY = 0;
+    let lastTime = 0;
+    let velocity = 0;
     let dragging = false;
     let currentDragY = 0;
+
+    function setTransform(y, animated) {
+      if (animated) {
+        card.style.transition = 'transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1)';
+      } else {
+        card.style.transition = 'none';
+      }
+      card.style.transform = y === 0 ? '' : `translateY(${y}px)`;
+    }
 
     card.addEventListener('touchstart', e => {
       if (!card.classList.contains('visible')) return;
       touchStartY = e.touches[0].clientY;
-      touchStartScrollTop = card.scrollTop;
+      lastY = touchStartY;
+      lastTime = Date.now();
+      velocity = 0;
       dragging = false;
       currentDragY = 0;
     }, { passive: true });
@@ -261,42 +274,55 @@
       if (!card.classList.contains('visible')) return;
       const dy = e.touches[0].clientY - touchStartY;
 
-      // Only drag if: swiping down AND already at top of scroll
+      // Only drag down when scrolled to top
       if (dy > 0 && card.scrollTop <= 0) {
         dragging = true;
         currentDragY = dy;
-        card.classList.remove('animating');
-        card.style.transform = `translateY(${dy}px)`;
-        // prevent page scroll while dragging
+
+        // Track velocity
+        const now = Date.now();
+        const dt = now - lastTime;
+        if (dt > 0) velocity = (e.touches[0].clientY - lastY) / dt;
+        lastY = e.touches[0].clientY;
+        lastTime = now;
+
+        // Move card instantly with finger — no transition
+        setTransform(dy, false);
         e.preventDefault();
       }
     }, { passive: false });
 
     card.addEventListener('touchend', () => {
       if (!dragging) return;
-      card.classList.add('animating');
 
-      if (currentDragY > 60) {
-        // dismiss
+      // Dismiss if dragged far enough OR flicked fast
+      const shouldDismiss = currentDragY > 80 || velocity > 0.5;
+
+      if (shouldDismiss) {
+        // Animate out fast
+        card.style.transition = 'transform 0.28s cubic-bezier(0.4, 0, 0.6, 1)';
         card.style.transform = 'translateY(110%)';
         setTimeout(() => {
           card.classList.remove('visible', 'animating');
           card.style.transform = '';
+          card.style.transition = '';
           markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
           activeItemId = null;
           document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
-        }, 380);
+        }, 280);
       } else {
-        // snap back
+        // Spring back with bounce
+        card.style.transition = 'transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1)';
         card.style.transform = 'translateY(0)';
         setTimeout(() => {
-          card.classList.remove('animating');
           card.style.transform = '';
-        }, 380);
+          card.style.transition = '';
+        }, 420);
       }
 
       dragging = false;
       currentDragY = 0;
+      velocity = 0;
     });
   }
 
@@ -416,19 +442,24 @@
     actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Book catering</a>`;
     document.getElementById('info-actions').innerHTML = actions;
 
-    // Reset transform, add animating class, then visible
-    card.style.transform = '';
-    card.classList.remove('animating');
+    // Snap to hidden, force reflow, then spring up
+    card.style.transition = 'none';
+    card.style.transform = 'translateY(110%)';
     card.classList.add('visible');
-    // Force reflow so transition fires
     card.getBoundingClientRect();
-    card.classList.add('animating');
+    card.style.transition = 'transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1)';
+    card.style.transform = 'translateY(0)';
   }
 
   function closeInfoCard() {
     const card = document.getElementById('map-info-card');
-    card.classList.remove('visible', 'animating');
-    card.style.transform = '';
+    card.style.transition = 'transform 0.28s cubic-bezier(0.4, 0, 0.6, 1)';
+    card.style.transform = 'translateY(110%)';
+    setTimeout(() => {
+      card.classList.remove('visible', 'animating');
+      card.style.transform = '';
+      card.style.transition = '';
+    }, 280);
     markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
     activeItemId = null;
     document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
