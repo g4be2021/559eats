@@ -202,6 +202,7 @@
         white-space: nowrap;
       }
       .view-toggle-btn:active { transform: translateX(-50%) scale(0.96); }
+      body.card-open .view-toggle-btn { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
       .view-toggle-btn .icon { font-size: 16px; }
 
       /* Desktop info card → bottom sheet on mobile */
@@ -221,6 +222,8 @@
         transition: transform 0.38s cubic-bezier(0.34,1.3,0.64,1);
       }
       .map-info-card.visible { transform: translateY(0); }
+      /* Extra bottom padding so toggle btn never overlaps buttons */
+      .map-info-card { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 90px) !important; }
 
       /* Drag handle */
       .map-info-card::before {
@@ -405,6 +408,7 @@
           card.classList.remove('visible');
           card.style.transition = '';
           card.style.transform = '';
+          document.body.classList.remove('card-open');
           markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
           activeItemId = null;
           document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
@@ -546,6 +550,7 @@
     card.style.transition = 'transform 0.38s cubic-bezier(0.34,1.3,0.64,1)';
     card.style.transform = 'translateY(0)';
     setTimeout(() => { card.style.transition = ''; card.style.transform = ''; }, 400);
+    document.body.classList.add('card-open');
   }
 
   function closeInfoCard() {
@@ -553,6 +558,7 @@
     if (!card.classList.contains('visible')) return;
     card.style.transition = 'transform 0.26s ease-in';
     card.style.transform = 'translateY(100%)';
+    document.body.classList.remove('card-open');
     setTimeout(() => {
       card.classList.remove('visible');
       card.style.transition = '';
