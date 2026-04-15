@@ -73,13 +73,12 @@
     .detail-btn.primary:hover { background: var(--coral-dark); }
     .detail-btn.secondary { background: var(--white); color: var(--ink-muted); border: 1px solid var(--card-border); }
     .detail-btn.secondary:hover { border-color: var(--coral); color: var(--coral); }
-
     .empty-state { text-align: center; padding: 2rem 1rem; color: var(--ink-muted); font-size: 13px; }
 
     .map-container { flex: 1; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* ── DESKTOP: floating card ── */
+    /* Desktop floating card */
     .map-info-card {
       position: absolute; bottom: 24px; left: 50%;
       transform: translateX(-50%);
@@ -109,58 +108,61 @@
     .skeleton { background: linear-gradient(90deg,#f0ebe4 25%,#e8e1d8 50%,#f0ebe4 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:var(--radius-sm); }
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* ── MOBILE: bottom drawer ── */
+    /* Mobile bottom drawer */
     @media (max-width: 700px) {
       .app { flex-direction: column; }
       .panel { width: 100%; height: 40vh; border-right: none; border-bottom: 1px solid var(--card-border); }
       .map-container { height: 60vh; }
       .nav-links a:not(.nav-cta) { display: none; }
 
-      /* Always in DOM, hidden off-screen below */
       .map-info-card {
         display: block !important;
         position: absolute;
         bottom: 0; left: 0; right: 0;
-        transform: translateY(105%);
+        transform: translateY(110%);
         max-width: 100%; min-width: 100%;
         border-radius: var(--radius) var(--radius) 0 0;
-        padding: 0 18px 40px;
-        max-height: 75vh;
+        padding: 0 20px 44px;
+        max-height: 78vh;
         overflow-y: auto;
-        box-shadow: 0 -6px 30px rgba(26,18,8,0.18);
-        transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 -8px 32px rgba(26,18,8,0.18);
         will-change: transform;
         z-index: 20;
-        /* hide close btn on mobile — handle does the job */
+        /* transition applied via JS so drag feels instant */
+      }
+      .map-info-card.animating {
+        transition: transform 0.38s cubic-bezier(0.34, 1.4, 0.64, 1);
       }
       .map-info-card.visible {
-        transform: translateY(0);
+        transform: translateY(0) !important;
       }
       .map-info-card-close { display: none; }
+
+      /* Drag zone — full width strip at top of drawer */
       .drawer-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 14px 0 10px;
+        cursor: grab;
+        touch-action: pan-y;
+        flex-shrink: 0;
+      }
+      .drawer-handle::after {
+        content: '';
         display: block;
         width: 40px; height: 5px;
         background: var(--ink-faint);
         border-radius: 3px;
-        margin: 14px auto 16px;
-        cursor: grab;
-        touch-action: none;
-        flex-shrink: 0;
       }
       .map-info-name { font-size: 19px; padding-right: 0; }
-      .map-info-meta { font-size: 13px; margin-bottom: 12px; }
-      .map-info-row { font-size: 14px; margin-bottom: 9px; }
+      .map-info-meta { font-size: 13px; margin-bottom: 14px; }
+      .map-info-row { font-size: 14px; margin-bottom: 10px; }
       .map-info-actions { gap: 10px; margin-top: 20px; flex-direction: column; }
-      .map-info-btn {
-        padding: 14px 20px;
-        font-size: 15px;
-        border-radius: 25px;
-        text-align: center;
-        flex: none;
-        width: 100%;
-      }
-      .map-info-btn.primary { width: 100%; }
-      .map-info-btn.secondary { width: 100%; background: var(--white); border: 1.5px solid var(--card-border); }
+      .map-info-btn { padding: 15px 20px; font-size: 15px; border-radius: 25px; text-align: center; width: 100%; }
+      .map-info-btn.secondary { background: var(--white); border: 1.5px solid var(--card-border); }
       .radius-label { top: 8px; right: 8px; bottom: auto; z-index: 5; }
     }
   </style>
@@ -239,46 +241,63 @@
   let userLocation = null;
   let activeItemId = null;
 
-  // ── Drawer drag-to-dismiss ──
-  function initDrawerDrag() {
+  // ── Drawer swipe-to-dismiss ──
+  function initDrawer() {
     const card = document.getElementById('map-info-card');
-    const handle = document.getElementById('drawer-handle');
-    let startY = 0;
-    let currentY = 0;
+    let touchStartY = 0;
+    let touchStartScrollTop = 0;
     let dragging = false;
+    let currentDragY = 0;
 
-    function onStart(e) {
+    card.addEventListener('touchstart', e => {
       if (!card.classList.contains('visible')) return;
-      dragging = true;
-      startY = e.touches ? e.touches[0].clientY : e.clientY;
-      card.style.transition = 'none';
-    }
-
-    function onMove(e) {
-      if (!dragging) return;
-      currentY = (e.touches ? e.touches[0].clientY : e.clientY) - startY;
-      if (currentY < 0) currentY = 0;
-      card.style.transform = `translateY(${currentY}px)`;
-    }
-
-    function onEnd() {
-      if (!dragging) return;
+      touchStartY = e.touches[0].clientY;
+      touchStartScrollTop = card.scrollTop;
       dragging = false;
-      card.style.transition = '';
-      if (currentY > 80) {
-        closeInfoCard();
-      } else {
-        card.style.transform = 'translateY(0)';
-      }
-      currentY = 0;
-    }
+      currentDragY = 0;
+    }, { passive: true });
 
-    handle.addEventListener('touchstart', onStart, { passive: true });
-    handle.addEventListener('touchmove', onMove, { passive: true });
-    handle.addEventListener('touchend', onEnd);
-    handle.addEventListener('mousedown', onStart);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onEnd);
+    card.addEventListener('touchmove', e => {
+      if (!card.classList.contains('visible')) return;
+      const dy = e.touches[0].clientY - touchStartY;
+
+      // Only drag if: swiping down AND already at top of scroll
+      if (dy > 0 && card.scrollTop <= 0) {
+        dragging = true;
+        currentDragY = dy;
+        card.classList.remove('animating');
+        card.style.transform = `translateY(${dy}px)`;
+        // prevent page scroll while dragging
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    card.addEventListener('touchend', () => {
+      if (!dragging) return;
+      card.classList.add('animating');
+
+      if (currentDragY > 60) {
+        // dismiss
+        card.style.transform = 'translateY(110%)';
+        setTimeout(() => {
+          card.classList.remove('visible', 'animating');
+          card.style.transform = '';
+          markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
+          activeItemId = null;
+          document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
+        }, 380);
+      } else {
+        // snap back
+        card.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          card.classList.remove('animating');
+          card.style.transform = '';
+        }, 380);
+      }
+
+      dragging = false;
+      currentDragY = 0;
+    });
   }
 
   async function fetchPlaces() {
@@ -327,14 +346,12 @@
     });
 
     map.addListener('click', () => closeInfoCard());
-
     fetchPlaces().then(places => {
       allPlaces = places;
       renderMarkers(places);
       renderList(places);
     });
-
-    initDrawerDrag();
+    initDrawer();
   }
 
   function makeMarkerIcon(isTruck, isActive) {
@@ -381,6 +398,7 @@
   }
 
   async function showInfoCard(place) {
+    const card = document.getElementById('map-info-card');
     document.getElementById('info-name').textContent = place.name;
     document.getElementById('info-meta').textContent =
       `${place.cuisine_type || ''}${place.neighborhood ? ' · ' + place.neighborhood : ''}${place.is_food_truck ? ' · 🚚 Food truck' : ''}`;
@@ -398,16 +416,19 @@
     actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Book catering</a>`;
     document.getElementById('info-actions').innerHTML = actions;
 
-    // Reset any drag offset then add visible
-    const card = document.getElementById('map-info-card');
+    // Reset transform, add animating class, then visible
     card.style.transform = '';
+    card.classList.remove('animating');
     card.classList.add('visible');
+    // Force reflow so transition fires
+    card.getBoundingClientRect();
+    card.classList.add('animating');
   }
 
   function closeInfoCard() {
     const card = document.getElementById('map-info-card');
+    card.classList.remove('visible', 'animating');
     card.style.transform = '';
-    card.classList.remove('visible');
     markers.forEach(m => m.setIcon(makeMarkerIcon(m._place.is_food_truck, false)));
     activeItemId = null;
     document.querySelectorAll('.r-item').forEach(el => el.classList.remove('active'));
