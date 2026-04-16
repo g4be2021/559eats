@@ -187,7 +187,6 @@
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
   const ADMIN_PASSWORDS = ['559eats-admin-2024', 'admin2-pass-2024'];
 
   // ── 300+ known chains ──
@@ -340,7 +339,7 @@
 
   // ── Geocode ──
   async function geocodeLocation(address) {
-    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`);
+    const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
     const data = await res.json();
     if (data.results && data.results[0]) return data.results[0].geometry.location;
     return null;
@@ -348,9 +347,7 @@
 
   // ── Nearby search — direct Google API call, no proxy needed ──
   async function nearbySearch(lat, lng, radius, type) {
-    const res = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${MAPS_KEY}`
-    );
+    const res = await fetch(`/api/places-nearby?lat=${lat}&lng=${lng}&radius=${radius}&type=${type}`);
     const data = await res.json();
     return data.results || [];
   }
