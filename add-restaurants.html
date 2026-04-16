@@ -359,6 +359,33 @@ In-N-Out Burger, 910 N Herndon Ave, Fresno CA 93720`;
     lbl.textContent = restaurants[id].isTruck ? '🚚 Food truck' : '🍽️ Restaurant';
   }
 
+  function guessNeighborhood(components, lat, lng) {
+    const parts = components.map(c => c.long_name.toLowerCase());
+    const joined = parts.join(' ');
+    if (joined.includes('clovis')) return 'Clovis';
+    const rules = [
+      { keywords: ['fig garden', 'fig ave', 'van ness'], value: 'Fig Garden' },
+      { keywords: ['tower district', 'olive ave', 'wishon'], value: 'Tower District' },
+      { keywords: ['woodward park', 'audubon', 'copper'], value: 'Woodward Park' },
+      { keywords: ['sunnyside', 'kings canyon', 'reedley'], value: 'Sunnyside' },
+      { keywords: ['bullard'], value: 'Bullard' },
+    ];
+    for (const rule of rules) {
+      if (rule.keywords.some(k => joined.includes(k))) return rule.value;
+    }
+    if (lat && lng) {
+      const north = lat > 36.82, south = lat < 36.74;
+      const east = lng > -119.76, west = lng < -119.82;
+      if (north) return 'North Fresno';
+      if (south && east) return 'Southeast Fresno';
+      if (south) return 'South Fresno';
+      if (east) return 'East Fresno';
+      if (west) return 'West Fresno';
+      return 'Central Fresno';
+    }
+    return null;
+  }
+
   async function lookupCoords(id) {
     const address = document.getElementById(`address-${id}`).value.trim();
     if (!address) return;
@@ -372,7 +399,8 @@ In-N-Out Burger, 910 N Herndon Ave, Fresno CA 93720`;
       );
       const data = await res.json();
       if (data.results && data.results[0]) {
-        const loc = data.results[0].geometry.location;
+        const result = data.results[0];
+        const loc = result.geometry.location;
         restaurants[id].lat = loc.lat;
         restaurants[id].lng = loc.lng;
         const latEl = document.getElementById(`lat-${id}`);
@@ -381,6 +409,15 @@ In-N-Out Burger, 910 N Herndon Ave, Fresno CA 93720`;
         lngEl.value = loc.lng;
         latEl.classList.add('autofilled');
         lngEl.classList.add('autofilled');
+
+        // Auto-fill neighborhood
+        const neighborhoodEl = document.getElementById(`neighborhood-${id}`);
+        const guessed = guessNeighborhood(result.address_components, loc.lat, loc.lng);
+        if (guessed && !neighborhoodEl.value) {
+          neighborhoodEl.value = guessed;
+          restaurants[id].neighborhood = guessed;
+        }
+
         btn.textContent = '✓ Found';
         btn.style.background = 'var(--green)';
       } else {
