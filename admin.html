@@ -259,7 +259,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Customer</th><th>Truck</th><th>Event date</th><th>Guests</th><th>Budget</th><th>Location</th><th>Commission</th><th>Status</th></tr></thead>
+        <thead><tr><th>Customer</th><th>Truck</th><th>Event date</th><th>Guests</th><th>Budget</th><th>Location</th><th>Commission</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="catering-body"><tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">Loading...</td></tr></tbody>
       </table>
     </div>
@@ -410,8 +410,9 @@
   // To add/remove admins just edit this list.
   // initials: shown on notes. password: their personal password.
   const ADMINS = [
-    { name: 'G4be',  initials: 'G4be', password: '559eats-admin-2024', color: '#D85A30' },
-    { name: 'SpicyMayo', initials: 'Mayo', password: 'admin2-pass-2024',   color: '#185FA5' },
+    { name: 'Owner',  initials: 'OW', password: '559eats-admin-2024', color: '#D85A30' },
+    { name: 'Admin 2', initials: 'A2', password: 'admin2-pass-2024',   color: '#185FA5' },
+    { name: 'Admin 3', initials: 'A3', password: 'admin3-pass-2024',   color: '#3B6D11' },
   ];
 
   let currentAdmin = null;
@@ -802,7 +803,7 @@
 
   function renderCatering(data) {
     const tbody = document.getElementById('catering-body');
-    if (!data||!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No catering requests yet</td></tr>'; return; }
+    if (!data||!data.length) { tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--ink-muted);padding:2rem">No catering requests yet</td></tr>'; return; }
     tbody.innerHTML = data.map(c => {
       const eventDate = c.event_date ? new Date(c.event_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—';
       let commCell = '—';
@@ -813,8 +814,16 @@
         <td>${c.guest_count||'—'}</td><td>${c.budget||'—'}</td>
         <td><div style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.event_location||'—'}</div>${c.notes?`<div class="sub-detail">${c.notes}</div>`:''}</td>
         <td>${commCell}</td><td><span class="badge badge-${c.status}">${c.status}</span></td>
+        <td><button class="action-btn delete" onclick="deleteCatering('${c.id}')">Delete</button></td>
       </tr>`;
     }).join('');
+  }
+
+  async function deleteCatering(id) {
+    if (!confirm('Delete this catering request? This cannot be undone.')) return;
+    await api(`catering_bookings?id=eq.${id}`, 'DELETE');
+    showToast('Catering request deleted.');
+    loadCatering();
   }
 
   function filterCatering(status) {
