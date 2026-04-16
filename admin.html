@@ -471,6 +471,46 @@
     document.getElementById('edit-truck-label').textContent = editIsTruck ? '🚚 Food truck' : '🍽️ Restaurant';
   }
 
+  // Maps geocode sublocality/neighborhood strings → our dropdown values
+  function guessNeighborhood(components, lat, lng) {
+    // Build a searchable string from address components
+    const parts = components.map(c => c.long_name.toLowerCase());
+    const joined = parts.join(' ');
+
+    // Clovis check first — it's its own city
+    if (joined.includes('clovis')) return 'Clovis';
+
+    // Map known Fresno neighborhoods by street/area name in the geocode result
+    const rules = [
+      { keywords: ['fig garden', 'fig ave', 'van ness'], value: 'Fig Garden' },
+      { keywords: ['tower district', 'olive ave', 'wishon'], value: 'Tower District' },
+      { keywords: ['woodward park', 'audubon', 'copper'], value: 'Woodward Park' },
+      { keywords: ['sunnyside', 'kings canyon', 'reedley'], value: 'Sunnyside' },
+      { keywords: ['bullard'], value: 'Bullard' },
+    ];
+    for (const rule of rules) {
+      if (rule.keywords.some(k => joined.includes(k))) return rule.value;
+    }
+
+    // Fall back to lat/lng bounding boxes for Fresno quadrants
+    // Fresno center approx: 36.7783, -119.7945
+    if (lat && lng) {
+      const north = lat > 36.82;
+      const south = lat < 36.74;
+      const east  = lng > -119.76;
+      const west  = lng < -119.82;
+      if (north && east)  return 'North Fresno';
+      if (north && west)  return 'North Fresno';
+      if (north)          return 'North Fresno';
+      if (south && east)  return 'Southeast Fresno';
+      if (south)          return 'South Fresno';
+      if (east)           return 'East Fresno';
+      if (west)           return 'West Fresno';
+      return 'Central Fresno';
+    }
+    return null;
+  }
+
   async function lookupEditCoords() {
     const address = document.getElementById('edit-address').value.trim();
     if (!address) { showToast('Enter an address first'); return; }
@@ -480,15 +520,32 @@
       const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`);
       const data = await res.json();
       if (data.results && data.results[0]) {
-        const loc = data.results[0].geometry.location;
+        const result = data.results[0];
+        const loc = result.geometry.location;
+
+        // Set coordinates
         document.getElementById('edit-lat').value = loc.lat;
         document.getElementById('edit-lng').value = loc.lng;
+
+        // Auto-fill neighborhood if not already set
+        const neighborhoodEl = document.getElementById('edit-neighborhood');
+        const guessed = guessNeighborhood(result.address_components, loc.lat, loc.lng);
+        if (guessed && !neighborhoodEl.value) {
+          neighborhoodEl.value = guessed;
+          showToast(`📍 Coordinates + neighborhood set (${guessed})`);
+        } else if (guessed && neighborhoodEl.value !== guessed) {
+          // Neighborhood already filled — offer the suggestion via toast
+          showToast(`📍 Coords set · Suggested neighborhood: ${guessed}`);
+        } else {
+          showToast('📍 Coordinates updated');
+        }
+
         btn.textContent = '✓ Found'; btn.style.background = 'var(--green)';
-        showToast('📍 Coordinates updated');
       } else {
         btn.textContent = '⚠ Not found'; btn.style.background = '#A32D2D';
+        showToast('Address not found — check spelling');
       }
-    } catch(e) { btn.textContent = '⚠ Error'; }
+    } catch(e) { btn.textContent = '⚠ Error'; showToast('Lookup failed'); }
     btn.disabled = false;
   }
 
