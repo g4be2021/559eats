@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>559eats · Discover Local Spots</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #fff; --border: rgba(26,18,8,0.09);
+      --green: #3B6D11; --green-light: #EAF3DE; --radius: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+    nav { background: var(--coral-dark); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: #fff; text-decoration: none; }
+    .nav-back { font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; }
+    .nav-back:hover { color: #fff; }
+    .page { max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: var(--ink-muted); margin-bottom: 28px; line-height: 1.6; }
+
+    /* AUTH */
+    #auth-gate { position: fixed; inset: 0; background: var(--cream); display: flex; align-items: center; justify-content: center; z-index: 999; }
+    .auth-box { background: #fff; border-radius: 16px; border: 1px solid var(--border); padding: 36px 32px; width: 100%; max-width: 360px; text-align: center; }
+    .auth-logo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--coral); margin-bottom: 16px; }
+    .auth-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; margin-bottom: 10px; text-align: center; letter-spacing: 2px; }
+    .auth-input:focus { border-color: var(--coral); }
+    .auth-btn { width: 100%; padding: 12px; background: var(--coral); color: #fff; border: none; border-radius: 25px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .auth-error { font-size: 12px; color: #A32D2D; margin-top: 8px; min-height: 16px; }
+
+    /* CONTROLS */
+    .controls { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+    .controls-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .ctrl-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+    .ctrl-label { font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+    .ctrl-input, .ctrl-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--cream); outline: none; transition: border-color 0.15s; width: 100%; }
+    .ctrl-input:focus, .ctrl-select:focus { border-color: var(--coral); }
+    .search-btn { padding: 10px 24px; background: var(--coral); color: #fff; border: none; border-radius: 25px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.15s; align-self: flex-end; }
+    .search-btn:hover { background: var(--coral-dark); }
+    .search-btn:disabled { background: var(--ink-faint); cursor: wait; }
+
+    /* FILTER ROW */
+    .filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-label { font-size: 12px; color: var(--ink-muted); font-weight: 500; }
+    .fchip { padding: 4px 12px; border-radius: 15px; font-size: 12px; border: 1px solid var(--border); background: #fff; color: var(--ink-muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+    .fchip:hover { border-color: var(--coral); color: var(--coral); }
+    .fchip.active { background: var(--coral); color: #fff; border-color: var(--coral); }
+
+    /* SUMMARY */
+    .summary-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; gap: 24px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .s-stat { display: flex; flex-direction: column; }
+    .s-num { font-size: 22px; font-weight: 500; line-height: 1; color: var(--coral); }
+    .s-lbl { font-size: 11px; color: var(--ink-faint); margin-top: 2px; }
+    .s-num.green { color: var(--green); }
+
+    /* RESULT CARDS */
+    .results-grid { display: flex; flex-direction: column; gap: 10px; }
+    .r-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; transition: border-color 0.15s; }
+    .r-card:hover { border-color: var(--coral); }
+    .r-card.added { border-color: var(--green); background: #f8fef4; opacity: 0.7; }
+    .r-card.chain { border-color: transparent; opacity: 0.45; }
+    .r-icon { width: 48px; height: 48px; border-radius: 10px; background: var(--coral-light); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .r-info { flex: 1; min-width: 0; }
+    .r-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+    .r-address { font-size: 12px; color: var(--ink-muted); margin-bottom: 6px; }
+    .r-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .r-tag { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500; }
+    .tag-local { background: var(--green-light); color: var(--green); }
+    .tag-chain { background: #FCEBEB; color: #791F1F; }
+    .tag-maybe { background: #FAEEDA; color: #633806; }
+    .tag-rating { background: var(--cream); color: var(--ink-muted); }
+    .tag-price { background: var(--cream); color: var(--ink-muted); }
+    .r-locations { font-size: 11px; color: var(--ink-faint); }
+    .r-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+    .add-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; background: var(--coral); color: #fff; white-space: nowrap; transition: background 0.15s; }
+    .add-btn:hover { background: var(--coral-dark); }
+    .add-btn:disabled { background: var(--green); cursor: default; }
+    .add-btn.added { background: var(--green); }
+    .skip-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--ink-muted); white-space: nowrap; }
+    .skip-btn:hover { border-color: #A32D2D; color: #A32D2D; }
+
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--ink-muted); font-size: 14px; }
+    .loading-text { text-align: center; padding: 2rem; color: var(--ink-muted); font-size: 14px; }
+    .progress { font-size: 12px; color: var(--ink-faint); text-align: center; margin-top: 8px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 11px 22px; border-radius: 25px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .r-card { flex-direction: column; }
+      .r-actions { flex-direction: row; align-self: stretch; }
+      .controls-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-logo">559eats</div>
+    <p style="font-size:14px;color:var(--ink-muted);margin-bottom:20px">Admin access required</p>
+    <input class="auth-input" type="password" id="auth-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAuth()"/>
+    <button class="auth-btn" onclick="checkAuth()">Enter →</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">559eats</a>
+  <a href="admin.html" class="nav-back">← Admin panel</a>
+</nav>
+
+<div class="page">
+  <h1>Discover local spots</h1>
+  <p class="subtitle">Searches Google Places for restaurants in your area, then checks how many locations each has nationwide. Anything with fewer than 3 locations is flagged as truly local — the kind of independent spot 559eats is built for.</p>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="controls-row">
+      <div class="ctrl-group">
+        <label class="ctrl-label">Search area</label>
+        <input class="ctrl-input" id="search-location" value="Fresno, CA" placeholder="City, State"/>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label">Radius</label>
+        <select class="ctrl-select" id="search-radius">
+          <option value="1000">1 mile</option>
+          <option value="3000">3 miles</option>
+          <option value="5000" selected>5 miles</option>
+          <option value="10000">10 miles</option>
+          <option value="20000">20 miles</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label">Max chain locations</label>
+        <select class="ctrl-select" id="max-locations">
+          <option value="2">1–2 locations (hyper local)</option>
+          <option value="3" selected>Up to 3 locations</option>
+          <option value="5">Up to 5 locations</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label class="ctrl-label">Type</label>
+        <select class="ctrl-select" id="search-type">
+          <option value="restaurant">Restaurants</option>
+          <option value="food">Food (all)</option>
+          <option value="cafe">Cafes / Coffee</option>
+          <option value="bakery">Bakeries</option>
+          <option value="meal_takeaway">Takeaway</option>
+        </select>
+      </div>
+      <button class="search-btn" id="search-btn" onclick="startSearch()">🔍 Search</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-area" style="display:none">
+    <div class="summary-bar" id="summary-bar">
+      <div class="s-stat"><div class="s-num" id="stat-found">0</div><div class="s-lbl">Found</div></div>
+      <div class="s-stat"><div class="s-num green" id="stat-local">0</div><div class="s-lbl">Truly local</div></div>
+      <div class="s-stat"><div class="s-num" id="stat-added" style="color:var(--ink-muted)">0</div><div class="s-lbl">Added to 559eats</div></div>
+      <div style="flex:1"></div>
+      <button class="search-btn" onclick="addAllLocal()" id="add-all-btn" style="background:var(--green)">+ Add all local</button>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">Show:</span>
+      <button class="fchip active" onclick="setFilter('all',this)">All</button>
+      <button class="fchip" onclick="setFilter('local',this)">✅ Local only</button>
+      <button class="fchip" onclick="setFilter('maybe',this)">🟡 Maybe local</button>
+      <button class="fchip" onclick="setFilter('chain',this)">❌ Chains</button>
+    </div>
+
+    <div class="results-grid" id="results-grid"></div>
+    <div class="progress" id="progress-text"></div>
+  </div>
+
+  <div class="empty" id="empty-state">
+    <div style="font-size:40px;margin-bottom:12px">🍽️</div>
+    Search your area to find local independent restaurants to add to 559eats.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
+  const ADMIN_PASSWORDS = ['559eats-admin-2024', 'admin2-pass-2024'];
+
+  const CUISINE_MAP = {
+    'mexican': 'Mexican', 'pizza': 'Pizza', 'burger': 'Burgers',
+    'sushi': 'Sushi', 'japanese': 'Japanese', 'chinese': 'Chinese',
+    'thai': 'Thai', 'vietnamese': 'Vietnamese', 'indian': 'Indian',
+    'italian': 'Italian', 'korean': 'Korean', 'mediterranean': 'Mediterranean',
+    'bbq': 'BBQ', 'seafood': 'Seafood', 'american': 'American',
+    'coffee': 'Coffee', 'cafe': 'Coffee', 'bakery': 'Breakfast',
+    'filipino': 'Filipino', 'salvadoran': 'Salvadoran', 'wings': 'Wings',
+    'sandwich': 'Sandwiches', 'vegan': 'Vegan', 'soul': 'Soul Food',
+    'greek': 'Greek', 'middle eastern': 'Middle Eastern',
+  };
+
+  // Known chains to immediately flag
+  const KNOWN_CHAINS = [
+    'mcdonald','burger king','taco bell','subway','starbucks','chick-fil-a',
+    'wendy','jack in the box','panda express','chipotle','domino','pizza hut',
+    'kfc','popeyes','in-n-out','five guys','shake shack','wingstop','raising cane',
+    'del taco','carl\'s jr','denny\'s','ihop','olive garden','applebee',
+    'chili\'s','outback','red robin','buffalo wild wings','panera','jersey mike',
+    'jimmy john','firehouse','el pollo loco','habit burger','sonic','arby',
+    'dairy queen','baskin','jamba','dutch bros','black bear','cracker barrel',
+    'golden corral','pf chang','cheesecake factory','long john silver','little caesar',
+    'papa john','round table','sizzler','hometown buffet','claim jumper',
+  ];
+
+  let results = [];
+  let activeFilter = 'all';
+  let addedIds = new Set();
+
+  function checkAuth() {
+    const val = document.getElementById('auth-input').value;
+    if (ADMIN_PASSWORDS.includes(val)) {
+      document.getElementById('auth-gate').style.display = 'none';
+      sessionStorage.setItem('559eats-auth', '1');
+    } else {
+      document.getElementById('auth-error').textContent = 'Incorrect password.';
+      document.getElementById('auth-input').value = '';
+    }
+  }
+  if (sessionStorage.getItem('559eats-auth') === '1') {
+    document.getElementById('auth-gate').style.display = 'none';
+  }
+
+  function isKnownChain(name) {
+    const n = name.toLowerCase();
+    return KNOWN_CHAINS.some(c => n.includes(c));
+  }
+
+  function guessCuisine(types, name) {
+    const combined = [...(types||[]), name.toLowerCase()].join(' ');
+    for (const [key, val] of Object.entries(CUISINE_MAP)) {
+      if (combined.includes(key)) return val;
+    }
+    return null;
+  }
+
+  function localityScore(locationCount) {
+    if (locationCount <= 2) return 'local';
+    if (locationCount <= 5) return 'maybe';
+    return 'chain';
+  }
+
+  async function geocodeLocation(address) {
+    const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`);
+    const data = await res.json();
+    if (data.results && data.results[0]) return data.results[0].geometry.location;
+    return null;
+  }
+
+  async function nearbySearch(lat, lng, radius, type) {
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius}&type=${type}&key=${MAPS_KEY}`;
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+    const data = await res.json();
+    return data.results || [];
+  }
+
+  async function textSearch(query) {
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${MAPS_KEY}`;
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+    const data = await res.json();
+    return (data.results || []).length;
+  }
+
+  async function startSearch() {
+    const btn = document.getElementById('search-btn');
+    btn.textContent = 'Searching...'; btn.disabled = true;
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('results-area').style.display = 'none';
+    document.getElementById('results-grid').innerHTML = '<div class="loading-text">📍 Finding restaurants in your area...</div>';
+    document.getElementById('results-area').style.display = 'block';
+
+    const location = document.getElementById('search-location').value.trim() || 'Fresno, CA';
+    const radius = document.getElementById('search-radius').value;
+    const type = document.getElementById('search-type').value;
+    const maxLocs = parseInt(document.getElementById('max-locations').value);
+
+    // Geocode the location
+    const coords = await geocodeLocation(location);
+    if (!coords) { showToast('Could not find that location'); btn.textContent = '🔍 Search'; btn.disabled = false; return; }
+
+    // Search nearby
+    const places = await nearbySearch(coords.lat, coords.lng, radius, type);
+    document.getElementById('results-grid').innerHTML = `<div class="loading-text">Found ${places.length} spots — checking which ones are truly local...<br><span style="font-size:11px;color:var(--ink-faint)">This takes ~20 seconds</span></div>`;
+
+    // Check each place for chain status
+    results = [];
+    for (let i = 0; i < places.length; i++) {
+      const p = places[i];
+      const progress = document.getElementById('progress-text');
+      if (progress) progress.textContent = `Checking ${i+1} of ${places.length}: ${p.name}`;
+
+      let locationCount = 1;
+      let status = 'local';
+
+      if (isKnownChain(p.name)) {
+        locationCount = 999;
+        status = 'chain';
+      } else {
+        // Search nationally for this name
+        try {
+          const count = await textSearch(p.name + ' restaurant');
+          locationCount = count;
+          status = localityScore(count);
+        } catch(e) {
+          locationCount = 1;
+          status = 'maybe';
+        }
+        await new Promise(r => setTimeout(r, 300)); // rate limit
+      }
+
+      results.push({
+        id: p.place_id,
+        name: p.name,
+        address: p.vicinity || '',
+        lat: p.geometry?.location?.lat,
+        lng: p.geometry?.location?.lng,
+        rating: p.rating,
+        price: p.price_level,
+        types: p.types || [],
+        cuisine: guessCuisine(p.types, p.name),
+        locationCount,
+        status,
+      });
+
+      renderResults();
+      updateStats();
+    }
+
+    if (progress) progress.textContent = `Done — checked ${places.length} spots`;
+    btn.textContent = '🔍 Search'; btn.disabled = false;
+  }
+
+  function renderResults() {
+    const grid = document.getElementById('results-grid');
+    const filtered = activeFilter === 'all' ? results :
+      results.filter(r => r.status === activeFilter);
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty-state" style="padding:2rem;text-align:center;color:var(--ink-muted)">No results for this filter</div>';
+      return;
+    }
+
+    const priceStr = p => p ? '$'.repeat(p) : '';
+    const stars = r => r ? `⭐ ${r}` : '';
+
+    grid.innerHTML = filtered.map(r => {
+      const isAdded = addedIds.has(r.id);
+      const tagClass = r.status === 'local' ? 'tag-local' : r.status === 'maybe' ? 'tag-maybe' : 'tag-chain';
+      const tagText = r.status === 'local' ? '✅ Local' : r.status === 'maybe' ? '🟡 Maybe local' : '❌ Chain';
+      const locText = r.status === 'chain' && isKnownChain(r.name) ? 'Known chain' :
+        r.locationCount === 1 ? '1 location found' :
+        `~${r.locationCount} locations found`;
+      const emoji = r.cuisine ? getCuisineEmoji(r.cuisine) : '🍽️';
+
+      return `<div class="r-card ${isAdded?'added':''} ${r.status==='chain'?'chain':''}" id="card-${r.id}">
+        <div class="r-icon">${emoji}</div>
+        <div class="r-info">
+          <div class="r-name">${r.name}</div>
+          <div class="r-address">📍 ${r.address}</div>
+          <div class="r-tags">
+            <span class="r-tag ${tagClass}">${tagText}</span>
+            ${r.cuisine ? `<span class="r-tag tag-rating">${r.cuisine}</span>` : ''}
+            ${r.rating ? `<span class="r-tag tag-rating">${stars(r.rating)}</span>` : ''}
+            ${r.price ? `<span class="r-tag tag-price">${priceStr(r.price)}</span>` : ''}
+          </div>
+          <div class="r-locations">${locText}</div>
+        </div>
+        <div class="r-actions">
+          ${!isAdded && r.status !== 'chain' ? `<button class="add-btn" onclick="addToSite('${r.id}')">+ Add to 559eats</button>` : ''}
+          ${isAdded ? `<button class="add-btn added" disabled>✓ Added</button>` : ''}
+          ${!isAdded && r.status === 'chain' ? `<span style="font-size:11px;color:var(--ink-faint)">Skipped</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function getCuisineEmoji(cuisine) {
+    const map = {
+      'Mexican':'🌮','Pizza':'🍕','Burgers':'🍔','Sushi':'🍱','Japanese':'🍣',
+      'Chinese':'🥡','Thai':'🍜','Vietnamese':'🍜','Indian':'🍛','Italian':'🍝',
+      'Korean':'🥘','Mediterranean':'🥗','BBQ':'🍖','Seafood':'🦞',
+      'American':'🍔','Coffee':'☕','Breakfast':'🍳','Filipino':'🍱',
+      'Salvadoran':'🫔','Wings':'🍗','Sandwiches':'🥪','Vegan':'🥦',
+      'Soul Food':'🍗','Greek':'🫒','Middle Eastern':'🧆',
+    };
+    return map[cuisine] || '🍽️';
+  }
+
+  function updateStats() {
+    const local = results.filter(r => r.status === 'local').length;
+    const added = addedIds.size;
+    document.getElementById('stat-found').textContent = results.length;
+    document.getElementById('stat-local').textContent = local;
+    document.getElementById('stat-added').textContent = added;
+  }
+
+  function setFilter(f, el) {
+    activeFilter = f;
+    document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderResults();
+  }
+
+  async function addToSite(placeId) {
+    const r = results.find(p => p.id === placeId);
+    if (!r) return;
+
+    const btn = document.querySelector(`#card-${placeId} .add-btn`);
+    if (btn) { btn.textContent = 'Adding...'; btn.disabled = true; }
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/restaurants`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          name: r.name,
+          address: r.address,
+          latitude: r.lat,
+          longitude: r.lng,
+          cuisine_type: r.cuisine || null,
+          is_food_truck: false,
+          status: 'approved',
+          is_active: true,
+        })
+      });
+
+      if (res.ok) {
+        addedIds.add(placeId);
+        showToast(`✅ ${r.name} added to 559eats`);
+        updateStats();
+        renderResults();
+      } else {
+        const err = await res.text();
+        throw new Error(err);
+      }
+    } catch(e) {
+      showToast('❌ Failed to add — check console');
+      console.error(e);
+      if (btn) { btn.textContent = '+ Add to 559eats'; btn.disabled = false; }
+    }
+  }
+
+  async function addAllLocal() {
+    const localSpots = results.filter(r => r.status === 'local' && !addedIds.has(r.id));
+    if (!localSpots.length) { showToast('No new local spots to add'); return; }
+    if (!confirm(`Add all ${localSpots.length} local spots to 559eats?`)) return;
+    for (const r of localSpots) {
+      await addToSite(r.id);
+      await new Promise(res => setTimeout(res, 200));
+    }
+    showToast(`✅ Added ${localSpots.length} local spots`);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>
