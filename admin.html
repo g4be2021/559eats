@@ -144,6 +144,25 @@
     .note-add-btn:hover { background: var(--coral); }
     .note-add-btn:disabled { background: var(--ink-faint); cursor: wait; }
 
+    /* ── PHOTOS ── */
+    .photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .photo-thumb { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--cream); border: 1px solid var(--card-border); }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-thumb-del { position: absolute; top: 4px; right: 4px; background: rgba(26,18,8,0.7); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; line-height: 1; }
+    .photo-thumb:hover .photo-thumb-del { opacity: 1; }
+    .photo-primary-badge { position: absolute; bottom: 4px; left: 4px; background: var(--coral); color: #fff; font-size: 9px; font-weight: 500; padding: 2px 6px; border-radius: 6px; }
+    .photo-upload-zone { border: 2px dashed var(--card-border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--cream); }
+    .photo-upload-zone:hover { border-color: var(--coral); background: var(--coral-light); }
+    .photo-upload-zone.dragover { border-color: var(--coral); background: var(--coral-light); }
+    .photo-upload-icon { font-size: 28px; margin-bottom: 6px; }
+    .photo-upload-label { font-size: 13px; color: var(--ink-muted); }
+    .photo-upload-label strong { color: var(--coral); }
+    .photo-upload-sub { font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+    .photo-upload-input { display: none; }
+    .photo-progress { height: 4px; background: var(--card-border); border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; }
+    .photo-progress-bar { height: 100%; background: var(--coral); border-radius: 2px; transition: width 0.3s; width: 0%; }
+    .photos-empty { font-size: 12px; color: var(--ink-faint); text-align: center; padding: 8px 0; }
+
     @media (max-width: 640px) {
       main { padding: 1.5rem 1rem; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
@@ -380,6 +399,24 @@
         <textarea class="form-input" id="edit-description" rows="3" placeholder="Brief description shown on the listing page..." style="resize:vertical;line-height:1.5"></textarea>
       </div>
 
+      <div class="form-section">Photos</div>
+      <div>
+        <div class="photos-grid" id="photos-grid">
+          <div class="photos-empty" style="grid-column:1/-1">No photos yet</div>
+        </div>
+        <div class="photo-upload-zone" id="photo-upload-zone"
+          onclick="document.getElementById('photo-file-input').click()"
+          ondragover="e=>e.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handlePhotoDrop(event)">
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-label"><strong>Click to upload</strong> or drag and drop</div>
+          <div class="photo-upload-sub">JPG, PNG, WEBP · Max 5MB each · First photo = cover image</div>
+          <div class="photo-progress" id="photo-progress"><div class="photo-progress-bar" id="photo-progress-bar"></div></div>
+        </div>
+        <input type="file" id="photo-file-input" class="photo-upload-input" accept="image/*" multiple onchange="handlePhotoSelect(event)"/>
+      </div>
+
       <div class="form-section">Internal notes</div>
       <div class="notes-section">
         <div class="notes-list" id="notes-list">
@@ -410,7 +447,7 @@
   // To add/remove admins just edit this list.
   // initials: shown on notes. password: their personal password.
   const ADMINS = [
-    { name: 'G4be',  initials: 'G4be', password: '559eats-admin-2024', color: '#D85A30' },
+    { name: 'G4be',      initials: 'G4be', password: '559eats-admin-2024', color: '#D85A30' },
     { name: 'SpicyMayo', initials: 'Mayo', password: 'admin2-pass-2024',   color: '#185FA5' },
   ];
 
@@ -595,8 +632,9 @@
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('edit-name').focus(), 120);
 
-    // Load notes for this restaurant
+    // Load notes and photos for this restaurant
     loadNotes(r.id);
+    loadPhotos(r.id);
   }
 
   function closeEdit() {
@@ -604,6 +642,7 @@
     document.body.style.overflow = '';
     currentNotes = [];
     currentRestaurantId = null;
+    currentPhotos = [];
   }
 
   function handleOverlayClick(e) {
@@ -962,6 +1001,118 @@
     } catch(e) {
       // Fallback to localStorage
       localStorage.setItem(`notes_${currentRestaurantId}`, JSON.stringify(currentNotes));
+    }
+  }
+
+  // ── PHOTOS ──
+  let currentPhotos = [];
+  const STORAGE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co/storage/v1/object/public/restaurant-photos';
+  const STORAGE_UPLOAD_URL = 'https://wlpugteoycouvvnhamnm.supabase.co/storage/v1/object/restaurant-photos';
+
+  async function loadPhotos(restaurantId) {
+    currentPhotos = [];
+    try {
+      const data = await api(`photos?restaurant_id=eq.${restaurantId}&order=sort_order.asc`);
+      currentPhotos = data || [];
+    } catch(e) { currentPhotos = []; }
+    renderPhotos();
+  }
+
+  function renderPhotos() {
+    const grid = document.getElementById('photos-grid');
+    if (!currentPhotos.length) {
+      grid.innerHTML = '<div class="photos-empty" style="grid-column:1/-1">No photos yet — upload some below</div>';
+      return;
+    }
+    grid.innerHTML = currentPhotos.map((p, i) => `
+      <div class="photo-thumb">
+        <img src="${p.url}" alt="Photo ${i+1}" loading="lazy"/>
+        ${i === 0 ? '<span class="photo-primary-badge">Cover</span>' : ''}
+        <button class="photo-thumb-del" onclick="deletePhoto('${p.id}','${p.url}')" title="Delete photo">✕</button>
+      </div>`).join('');
+  }
+
+  function handlePhotoDrop(e) {
+    e.preventDefault();
+    document.getElementById('photo-upload-zone').classList.remove('dragover');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    if (files.length) uploadPhotos(files);
+  }
+
+  function handlePhotoSelect(e) {
+    const files = Array.from(e.target.files);
+    if (files.length) uploadPhotos(files);
+    e.target.value = '';
+  }
+
+  async function uploadPhotos(files) {
+    if (!currentRestaurantId) return;
+    const zone = document.getElementById('photo-upload-zone');
+    const progress = document.getElementById('photo-progress');
+    const bar = document.getElementById('photo-progress-bar');
+    progress.style.display = 'block';
+    bar.style.width = '0%';
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size > 5 * 1024 * 1024) { showToast(`${file.name} is too large (max 5MB)`); continue; }
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      const filename = `${currentRestaurantId}/${Date.now()}_${i}.${ext}`;
+
+      try {
+        // Upload to Supabase Storage
+        const uploadRes = await fetch(`${STORAGE_UPLOAD_URL}/${filename}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': file.type,
+            'x-upsert': 'true',
+          },
+          body: file,
+        });
+
+        if (!uploadRes.ok) throw new Error(await uploadRes.text());
+
+        const publicUrl = `${STORAGE_URL}/${filename}`;
+
+        // Save record to photos table
+        await api('photos', 'POST', [{
+          restaurant_id: currentRestaurantId,
+          url: publicUrl,
+          sort_order: currentPhotos.length + i,
+        }]);
+
+        bar.style.width = `${((i + 1) / files.length) * 100}%`;
+        showToast(`✅ ${file.name} uploaded`);
+      } catch(e) {
+        showToast(`❌ Failed to upload ${file.name}`);
+        console.error(e);
+      }
+    }
+
+    progress.style.display = 'none';
+    await loadPhotos(currentRestaurantId);
+  }
+
+  async function deletePhoto(photoId, url) {
+    if (!confirm('Delete this photo?')) return;
+    try {
+      // Delete from photos table
+      await api(`photos?id=eq.${photoId}`, 'DELETE');
+      // Delete from storage
+      const path = url.split('/restaurant-photos/')[1];
+      if (path) {
+        await fetch(`${STORAGE_UPLOAD_URL}/${path}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        });
+      }
+      showToast('Photo deleted');
+      await loadPhotos(currentRestaurantId);
+    } catch(e) {
+      showToast('Failed to delete photo');
     }
   }
 
