@@ -1047,7 +1047,6 @@
 
   async function uploadPhotos(files) {
     if (!currentRestaurantId) return;
-    const zone = document.getElementById('photo-upload-zone');
     const progress = document.getElementById('photo-progress');
     const bar = document.getElementById('photo-progress-bar');
     progress.style.display = 'block';
@@ -1058,36 +1057,23 @@
       if (file.size > 5 * 1024 * 1024) { showToast(`${file.name} is too large (max 5MB)`); continue; }
 
       const ext = file.name.split('.').pop().toLowerCase();
-      const filename = `${currentRestaurantId}/${Date.now()}_${i}.${ext}`;
+      const filename = `${Date.now()}_${i}.${ext}`;
+      const sortOrder = currentPhotos.length + i;
 
       try {
-        // Upload to Supabase Storage
-        const uploadRes = await fetch(`${STORAGE_UPLOAD_URL}/${filename}`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': file.type,
-            'x-upsert': 'true',
-          },
-          body: file,
-        });
+        // Route through Vercel API to bypass storage RLS
+        const uploadRes = await fetch(
+          `/api/upload-photo?restaurantId=${currentRestaurantId}&filename=${filename}&contentType=${encodeURIComponent(file.type)}&sortOrder=${sortOrder}`,
+          { method: 'POST', body: file }
+        );
 
-        if (!uploadRes.ok) throw new Error(await uploadRes.text());
-
-        const publicUrl = `${STORAGE_URL}/${filename}`;
-
-        // Save record to photos table
-        await api('photos', 'POST', [{
-          restaurant_id: currentRestaurantId,
-          url: publicUrl,
-          sort_order: currentPhotos.length + i,
-        }]);
+        const result = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(result.error || 'Upload failed');
 
         bar.style.width = `${((i + 1) / files.length) * 100}%`;
         showToast(`✅ ${file.name} uploaded`);
       } catch(e) {
-        showToast(`❌ Failed to upload ${file.name}`);
+        showToast(`❌ Failed: ${e.message}`);
         console.error(e);
       }
     }
