@@ -562,14 +562,26 @@
     const hoursMap = await fetchHours(place.id);
     const today = getTodayHours(hoursMap);
     let rows = '';
-    if (place.address) rows += `<div class="map-info-row">📍 <span>${place.address}</span></div>`;
+    if (place.address) {
+      const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(place.address)}&ll=${place.latitude},${place.longitude}`;
+      const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}`;
+      // Use Apple Maps on iOS, Google Maps everywhere else
+      const directionsUrl = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? mapsUrl : googleUrl;
+      rows += `<div class="map-info-row">📍 <a href="${directionsUrl}" target="_blank" style="color:var(--ink-muted);text-decoration:underline;text-decoration-color:var(--ink-faint)">${place.address}</a></div>`;
+    }
     if (place.phone) rows += `<div class="map-info-row">📞 <a href="tel:${place.phone}">${place.phone}</a></div>`;
     if (today) rows += `<div class="map-info-row">🕐 <span>${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
     document.getElementById('info-rows').innerHTML = rows;
 
+    const directionsUrl2 = place.latitude && place.longitude
+      ? (/iPhone|iPad|iPod/i.test(navigator.userAgent)
+          ? `https://maps.apple.com/?daddr=${place.latitude},${place.longitude}`
+          : `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`)
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address || place.name)}`;
+
     let actions = `<a href="restaurant.html?id=${place.id}" class="map-info-btn primary">View listing →</a>`;
+    actions += `<a href="${directionsUrl2}" target="_blank" class="map-info-btn secondary">🗺️ Directions</a>`;
     if (place.phone) actions += `<a href="tel:${place.phone}" class="map-info-btn secondary">📞 Call</a>`;
-    actions += `<a href="catering.html?id=${place.id}" class="map-info-btn secondary">🍽️ Book catering</a>`;
     document.getElementById('info-actions').innerHTML = actions;
 
     card.style.transition = 'none';
@@ -638,7 +650,14 @@
     const hoursMap = await fetchHours(id);
     const today = getTodayHours(hoursMap);
     let html = '';
-    if (place.address) html += `<div class="detail-row"><span class="detail-icon">📍</span><span class="detail-text">${place.address}</span></div>`;
+    if (place.address) {
+      const du = place.latitude && place.longitude
+        ? (/iPhone|iPad|iPod/i.test(navigator.userAgent)
+            ? `https://maps.apple.com/?daddr=${place.latitude},${place.longitude}`
+            : `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`)
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}`;
+      html += `<div class="detail-row"><span class="detail-icon">📍</span><span class="detail-text"><a href="${du}" target="_blank" style="color:var(--ink-muted);text-decoration:underline;text-decoration-color:var(--ink-faint)">${place.address}</a></span></div>`;
+    }
     if (place.phone) html += `<div class="detail-row"><span class="detail-icon">📞</span><span class="detail-text"><a href="tel:${place.phone}">${place.phone}</a></span></div>`;
     if (place.website) html += `<div class="detail-row"><span class="detail-icon">🌐</span><span class="detail-text"><a href="${place.website}" target="_blank">${place.website.replace('https://','').replace('http://','')}</a></span></div>`;
     if (today) html += `<div class="detail-row"><span class="detail-icon">🕐</span><span class="detail-text">${today.closed ? '<strong style="color:#791F1F">Closed today</strong>' : `<strong>Today:</strong> ${today.open} – ${today.close}`}</span></div>`;
