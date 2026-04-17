@@ -16,7 +16,12 @@ export default async function handler(req, res) {
   for await (const chunk of req) chunks.push(chunk);
   const body = Buffer.concat(chunks);
 
+  // Debug — remove after fixing
+  if (!SERVICE_KEY) {
+    console.warn('SUPABASE_SERVICE_KEY not set in Vercel env — falling back to anon key');
+  }
   const authKey = SERVICE_KEY || ANON_KEY;
+  res.setHeader('X-Using-Service-Key', SERVICE_KEY ? 'yes' : 'no');
   const storagePath = `${restaurantId}/${filename}`;
 
   try {
@@ -54,7 +59,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         restaurant_id: restaurantId,
         url: publicUrl,
-        sort_order: parseInt(req.query.sortOrder || '0'),
+        sort_order: isNaN(parseInt(req.query.sortOrder)) ? 0 : parseInt(req.query.sortOrder),
       }),
     });
 
