@@ -11,6 +11,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: #f5f5f5; color: #111; font-family: 'Courier New', monospace; max-width: 480px; margin: 0 auto; padding-bottom: 100px; min-height: 100vh; }
 
+  /* LOGIN */
   #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; background: #fff; }
   .login-sub { font-size: 10px; color: #999; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
   .login-title { font-size: 36px; font-weight: 900; color: #f5c842; letter-spacing: -1px; margin-bottom: 40px; text-shadow: 2px 2px 0px #e0a800; }
@@ -21,20 +22,49 @@
   .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; box-shadow: 0 2px 8px rgba(245,200,66,0.4); }
   .login-error { color: #e53e3e; font-size: 11px; text-align: center; margin-top: 12px; letter-spacing: 1px; display: none; }
 
+  /* APP */
   #appScreen { display: none; }
-  .header { background: #fff; border-bottom: 1.5px solid #eee; padding: 20px 16px 14px; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .header { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px 16px 12px; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .header-top { display: flex; justify-content: space-between; align-items: center; }
   .header-sub { font-size: 10px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
-  .header-title { font-size: 24px; font-weight: 900; color: #f5c842; letter-spacing: -1px; text-shadow: 1px 1px 0px #e0a800; }
+  .header-title { font-size: 22px; font-weight: 900; color: #f5c842; letter-spacing: -1px; text-shadow: 1px 1px 0px #e0a800; }
   .header-right { display: flex; gap: 8px; align-items: center; }
-  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(245,200,66,0.3); }
+  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(245,200,66,0.3); }
   .btn-add.cancel { background: #f0f0f0; color: #888; box-shadow: none; }
-  .btn-logout { background: none; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 8px; padding: 10px 12px; font-size: 11px; font-family: inherit; cursor: pointer; }
+  .btn-logout { background: none; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 8px; padding: 10px 10px; font-size: 10px; font-family: inherit; cursor: pointer; }
 
+  /* DASHBOARD STRIP */
+  .dashboard { background: #fff; border-bottom: 1.5px solid #eee; padding: 12px 16px; }
+  .dash-row1 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .dash-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .dash-card { background: #f9f9f9; border: 1.5px solid #eee; border-radius: 10px; padding: 10px 12px; }
+  .dash-card.highlight { background: #fffbeb; border-color: #fde68a; }
+  .dash-card.green { background: #f0fff4; border-color: #c6f6d5; }
+  .dash-card.blue { background: #ebf8ff; border-color: #bee3f8; }
+  .dash-card.red { background: #fff5f5; border-color: #fed7d7; }
+  .dash-label { font-size: 8px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+  .dash-val { font-size: 16px; font-weight: 900; color: #111; letter-spacing: -0.5px; }
+  .dash-val.green { color: #38a169; }
+  .dash-val.yellow { color: #d97706; }
+  .dash-val.blue { color: #3182ce; }
+  .dash-val.red { color: #e53e3e; }
+  .dash-sub { font-size: 9px; color: #bbb; margin-top: 2px; }
+
+  /* PROJECTIONS */
+  .projections { background: #fff; border-bottom: 1.5px solid #eee; padding: 12px 16px; }
+  .proj-title { font-size: 9px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+  .proj-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .proj-card { background: #f9f9f9; border: 1.5px solid #eee; border-radius: 10px; padding: 10px 12px; text-align: center; }
+  .proj-period { font-size: 8px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .proj-val { font-size: 15px; font-weight: 900; color: #38a169; }
+  .proj-note { font-size: 8px; color: #ccc; margin-top: 2px; }
+
+  /* TABS */
   .tabs { display: flex; background: #fff; border-bottom: 1.5px solid #eee; }
-  .tab { flex: 1; padding: 13px 0; background: none; border: none; color: #bbb; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2.5px solid transparent; }
+  .tab { flex: 1; padding: 12px 0; background: none; border: none; color: #bbb; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2.5px solid transparent; }
   .tab.active { color: #f5c842; border-bottom: 2.5px solid #f5c842; }
 
+  /* FORM */
   .form-wrap { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
   .form-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
   .field { margin-bottom: 12px; }
@@ -44,11 +74,13 @@
   .field input:focus, .field select:focus { border-color: #f5c842; }
   .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; box-shadow: 0 2px 8px rgba(245,200,66,0.3); }
 
+  /* FILTERS */
   .filters { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .filters::-webkit-scrollbar { display: none; }
   .chip { background: #fff; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 20px; padding: 6px 14px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
   .chip.active { background: #f5c842; border-color: #f5c842; color: #000; }
 
+  /* CARDS */
   .items { padding: 0 16px; }
   .card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
@@ -71,11 +103,13 @@
   .empty-text { font-size: 11px; letter-spacing: 2px; }
   .loading { text-align: center; padding: 40px 0; color: #ccc; font-size: 11px; letter-spacing: 2px; }
 
+  /* TOAST */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111; color: #fff; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
   .toast.show { opacity: 1; }
   .toast.error { background: #e53e3e; }
   .toast.success { background: #38a169; }
 
+  /* STATS TAB */
   .stats { padding: 16px; }
   .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
   .stat-card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
@@ -123,6 +157,12 @@
       </div>
     </div>
   </div>
+
+  <!-- DASHBOARD STRIP -->
+  <div class="dashboard" id="dashboard"></div>
+
+  <!-- PROJECTIONS -->
+  <div class="projections" id="projections"></div>
 
   <div class="tabs">
     <button class="tab active" id="tab-inventory" onclick="switchTab('inventory')">Inventory</button>
@@ -213,8 +253,7 @@
 
   function toRow(obj) {
     return {
-      item: obj.item,
-      purchase_date: obj.purchaseDate || null,
+      item: obj.item, purchase_date: obj.purchaseDate || null,
       cost: parseFloat(obj.cost) || 0,
       listed_price: parseFloat(obj.listedPrice) || null,
       sale_price: parseFloat(obj.salePrice) || null,
@@ -269,8 +308,95 @@
     setTimeout(() => t.className = 'toast', 2500);
   }
 
-  function fmt(v) { return v!=null && v!=='' ? '$'+parseFloat(v).toFixed(2) : '—'; }
+  function fmt(v) { return (v!=null && v!=='') ? '$'+parseFloat(v).toFixed(2) : '—'; }
   function fmtDate(d) { if(!d) return '—'; const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
+
+  function calcStats() {
+    const mapped = items.map(fromRow);
+    const sold = mapped.filter(i => i.status === 'Sold');
+    const totalProfit = sold.reduce((a,i) => a + (parseFloat(i.salePrice)||0) - (parseFloat(i.cost)||0), 0);
+    const tiedUp = mapped.filter(i => i.status !== 'Sold').reduce((a,i) => a + (parseFloat(i.cost)||0), 0);
+    const totalMiles = mapped.reduce((a,i) => a + (parseFloat(i.miles)||0), 0);
+    const mileageDeduction = totalMiles * 0.67;
+
+    // Weekly avg — find earliest sale date
+    let weeklyAvg = 0;
+    if (sold.length > 0) {
+      const saleDates = sold.filter(i => i.saleDate).map(i => new Date(i.saleDate).getTime());
+      if (saleDates.length > 0) {
+        const earliest = Math.min(...saleDates);
+        const now = Date.now();
+        const weeksElapsed = Math.max(1, (now - earliest) / (7 * 24 * 60 * 60 * 1000));
+        weeklyAvg = totalProfit / weeksElapsed;
+      }
+    }
+
+    return { mapped, sold, totalProfit, tiedUp, totalMiles, mileageDeduction, weeklyAvg };
+  }
+
+  function renderDashboard() {
+    const { totalProfit, tiedUp, sold, mapped, weeklyAvg, mileageDeduction } = calcStats();
+    const active = mapped.filter(i => i.status === 'Listed' || i.status === 'Pending').length;
+    const profitColor = totalProfit >= 0 ? 'green' : 'red';
+    const profitClass = totalProfit >= 0 ? 'green' : 'red';
+
+    document.getElementById('dashboard').innerHTML = `
+      <div class="dash-row1">
+        <div class="dash-card ${profitClass}">
+          <div class="dash-label">Total Profit</div>
+          <div class="dash-val ${profitColor}">${totalProfit >= 0 ? '+' : ''}${fmt(totalProfit)}</div>
+          <div class="dash-sub">${sold.length} item${sold.length !== 1 ? 's' : ''} sold</div>
+        </div>
+        <div class="dash-card red">
+          <div class="dash-label">Tied Up Funds</div>
+          <div class="dash-val red">${fmt(tiedUp)}</div>
+          <div class="dash-sub">${active} active listing${active !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <div class="dash-row2">
+        <div class="dash-card highlight">
+          <div class="dash-label">Weekly Avg</div>
+          <div class="dash-val yellow">${weeklyAvg > 0 ? fmt(weeklyAvg) : '—'}</div>
+        </div>
+        <div class="dash-card blue">
+          <div class="dash-label">Total Items</div>
+          <div class="dash-val blue">${mapped.length}</div>
+        </div>
+        <div class="dash-card green">
+          <div class="dash-label">Miles Deduct</div>
+          <div class="dash-val green">${fmt(mileageDeduction)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProjections() {
+    const { weeklyAvg } = calcStats();
+    const monthly = weeklyAvg * 4.33;
+    const quarterly = weeklyAvg * 13;
+    const yearly = weeklyAvg * 52;
+
+    document.getElementById('projections').innerHTML = `
+      <div class="proj-title">📈 Projected Earnings (based on avg)</div>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <div class="proj-period">Monthly</div>
+          <div class="proj-val">${weeklyAvg > 0 ? fmt(monthly) : '—'}</div>
+          <div class="proj-note">4.33 wks</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-period">Quarterly</div>
+          <div class="proj-val">${weeklyAvg > 0 ? fmt(quarterly) : '—'}</div>
+          <div class="proj-note">13 wks</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-period">Yearly</div>
+          <div class="proj-val">${weeklyAvg > 0 ? fmt(yearly) : '—'}</div>
+          <div class="proj-note">52 wks</div>
+        </div>
+      </div>
+    `;
+  }
 
   function toggleForm() {
     const wrap = document.getElementById('formWrap');
@@ -310,12 +436,12 @@
     try {
       if (editId) {
         await sbFetch(TABLE + '?id=eq.' + editId, 'PATCH', toRow(obj));
-        items = items.map(i => i.id===editId ? {...fromRow(toRow(obj)), id:editId} : i);
+        items = items.map(i => i.id===editId ? {...toRow(obj), id:editId, purchase_date:obj.purchaseDate, listed_price:obj.listedPrice, sale_price:obj.salePrice, sale_date:obj.saleDate} : i);
         editId=null; showToast('ITEM UPDATED ✓');
       } else {
         const res = await sbFetch(TABLE, 'POST', toRow(obj));
         const newRow = Array.isArray(res) ? res[0] : res;
-        items.unshift(fromRow(newRow));
+        items.unshift(newRow);
         showToast('ITEM ADDED ✓');
       }
       clearForm(); toggleForm(); render();
@@ -388,21 +514,20 @@
   }
 
   function renderStats() {
-    const mapped = items.map(fromRow);
-    const sold=mapped.filter(i=>i.status==='Sold');
-    const totalProfit=sold.reduce((acc,i)=>acc+(parseFloat(i.salePrice)||0)-(parseFloat(i.cost)||0),0);
-    const totalMiles=mapped.reduce((acc,i)=>acc+(parseFloat(i.miles)||0),0);
-    const invested=mapped.filter(i=>i.status!=='Sold').reduce((acc,i)=>acc+(parseFloat(i.cost)||0),0);
+    const { mapped, sold, totalProfit, tiedUp, totalMiles, mileageDeduction, weeklyAvg } = calcStats();
     const rows=[
       {label:'Total Items',val:mapped.length,color:'#111'},
       {label:'Items Sold',val:sold.length,color:'#3182ce'},
       {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#38a169':'#e53e3e',big:true},
-      {label:'Capital Invested',val:fmt(invested),color:'#d97706'},
+      {label:'Tied Up Funds',val:fmt(tiedUp),color:'#e53e3e'},
+      {label:'Weekly Avg Profit',val:weeklyAvg>0?fmt(weeklyAvg):'—',color:'#d97706'},
+      {label:'Projected Monthly',val:weeklyAvg>0?fmt(weeklyAvg*4.33):'—',color:'#38a169'},
+      {label:'Projected Yearly',val:weeklyAvg>0?fmt(weeklyAvg*52):'—',color:'#38a169'},
       {label:'Miles Logged',val:totalMiles+' mi',color:'#111'},
-      {label:'Mileage Deduction ($.67/mi)',val:fmt(totalMiles*0.67),color:'#38a169'},
+      {label:'Mileage Deduction',val:fmt(mileageDeduction),color:'#38a169'},
     ];
     document.getElementById('statsContent').innerHTML=`
-      <div class="stats-title">Summary</div>
+      <div class="stats-title">Full Summary</div>
       ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
       <div class="breakdown"><div class="breakdown-title">By Status</div>
         ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.dot}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
@@ -410,7 +535,12 @@
       <div class="footer-note">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
   }
 
-  function render() { renderFilters(); renderItems(); }
+  function render() {
+    renderDashboard();
+    renderProjections();
+    renderFilters();
+    renderItems();
+  }
 </script>
 </body>
 </html>
