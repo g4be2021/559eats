@@ -70,6 +70,12 @@
   .empty-icon { font-size: 36px; margin-bottom: 8px; }
   .empty-text { font-size: 11px; letter-spacing: 2px; }
 
+  .loading { text-align: center; padding: 40px 0; color: #444; font-size: 11px; letter-spacing: 2px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a3a2a; color: #4ade80; border: 1px solid #4ade80; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 100; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .toast.error { background: #2a1a1a; color: #f87171; border-color: #f87171; }
+
   .stats { padding: 16px; }
   .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
   .stat-card { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
@@ -146,17 +152,21 @@
 
   <div id="tab-inventory-content">
     <div class="filters" id="filters"></div>
-    <div class="items" id="itemsList"></div>
+    <div class="items" id="itemsList"><div class="loading">LOADING...</div></div>
   </div>
   <div id="tab-stats-content" style="display:none">
     <div class="stats" id="statsContent"></div>
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
   const APP_PASSWORD = 'flip559'; // Change this to whatever you want
+  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+  const TABLE = 'flip_log';
   const SESSION_KEY = 'fliplog_auth';
-  const DATA_KEY = 'fliplog_items';
 
   let items = [];
   let editId = null;
@@ -169,13 +179,88 @@
     Unlisted: { bg:'#2a1a1a', text:'#f87171', dot:'#f87171' },
   };
 
+  // SUPABASE HELPERS
+  async function sbFetch(path, method='GET', body=null) {
+    const opts = {
+      method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  async function loadItems() {
+    try {
+      const data = await sbFetch(TABLE + '?order=created_at.desc');
+      items = data || [];
+      render();
+    } catch(e) {
+      showToast('Error loading data', true);
+      console.error(e);
+    }
+  }
+
+  async function insertItem(obj) {
+    const row = toRow(obj);
+    const data = await sbFetch(TABLE, 'POST', row);
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  async function updateItem(id, obj) {
+    const row = toRow(obj);
+    await sbFetch(TABLE + '?id=eq.' + id, 'PATCH', row);
+  }
+
+  async function removeItem(id) {
+    await sbFetch(TABLE + '?id=eq.' + id, 'DELETE');
+  }
+
+  function toRow(obj) {
+    return {
+      item: obj.item,
+      purchase_date: obj.purchaseDate || null,
+      cost: parseFloat(obj.cost) || 0,
+      listed_price: parseFloat(obj.listedPrice) || null,
+      sale_price: parseFloat(obj.salePrice) || null,
+      sale_date: obj.saleDate || null,
+      miles: parseFloat(obj.miles) || null,
+      platform: obj.platform || null,
+      status: obj.status || 'Listed',
+      notes: obj.notes || null,
+    };
+  }
+
+  function fromRow(row) {
+    return {
+      id: row.id,
+      item: row.item,
+      purchaseDate: row.purchase_date,
+      cost: row.cost,
+      listedPrice: row.listed_price,
+      salePrice: row.sale_price,
+      saleDate: row.sale_date,
+      miles: row.miles,
+      platform: row.platform,
+      status: row.status,
+      notes: row.notes,
+    };
+  }
+
+  // AUTH
   function doLogin() {
     if (document.getElementById('passwordInput').value === APP_PASSWORD) {
       sessionStorage.setItem(SESSION_KEY, '1');
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('appScreen').style.display = 'block';
-      items = JSON.parse(localStorage.getItem(DATA_KEY) || '[]');
-      render();
+      loadItems();
     } else {
       document.getElementById('loginError').style.display = 'block';
       document.getElementById('passwordInput').value = '';
@@ -193,39 +278,47 @@
     if (sessionStorage.getItem(SESSION_KEY) === '1') {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('appScreen').style.display = 'block';
-      items = JSON.parse(localStorage.getItem(DATA_KEY) || '[]');
-      render();
+      loadItems();
     }
   };
 
-  function save() { localStorage.setItem(DATA_KEY, JSON.stringify(items)); }
-  function fmt(v) { return v ? '$'+parseFloat(v).toFixed(2) : '—'; }
+  // TOAST
+  function showToast(msg, error=false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (error ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 2500);
+  }
+
+  // FORM
+  function fmt(v) { return v!=null && v!=='' ? '$'+parseFloat(v).toFixed(2) : '—'; }
   function fmtDate(d) { if(!d) return '—'; const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
 
   function toggleForm() {
     const wrap = document.getElementById('formWrap');
     const btn = document.getElementById('btnAdd');
     if (wrap.style.display === 'block') {
-      wrap.style.display = 'none'; btn.textContent = '+ ADD'; btn.classList.remove('cancel');
-      clearForm(); editId = null;
+      wrap.style.display='none'; btn.textContent='+ ADD'; btn.classList.remove('cancel');
+      clearForm(); editId=null;
     } else {
-      wrap.style.display = 'block'; btn.textContent = 'CANCEL'; btn.classList.add('cancel');
+      wrap.style.display='block'; btn.textContent='CANCEL'; btn.classList.add('cancel');
       document.getElementById('formTitle').textContent = editId ? 'Edit Item' : 'New Item';
       document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
     }
   }
 
   function clearForm() {
-    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value = '');
-    document.getElementById('f-platform').value = 'Facebook Marketplace';
-    document.getElementById('f-status').value = 'Listed';
+    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value='');
+    document.getElementById('f-platform').value='Facebook Marketplace';
+    document.getElementById('f-status').value='Listed';
   }
 
-  function saveItem() {
+  async function saveItem() {
     const item = document.getElementById('f-item').value.trim();
     const purchaseDate = document.getElementById('f-purchaseDate').value;
     const cost = document.getElementById('f-cost').value;
     if (!item || !purchaseDate || !cost) { alert('Item name, purchase date, and cost are required.'); return; }
+
     const obj = {
       item, purchaseDate, cost,
       listedPrice: document.getElementById('f-listedPrice').value,
@@ -236,51 +329,76 @@
       status: document.getElementById('f-status').value,
       notes: document.getElementById('f-notes').value.trim(),
     };
-    if (editId) { obj.id = editId; items = items.map(i => i.id===editId ? obj : i); editId = null; }
-    else { obj.id = Date.now(); items.unshift(obj); }
-    save(); clearForm(); toggleForm(); render();
+
+    document.getElementById('btnSave').textContent = 'SAVING...';
+
+    try {
+      if (editId) {
+        await updateItem(editId, obj);
+        items = items.map(i => i.id===editId ? {...fromRow(toRow(obj)), id: editId} : i);
+        editId=null;
+        showToast('ITEM UPDATED');
+      } else {
+        const newRow = await insertItem(obj);
+        items.unshift(fromRow(newRow));
+        showToast('ITEM ADDED');
+      }
+      clearForm(); toggleForm(); render();
+    } catch(e) {
+      showToast('Save failed — check connection', true);
+      document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
+    }
   }
 
-  function deleteItem(id) {
-    if (confirm('Delete this item?')) { items = items.filter(i => i.id!==id); save(); render(); }
+  async function deleteItem(id) {
+    if (!confirm('Delete this item?')) return;
+    try {
+      await removeItem(id);
+      items = items.filter(i=>i.id!==id);
+      showToast('ITEM DELETED');
+      render();
+    } catch(e) {
+      showToast('Delete failed', true);
+    }
   }
 
   function editItem(id) {
-    const item = items.find(i => i.id===id); if (!item) return;
-    editId = id;
-    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value = item[k]||'');
-    document.getElementById('f-platform').value = item.platform||'Facebook Marketplace';
-    document.getElementById('f-status').value = item.status||'Listed';
-    const wrap = document.getElementById('formWrap');
-    if (wrap.style.display !== 'block') toggleForm();
+    const item = items.find(i=>i.id===id); if(!item) return;
+    editId=id;
+    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value=item[k]||'');
+    document.getElementById('f-platform').value=item.platform||'Facebook Marketplace';
+    document.getElementById('f-status').value=item.status||'Listed';
+    const wrap=document.getElementById('formWrap');
+    if(wrap.style.display!=='block') toggleForm();
     else { document.getElementById('formTitle').textContent='Edit Item'; document.getElementById('btnSave').textContent='SAVE CHANGES'; }
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
   function switchTab(tab) {
-    document.getElementById('tab-inventory-content').style.display = tab==='inventory' ? 'block' : 'none';
-    document.getElementById('tab-stats-content').style.display = tab==='stats' ? 'block' : 'none';
-    document.getElementById('tab-inventory').classList.toggle('active', tab==='inventory');
-    document.getElementById('tab-stats').classList.toggle('active', tab==='stats');
-    if (tab==='stats') renderStats();
+    document.getElementById('tab-inventory-content').style.display=tab==='inventory'?'block':'none';
+    document.getElementById('tab-stats-content').style.display=tab==='stats'?'block':'none';
+    document.getElementById('tab-inventory').classList.toggle('active',tab==='inventory');
+    document.getElementById('tab-stats').classList.toggle('active',tab==='stats');
+    if(tab==='stats') renderStats();
   }
 
   function setFilter(s) { activeFilter=s; renderFilters(); renderItems(); }
 
   function renderFilters() {
-    document.getElementById('filters').innerHTML = ['All','Listed','Sold','Pending','Unlisted'].map(s =>
+    document.getElementById('filters').innerHTML=['All','Listed','Sold','Pending','Unlisted'].map(s=>
       `<button class="chip ${activeFilter===s?'active':''}" onclick="setFilter('${s}')">${s.toUpperCase()}</button>`
     ).join('');
   }
 
   function renderItems() {
-    const filtered = activeFilter==='All' ? items : items.filter(i=>i.status===activeFilter);
-    const el = document.getElementById('itemsList');
-    if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">NO ITEMS YET</div></div>'; return; }
-    el.innerHTML = filtered.map(item => {
-      const sc = statusColors[item.status]||statusColors.Listed;
-      const profit = item.status==='Sold' ? (parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0) : null;
-      const fields = [
+    const mapped = items.map(fromRow);
+    const filtered = activeFilter==='All' ? mapped : mapped.filter(i=>i.status===activeFilter);
+    const el=document.getElementById('itemsList');
+    if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">NO ITEMS YET</div></div>';return;}
+    el.innerHTML=filtered.map(item=>{
+      const sc=statusColors[item.status]||statusColors.Listed;
+      const profit=item.status==='Sold'?(parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0):null;
+      const fields=[
         {label:'Bought',val:fmtDate(item.purchaseDate)},{label:'Cost',val:fmt(item.cost)},
         {label:'Listed',val:fmt(item.listedPrice)},{label:'Platform',val:(item.platform||'').split(' ')[0]||'—'},
         ...(item.status==='Sold'?[{label:'Sold',val:fmtDate(item.saleDate)},{label:'Sale Price',val:fmt(item.salePrice)}]:[]),
@@ -297,23 +415,24 @@
   }
 
   function renderStats() {
-    const sold = items.filter(i=>i.status==='Sold');
-    const totalProfit = sold.reduce((acc,i)=>acc+(parseFloat(i.salePrice)||0)-(parseFloat(i.cost)||0),0);
-    const totalMiles = items.reduce((acc,i)=>acc+(parseFloat(i.miles)||0),0);
-    const invested = items.filter(i=>i.status!=='Sold').reduce((acc,i)=>acc+(parseFloat(i.cost)||0),0);
-    const rows = [
-      {label:'Total Items',val:items.length,color:'#e8e0d4'},
+    const mapped = items.map(fromRow);
+    const sold=mapped.filter(i=>i.status==='Sold');
+    const totalProfit=sold.reduce((acc,i)=>acc+(parseFloat(i.salePrice)||0)-(parseFloat(i.cost)||0),0);
+    const totalMiles=mapped.reduce((acc,i)=>acc+(parseFloat(i.miles)||0),0);
+    const invested=mapped.filter(i=>i.status!=='Sold').reduce((acc,i)=>acc+(parseFloat(i.cost)||0),0);
+    const rows=[
+      {label:'Total Items',val:mapped.length,color:'#e8e0d4'},
       {label:'Items Sold',val:sold.length,color:'#60a5fa'},
       {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#4ade80':'#f87171',big:true},
       {label:'Capital Invested',val:fmt(invested),color:'#fbbf24'},
       {label:'Miles Logged',val:totalMiles+' mi',color:'#e8e0d4'},
       {label:'Mileage Deduction ($.67/mi)',val:fmt(totalMiles*0.67),color:'#4ade80'},
     ];
-    document.getElementById('statsContent').innerHTML = `
+    document.getElementById('statsContent').innerHTML=`
       <div class="stats-title">Summary</div>
       ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
       <div class="breakdown"><div class="breakdown-title">By Status</div>
-        ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.text}">${items.filter(i=>i.status===s).length}</span></div>`;}).join('')}
+        ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.text}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
       </div>
       <div class="footer-note">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
   }
