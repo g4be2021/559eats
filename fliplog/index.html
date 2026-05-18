@@ -4,92 +4,97 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Flip Log">
 <title>Flip Log</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: #0a0a0a; color: #e8e0d4; font-family: 'Courier New', monospace; max-width: 480px; margin: 0 auto; padding-bottom: 100px; min-height: 100vh; }
+  body { background: #f5f5f5; color: #111; font-family: 'Courier New', monospace; max-width: 480px; margin: 0 auto; padding-bottom: 100px; min-height: 100vh; }
 
-  #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; }
-  .login-sub { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
-  .login-title { font-size: 36px; font-weight: 900; color: #f5c842; letter-spacing: -1px; margin-bottom: 40px; }
+  #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; background: #fff; }
+  .login-sub { font-size: 10px; color: #999; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+  .login-title { font-size: 36px; font-weight: 900; color: #f5c842; letter-spacing: -1px; margin-bottom: 40px; text-shadow: 2px 2px 0px #e0a800; }
   .login-field { width: 100%; margin-bottom: 14px; }
-  .login-field label { display: block; font-size: 9px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .login-field input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 14px 16px; color: #e8e0d4; font-family: inherit; font-size: 16px; outline: none; color-scheme: dark; }
+  .login-field label { display: block; font-size: 9px; color: #999; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .login-field input { width: 100%; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; color: #111; font-family: inherit; font-size: 16px; outline: none; }
   .login-field input:focus { border-color: #f5c842; }
-  .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; }
-  .login-error { color: #f87171; font-size: 11px; text-align: center; margin-top: 12px; letter-spacing: 1px; display: none; }
+  .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; box-shadow: 0 2px 8px rgba(245,200,66,0.4); }
+  .login-error { color: #e53e3e; font-size: 11px; text-align: center; margin-top: 12px; letter-spacing: 1px; display: none; }
 
   #appScreen { display: none; }
-  .header { background: #111; border-bottom: 1px solid #222; padding: 20px 16px 14px; position: sticky; top: 0; z-index: 10; }
+  .header { background: #fff; border-bottom: 1.5px solid #eee; padding: 20px 16px 14px; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .header-top { display: flex; justify-content: space-between; align-items: center; }
-  .header-sub { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
-  .header-title { font-size: 24px; font-weight: 900; color: #f5c842; letter-spacing: -1px; }
+  .header-sub { font-size: 10px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
+  .header-title { font-size: 24px; font-weight: 900; color: #f5c842; letter-spacing: -1px; text-shadow: 1px 1px 0px #e0a800; }
   .header-right { display: flex; gap: 8px; align-items: center; }
-  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; }
-  .btn-add.cancel { background: #222; color: #666; }
-  .btn-logout { background: none; border: 1px solid #222; color: #444; border-radius: 8px; padding: 10px 12px; font-size: 11px; font-family: inherit; cursor: pointer; }
+  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(245,200,66,0.3); }
+  .btn-add.cancel { background: #f0f0f0; color: #888; box-shadow: none; }
+  .btn-logout { background: none; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 8px; padding: 10px 12px; font-size: 11px; font-family: inherit; cursor: pointer; }
 
-  .tabs { display: flex; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
-  .tab { flex: 1; padding: 13px 0; background: none; border: none; color: #444; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; }
-  .tab.active { color: #f5c842; border-bottom: 2px solid #f5c842; }
+  .tabs { display: flex; background: #fff; border-bottom: 1.5px solid #eee; }
+  .tab { flex: 1; padding: 13px 0; background: none; border: none; color: #bbb; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2.5px solid transparent; }
+  .tab.active { color: #f5c842; border-bottom: 2.5px solid #f5c842; }
 
-  .form-wrap { background: #111; border-bottom: 1px solid #1a1a1a; padding: 16px; display: none; }
-  .form-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
+  .form-wrap { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .form-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
   .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 9px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-  .field input, .field select, .field textarea { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; padding: 11px 12px; color: #e8e0d4; font-family: inherit; font-size: 15px; outline: none; appearance: none; -webkit-appearance: none; color-scheme: dark; }
+  .field label { display: block; font-size: 9px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 11px 12px; color: #111; font-family: inherit; font-size: 15px; outline: none; appearance: none; -webkit-appearance: none; }
   .field textarea { resize: none; }
   .field input:focus, .field select:focus { border-color: #f5c842; }
-  .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; }
+  .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; box-shadow: 0 2px 8px rgba(245,200,66,0.3); }
 
   .filters { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .filters::-webkit-scrollbar { display: none; }
-  .chip { background: #1a1a1a; border: 1px solid #2a2a2a; color: #555; border-radius: 20px; padding: 6px 14px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
+  .chip { background: #fff; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 20px; padding: 6px 14px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
   .chip.active { background: #f5c842; border-color: #f5c842; color: #000; }
 
   .items { padding: 0 16px; }
-  .card { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .card-name { font-size: 15px; font-weight: 700; color: #e8e0d4; flex: 1; padding-right: 8px; line-height: 1.3; }
+  .card-name { font-size: 15px; font-weight: 700; color: #111; flex: 1; padding-right: 8px; line-height: 1.3; }
   .badge { border-radius: 20px; padding: 4px 10px; font-size: 9px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 10px; }
-  .grid-item label { display: block; font-size: 9px; color: #444; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
-  .grid-item span { font-size: 13px; color: #aaa; }
-  .profit-row { border-radius: 6px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .profit-label { font-size: 10px; color: #555; letter-spacing: 1px; }
+  .grid-item label { display: block; font-size: 9px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .grid-item span { font-size: 13px; color: #555; }
+  .profit-row { border-radius: 8px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .profit-label { font-size: 10px; color: #888; letter-spacing: 1px; }
   .profit-val { font-size: 18px; font-weight: 700; }
-  .card-notes { font-size: 11px; color: #444; border-top: 1px solid #1a1a1a; padding-top: 8px; margin-bottom: 10px; }
+  .card-notes { font-size: 11px; color: #aaa; border-top: 1.5px solid #f0f0f0; padding-top: 8px; margin-bottom: 10px; }
   .card-actions { display: flex; gap: 8px; }
-  .btn-action { flex: 1; background: #1a1a1a; border: 1px solid #222; border-radius: 6px; padding: 9px; font-size: 10px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; }
+  .btn-action { flex: 1; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 9px; font-size: 10px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; }
   .btn-edit { color: #888; }
-  .btn-delete { color: #f87171; }
+  .btn-delete { color: #e53e3e; border-color: #fecaca; background: #fff5f5; }
 
-  .empty { text-align: center; padding: 50px 0; color: #2a2a2a; }
+  .empty { text-align: center; padding: 50px 0; color: #ccc; }
   .empty-icon { font-size: 36px; margin-bottom: 8px; }
   .empty-text { font-size: 11px; letter-spacing: 2px; }
+  .loading { text-align: center; padding: 40px 0; color: #ccc; font-size: 11px; letter-spacing: 2px; }
 
-  .loading { text-align: center; padding: 40px 0; color: #444; font-size: 11px; letter-spacing: 2px; }
-
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a3a2a; color: #4ade80; border: 1px solid #4ade80; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 100; white-space: nowrap; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111; color: #fff; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
   .toast.show { opacity: 1; }
-  .toast.error { background: #2a1a1a; color: #f87171; border-color: #f87171; }
+  .toast.error { background: #e53e3e; }
+  .toast.success { background: #38a169; }
 
   .stats { padding: 16px; }
-  .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
-  .stat-card { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-  .stat-label { font-size: 10px; color: #444; letter-spacing: 1px; text-transform: uppercase; }
+  .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
+  .stat-card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .stat-label { font-size: 10px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
   .stat-val { font-size: 18px; font-weight: 700; }
   .stat-val.big { font-size: 24px; }
-  .breakdown { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 16px; margin-top: 8px; }
-  .breakdown-title { font-size: 10px; color: #444; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+  .breakdown { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 16px; margin-top: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .breakdown-title { font-size: 10px; color: #bbb; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
   .breakdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .breakdown-left { display: flex; align-items: center; gap: 8px; }
   .dot { width: 7px; height: 7px; border-radius: 50%; }
   .breakdown-name { font-size: 12px; color: #777; }
   .breakdown-count { font-size: 14px; font-weight: 700; }
-  .footer-note { font-size: 9px; color: #2a2a2a; text-align: center; letter-spacing: 1px; margin-top: 14px; }
+  .footer-note { font-size: 9px; color: #ccc; text-align: center; letter-spacing: 1px; margin-top: 14px; }
+
+  .status-listed   { background: #f0fff4; color: #38a169; }
+  .status-sold     { background: #ebf8ff; color: #3182ce; }
+  .status-pending  { background: #fffbeb; color: #d97706; }
+  .status-unlisted { background: #fff5f5; color: #e53e3e; }
 </style>
 </head>
 <body>
@@ -162,7 +167,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const APP_PASSWORD = 'flip559'; // Change this to whatever you want
+  const APP_PASSWORD = 'flip559';
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
   const TABLE = 'flip_log';
@@ -173,13 +178,12 @@
   let activeFilter = 'All';
 
   const statusColors = {
-    Listed:   { bg:'#1a3a2a', text:'#4ade80', dot:'#4ade80' },
-    Sold:     { bg:'#1a2a3a', text:'#60a5fa', dot:'#60a5fa' },
-    Pending:  { bg:'#3a2a10', text:'#fbbf24', dot:'#fbbf24' },
-    Unlisted: { bg:'#2a1a1a', text:'#f87171', dot:'#f87171' },
+    Listed:   { cls:'status-listed',  dot:'#38a169' },
+    Sold:     { cls:'status-sold',    dot:'#3182ce' },
+    Pending:  { cls:'status-pending', dot:'#d97706' },
+    Unlisted: { cls:'status-unlisted',dot:'#e53e3e' },
   };
 
-  // SUPABASE HELPERS
   async function sbFetch(path, method='GET', body=null) {
     const opts = {
       method,
@@ -203,24 +207,8 @@
       items = data || [];
       render();
     } catch(e) {
-      showToast('Error loading data', true);
-      console.error(e);
+      showToast('Error loading data', 'error');
     }
-  }
-
-  async function insertItem(obj) {
-    const row = toRow(obj);
-    const data = await sbFetch(TABLE, 'POST', row);
-    return Array.isArray(data) ? data[0] : data;
-  }
-
-  async function updateItem(id, obj) {
-    const row = toRow(obj);
-    await sbFetch(TABLE + '?id=eq.' + id, 'PATCH', row);
-  }
-
-  async function removeItem(id) {
-    await sbFetch(TABLE + '?id=eq.' + id, 'DELETE');
   }
 
   function toRow(obj) {
@@ -240,21 +228,13 @@
 
   function fromRow(row) {
     return {
-      id: row.id,
-      item: row.item,
-      purchaseDate: row.purchase_date,
-      cost: row.cost,
-      listedPrice: row.listed_price,
-      salePrice: row.sale_price,
-      saleDate: row.sale_date,
-      miles: row.miles,
-      platform: row.platform,
-      status: row.status,
-      notes: row.notes,
+      id: row.id, item: row.item, purchaseDate: row.purchase_date,
+      cost: row.cost, listedPrice: row.listed_price, salePrice: row.sale_price,
+      saleDate: row.sale_date, miles: row.miles, platform: row.platform,
+      status: row.status, notes: row.notes,
     };
   }
 
-  // AUTH
   function doLogin() {
     if (document.getElementById('passwordInput').value === APP_PASSWORD) {
       sessionStorage.setItem(SESSION_KEY, '1');
@@ -282,15 +262,13 @@
     }
   };
 
-  // TOAST
-  function showToast(msg, error=false) {
+  function showToast(msg, type='success') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast show' + (error ? ' error' : '');
+    t.className = 'toast show ' + type;
     setTimeout(() => t.className = 'toast', 2500);
   }
 
-  // FORM
   function fmt(v) { return v!=null && v!=='' ? '$'+parseFloat(v).toFixed(2) : '—'; }
   function fmtDate(d) { if(!d) return '—'; const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
 
@@ -318,7 +296,6 @@
     const purchaseDate = document.getElementById('f-purchaseDate').value;
     const cost = document.getElementById('f-cost').value;
     if (!item || !purchaseDate || !cost) { alert('Item name, purchase date, and cost are required.'); return; }
-
     const obj = {
       item, purchaseDate, cost,
       listedPrice: document.getElementById('f-listedPrice').value,
@@ -329,23 +306,21 @@
       status: document.getElementById('f-status').value,
       notes: document.getElementById('f-notes').value.trim(),
     };
-
     document.getElementById('btnSave').textContent = 'SAVING...';
-
     try {
       if (editId) {
-        await updateItem(editId, obj);
-        items = items.map(i => i.id===editId ? {...fromRow(toRow(obj)), id: editId} : i);
-        editId=null;
-        showToast('ITEM UPDATED');
+        await sbFetch(TABLE + '?id=eq.' + editId, 'PATCH', toRow(obj));
+        items = items.map(i => i.id===editId ? {...fromRow(toRow(obj)), id:editId} : i);
+        editId=null; showToast('ITEM UPDATED ✓');
       } else {
-        const newRow = await insertItem(obj);
+        const res = await sbFetch(TABLE, 'POST', toRow(obj));
+        const newRow = Array.isArray(res) ? res[0] : res;
         items.unshift(fromRow(newRow));
-        showToast('ITEM ADDED');
+        showToast('ITEM ADDED ✓');
       }
       clearForm(); toggleForm(); render();
     } catch(e) {
-      showToast('Save failed — check connection', true);
+      showToast('Save failed — check connection', 'error');
       document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
     }
   }
@@ -353,21 +328,19 @@
   async function deleteItem(id) {
     if (!confirm('Delete this item?')) return;
     try {
-      await removeItem(id);
+      await sbFetch(TABLE + '?id=eq.' + id, 'DELETE');
       items = items.filter(i=>i.id!==id);
-      showToast('ITEM DELETED');
-      render();
-    } catch(e) {
-      showToast('Delete failed', true);
-    }
+      showToast('DELETED'); render();
+    } catch(e) { showToast('Delete failed', 'error'); }
   }
 
   function editItem(id) {
     const item = items.find(i=>i.id===id); if(!item) return;
+    const mapped = fromRow(item);
     editId=id;
-    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value=item[k]||'');
-    document.getElementById('f-platform').value=item.platform||'Facebook Marketplace';
-    document.getElementById('f-status').value=item.status||'Listed';
+    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value=mapped[k]||'');
+    document.getElementById('f-platform').value=mapped.platform||'Facebook Marketplace';
+    document.getElementById('f-status').value=mapped.status||'Listed';
     const wrap=document.getElementById('formWrap');
     if(wrap.style.display!=='block') toggleForm();
     else { document.getElementById('formTitle').textContent='Edit Item'; document.getElementById('btnSave').textContent='SAVE CHANGES'; }
@@ -405,9 +378,9 @@
         ...(item.miles?[{label:'Miles',val:item.miles+' mi'}]:[]),
       ];
       return `<div class="card">
-        <div class="card-top"><div class="card-name">${item.item}</div><div class="badge" style="background:${sc.bg};color:${sc.text}">${item.status.toUpperCase()}</div></div>
+        <div class="card-top"><div class="card-name">${item.item}</div><div class="badge ${sc.cls}">${item.status.toUpperCase()}</div></div>
         <div class="grid2">${fields.map(f=>`<div class="grid-item"><label>${f.label}</label><span>${f.val}</span></div>`).join('')}</div>
-        ${profit!==null?`<div class="profit-row" style="background:${profit>=0?'#1a2a1a':'#2a1a1a'}"><span class="profit-label">PROFIT</span><span class="profit-val" style="color:${profit>=0?'#4ade80':'#f87171'}">${profit>=0?'+':''}${fmt(profit)}</span></div>`:''}
+        ${profit!==null?`<div class="profit-row" style="background:${profit>=0?'#f0fff4':'#fff5f5'}"><span class="profit-label">PROFIT</span><span class="profit-val" style="color:${profit>=0?'#38a169':'#e53e3e'}">${profit>=0?'+':''}${fmt(profit)}</span></div>`:''}
         ${item.notes?`<div class="card-notes">${item.notes}</div>`:''}
         <div class="card-actions"><button class="btn-action btn-edit" onclick="editItem(${item.id})">EDIT</button><button class="btn-action btn-delete" onclick="deleteItem(${item.id})">DELETE</button></div>
       </div>`;
@@ -421,18 +394,18 @@
     const totalMiles=mapped.reduce((acc,i)=>acc+(parseFloat(i.miles)||0),0);
     const invested=mapped.filter(i=>i.status!=='Sold').reduce((acc,i)=>acc+(parseFloat(i.cost)||0),0);
     const rows=[
-      {label:'Total Items',val:mapped.length,color:'#e8e0d4'},
-      {label:'Items Sold',val:sold.length,color:'#60a5fa'},
-      {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#4ade80':'#f87171',big:true},
-      {label:'Capital Invested',val:fmt(invested),color:'#fbbf24'},
-      {label:'Miles Logged',val:totalMiles+' mi',color:'#e8e0d4'},
-      {label:'Mileage Deduction ($.67/mi)',val:fmt(totalMiles*0.67),color:'#4ade80'},
+      {label:'Total Items',val:mapped.length,color:'#111'},
+      {label:'Items Sold',val:sold.length,color:'#3182ce'},
+      {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#38a169':'#e53e3e',big:true},
+      {label:'Capital Invested',val:fmt(invested),color:'#d97706'},
+      {label:'Miles Logged',val:totalMiles+' mi',color:'#111'},
+      {label:'Mileage Deduction ($.67/mi)',val:fmt(totalMiles*0.67),color:'#38a169'},
     ];
     document.getElementById('statsContent').innerHTML=`
       <div class="stats-title">Summary</div>
       ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
       <div class="breakdown"><div class="breakdown-title">By Status</div>
-        ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.text}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
+        ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.dot}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
       </div>
       <div class="footer-note">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
   }
