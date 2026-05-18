@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flip Log">
+<title>Flip Log</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #0a0a0a; color: #e8e0d4; font-family: 'Courier New', monospace; max-width: 480px; margin: 0 auto; padding-bottom: 100px; min-height: 100vh; }
+
+  #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; }
+  .login-sub { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+  .login-title { font-size: 36px; font-weight: 900; color: #f5c842; letter-spacing: -1px; margin-bottom: 40px; }
+  .login-field { width: 100%; margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 9px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .login-field input { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 14px 16px; color: #e8e0d4; font-family: inherit; font-size: 16px; outline: none; color-scheme: dark; }
+  .login-field input:focus { border-color: #f5c842; }
+  .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; }
+  .login-error { color: #f87171; font-size: 11px; text-align: center; margin-top: 12px; letter-spacing: 1px; display: none; }
+
+  #appScreen { display: none; }
+  .header { background: #111; border-bottom: 1px solid #222; padding: 20px 16px 14px; position: sticky; top: 0; z-index: 10; }
+  .header-top { display: flex; justify-content: space-between; align-items: center; }
+  .header-sub { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; }
+  .header-title { font-size: 24px; font-weight: 900; color: #f5c842; letter-spacing: -1px; }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; }
+  .btn-add.cancel { background: #222; color: #666; }
+  .btn-logout { background: none; border: 1px solid #222; color: #444; border-radius: 8px; padding: 10px 12px; font-size: 11px; font-family: inherit; cursor: pointer; }
+
+  .tabs { display: flex; background: #0f0f0f; border-bottom: 1px solid #1a1a1a; }
+  .tab { flex: 1; padding: 13px 0; background: none; border: none; color: #444; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid transparent; }
+  .tab.active { color: #f5c842; border-bottom: 2px solid #f5c842; }
+
+  .form-wrap { background: #111; border-bottom: 1px solid #1a1a1a; padding: 16px; display: none; }
+  .form-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 9px; color: #555; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; padding: 11px 12px; color: #e8e0d4; font-family: inherit; font-size: 15px; outline: none; appearance: none; -webkit-appearance: none; color-scheme: dark; }
+  .field textarea { resize: none; }
+  .field input:focus, .field select:focus { border-color: #f5c842; }
+  .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; }
+
+  .filters { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .filters::-webkit-scrollbar { display: none; }
+  .chip { background: #1a1a1a; border: 1px solid #2a2a2a; color: #555; border-radius: 20px; padding: 6px 14px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
+  .chip.active { background: #f5c842; border-color: #f5c842; color: #000; }
+
+  .items { padding: 0 16px; }
+  .card { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .card-name { font-size: 15px; font-weight: 700; color: #e8e0d4; flex: 1; padding-right: 8px; line-height: 1.3; }
+  .badge { border-radius: 20px; padding: 4px 10px; font-size: 9px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 10px; }
+  .grid-item label { display: block; font-size: 9px; color: #444; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .grid-item span { font-size: 13px; color: #aaa; }
+  .profit-row { border-radius: 6px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .profit-label { font-size: 10px; color: #555; letter-spacing: 1px; }
+  .profit-val { font-size: 18px; font-weight: 700; }
+  .card-notes { font-size: 11px; color: #444; border-top: 1px solid #1a1a1a; padding-top: 8px; margin-bottom: 10px; }
+  .card-actions { display: flex; gap: 8px; }
+  .btn-action { flex: 1; background: #1a1a1a; border: 1px solid #222; border-radius: 6px; padding: 9px; font-size: 10px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; }
+  .btn-edit { color: #888; }
+  .btn-delete { color: #f87171; }
+
+  .empty { text-align: center; padding: 50px 0; color: #2a2a2a; }
+  .empty-icon { font-size: 36px; margin-bottom: 8px; }
+  .empty-text { font-size: 11px; letter-spacing: 2px; }
+
+  .stats { padding: 16px; }
+  .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; }
+  .stat-card { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .stat-label { font-size: 10px; color: #444; letter-spacing: 1px; text-transform: uppercase; }
+  .stat-val { font-size: 18px; font-weight: 700; }
+  .stat-val.big { font-size: 24px; }
+  .breakdown { background: #111; border: 1px solid #1a1a1a; border-radius: 10px; padding: 16px; margin-top: 8px; }
+  .breakdown-title { font-size: 10px; color: #444; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+  .breakdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .breakdown-left { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .breakdown-name { font-size: 12px; color: #777; }
+  .breakdown-count { font-size: 14px; font-weight: 700; }
+  .footer-note { font-size: 9px; color: #2a2a2a; text-align: center; letter-spacing: 1px; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-sub">resale tracker</div>
+  <div class="login-title">FLIP LOG</div>
+  <div class="login-field">
+    <label>Password</label>
+    <input type="password" id="passwordInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <button class="btn-login" onclick="doLogin()">ENTER</button>
+  <div class="login-error" id="loginError">Incorrect password. Try again.</div>
+</div>
+
+<div id="appScreen">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-sub">resale tracker</div>
+        <div class="header-title">FLIP LOG</div>
+      </div>
+      <div class="header-right">
+        <button class="btn-logout" onclick="doLogout()">LOCK</button>
+        <button class="btn-add" id="btnAdd" onclick="toggleForm()">+ ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-inventory" onclick="switchTab('inventory')">Inventory</button>
+    <button class="tab" id="tab-stats" onclick="switchTab('stats')">Stats</button>
+  </div>
+
+  <div id="formWrap" class="form-wrap">
+    <div class="form-title" id="formTitle">New Item</div>
+    <div class="field"><label>Item Name *</label><input type="text" id="f-item" placeholder="e.g. Pedal Commander"></div>
+    <div class="field"><label>Purchase Date *</label><input type="date" id="f-purchaseDate"></div>
+    <div class="field"><label>Cost *</label><input type="number" id="f-cost" placeholder="0.00" step="0.01"></div>
+    <div class="field"><label>Listed Price</label><input type="number" id="f-listedPrice" placeholder="0.00" step="0.01"></div>
+    <div class="field"><label>Sale Price</label><input type="number" id="f-salePrice" placeholder="0.00" step="0.01"></div>
+    <div class="field"><label>Sale Date</label><input type="date" id="f-saleDate"></div>
+    <div class="field"><label>Miles Driven</label><input type="number" id="f-miles" placeholder="0"></div>
+    <div class="field">
+      <label>Platform</label>
+      <select id="f-platform">
+        <option>Facebook Marketplace</option><option>OfferUp</option>
+        <option>eBay</option><option>Craigslist</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <select id="f-status">
+        <option>Listed</option><option>Sold</option><option>Pending</option><option>Unlisted</option>
+      </select>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="f-notes" rows="2" placeholder="Condition, source, etc."></textarea></div>
+    <button class="btn-save" id="btnSave" onclick="saveItem()">ADD ITEM</button>
+  </div>
+
+  <div id="tab-inventory-content">
+    <div class="filters" id="filters"></div>
+    <div class="items" id="itemsList"></div>
+  </div>
+  <div id="tab-stats-content" style="display:none">
+    <div class="stats" id="statsContent"></div>
+  </div>
+</div>
+
+<script>
+  const APP_PASSWORD = 'flip559'; // Change this to whatever you want
+  const SESSION_KEY = 'fliplog_auth';
+  const DATA_KEY = 'fliplog_items';
+
+  let items = [];
+  let editId = null;
+  let activeFilter = 'All';
+
+  const statusColors = {
+    Listed:   { bg:'#1a3a2a', text:'#4ade80', dot:'#4ade80' },
+    Sold:     { bg:'#1a2a3a', text:'#60a5fa', dot:'#60a5fa' },
+    Pending:  { bg:'#3a2a10', text:'#fbbf24', dot:'#fbbf24' },
+    Unlisted: { bg:'#2a1a1a', text:'#f87171', dot:'#f87171' },
+  };
+
+  function doLogin() {
+    if (document.getElementById('passwordInput').value === APP_PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      items = JSON.parse(localStorage.getItem(DATA_KEY) || '[]');
+      render();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('passwordInput').value = '';
+    }
+  }
+
+  function doLogout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    document.getElementById('appScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('passwordInput').value = '';
+  }
+
+  window.onload = () => {
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      items = JSON.parse(localStorage.getItem(DATA_KEY) || '[]');
+      render();
+    }
+  };
+
+  function save() { localStorage.setItem(DATA_KEY, JSON.stringify(items)); }
+  function fmt(v) { return v ? '$'+parseFloat(v).toFixed(2) : '—'; }
+  function fmtDate(d) { if(!d) return '—'; const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
+
+  function toggleForm() {
+    const wrap = document.getElementById('formWrap');
+    const btn = document.getElementById('btnAdd');
+    if (wrap.style.display === 'block') {
+      wrap.style.display = 'none'; btn.textContent = '+ ADD'; btn.classList.remove('cancel');
+      clearForm(); editId = null;
+    } else {
+      wrap.style.display = 'block'; btn.textContent = 'CANCEL'; btn.classList.add('cancel');
+      document.getElementById('formTitle').textContent = editId ? 'Edit Item' : 'New Item';
+      document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
+    }
+  }
+
+  function clearForm() {
+    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value = '');
+    document.getElementById('f-platform').value = 'Facebook Marketplace';
+    document.getElementById('f-status').value = 'Listed';
+  }
+
+  function saveItem() {
+    const item = document.getElementById('f-item').value.trim();
+    const purchaseDate = document.getElementById('f-purchaseDate').value;
+    const cost = document.getElementById('f-cost').value;
+    if (!item || !purchaseDate || !cost) { alert('Item name, purchase date, and cost are required.'); return; }
+    const obj = {
+      item, purchaseDate, cost,
+      listedPrice: document.getElementById('f-listedPrice').value,
+      salePrice: document.getElementById('f-salePrice').value,
+      saleDate: document.getElementById('f-saleDate').value,
+      miles: document.getElementById('f-miles').value,
+      platform: document.getElementById('f-platform').value,
+      status: document.getElementById('f-status').value,
+      notes: document.getElementById('f-notes').value.trim(),
+    };
+    if (editId) { obj.id = editId; items = items.map(i => i.id===editId ? obj : i); editId = null; }
+    else { obj.id = Date.now(); items.unshift(obj); }
+    save(); clearForm(); toggleForm(); render();
+  }
+
+  function deleteItem(id) {
+    if (confirm('Delete this item?')) { items = items.filter(i => i.id!==id); save(); render(); }
+  }
+
+  function editItem(id) {
+    const item = items.find(i => i.id===id); if (!item) return;
+    editId = id;
+    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value = item[k]||'');
+    document.getElementById('f-platform').value = item.platform||'Facebook Marketplace';
+    document.getElementById('f-status').value = item.status||'Listed';
+    const wrap = document.getElementById('formWrap');
+    if (wrap.style.display !== 'block') toggleForm();
+    else { document.getElementById('formTitle').textContent='Edit Item'; document.getElementById('btnSave').textContent='SAVE CHANGES'; }
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function switchTab(tab) {
+    document.getElementById('tab-inventory-content').style.display = tab==='inventory' ? 'block' : 'none';
+    document.getElementById('tab-stats-content').style.display = tab==='stats' ? 'block' : 'none';
+    document.getElementById('tab-inventory').classList.toggle('active', tab==='inventory');
+    document.getElementById('tab-stats').classList.toggle('active', tab==='stats');
+    if (tab==='stats') renderStats();
+  }
+
+  function setFilter(s) { activeFilter=s; renderFilters(); renderItems(); }
+
+  function renderFilters() {
+    document.getElementById('filters').innerHTML = ['All','Listed','Sold','Pending','Unlisted'].map(s =>
+      `<button class="chip ${activeFilter===s?'active':''}" onclick="setFilter('${s}')">${s.toUpperCase()}</button>`
+    ).join('');
+  }
+
+  function renderItems() {
+    const filtered = activeFilter==='All' ? items : items.filter(i=>i.status===activeFilter);
+    const el = document.getElementById('itemsList');
+    if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">NO ITEMS YET</div></div>'; return; }
+    el.innerHTML = filtered.map(item => {
+      const sc = statusColors[item.status]||statusColors.Listed;
+      const profit = item.status==='Sold' ? (parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0) : null;
+      const fields = [
+        {label:'Bought',val:fmtDate(item.purchaseDate)},{label:'Cost',val:fmt(item.cost)},
+        {label:'Listed',val:fmt(item.listedPrice)},{label:'Platform',val:(item.platform||'').split(' ')[0]||'—'},
+        ...(item.status==='Sold'?[{label:'Sold',val:fmtDate(item.saleDate)},{label:'Sale Price',val:fmt(item.salePrice)}]:[]),
+        ...(item.miles?[{label:'Miles',val:item.miles+' mi'}]:[]),
+      ];
+      return `<div class="card">
+        <div class="card-top"><div class="card-name">${item.item}</div><div class="badge" style="background:${sc.bg};color:${sc.text}">${item.status.toUpperCase()}</div></div>
+        <div class="grid2">${fields.map(f=>`<div class="grid-item"><label>${f.label}</label><span>${f.val}</span></div>`).join('')}</div>
+        ${profit!==null?`<div class="profit-row" style="background:${profit>=0?'#1a2a1a':'#2a1a1a'}"><span class="profit-label">PROFIT</span><span class="profit-val" style="color:${profit>=0?'#4ade80':'#f87171'}">${profit>=0?'+':''}${fmt(profit)}</span></div>`:''}
+        ${item.notes?`<div class="card-notes">${item.notes}</div>`:''}
+        <div class="card-actions"><button class="btn-action btn-edit" onclick="editItem(${item.id})">EDIT</button><button class="btn-action btn-delete" onclick="deleteItem(${item.id})">DELETE</button></div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderStats() {
+    const sold = items.filter(i=>i.status==='Sold');
+    const totalProfit = sold.reduce((acc,i)=>acc+(parseFloat(i.salePrice)||0)-(parseFloat(i.cost)||0),0);
+    const totalMiles = items.reduce((acc,i)=>acc+(parseFloat(i.miles)||0),0);
+    const invested = items.filter(i=>i.status!=='Sold').reduce((acc,i)=>acc+(parseFloat(i.cost)||0),0);
+    const rows = [
+      {label:'Total Items',val:items.length,color:'#e8e0d4'},
+      {label:'Items Sold',val:sold.length,color:'#60a5fa'},
+      {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#4ade80':'#f87171',big:true},
+      {label:'Capital Invested',val:fmt(invested),color:'#fbbf24'},
+      {label:'Miles Logged',val:totalMiles+' mi',color:'#e8e0d4'},
+      {label:'Mileage Deduction ($.67/mi)',val:fmt(totalMiles*0.67),color:'#4ade80'},
+    ];
+    document.getElementById('statsContent').innerHTML = `
+      <div class="stats-title">Summary</div>
+      ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
+      <div class="breakdown"><div class="breakdown-title">By Status</div>
+        ${['Listed','Sold','Pending','Unlisted'].map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.text}">${items.filter(i=>i.status===s).length}</span></div>`;}).join('')}
+      </div>
+      <div class="footer-note">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
+  }
+
+  function render() { renderFilters(); renderItems(); }
+</script>
+</body>
+</html>
