@@ -266,7 +266,7 @@ const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 const TABLE = 'flip_log';
 const SESSION_KEY = 'fliplog_auth';
-const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+const CLAUDE_API = '/api/price';
 
 let items = [];
 let editId = null;
@@ -364,17 +364,10 @@ async function fetchMarketPrice() {
     const response = await fetch(CLAUDE_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: `What is the current used resale market value for "${itemName}" on Facebook Marketplace in 2025? Give me: 1) A price range (low-high), 2) A recommended listing price, 3) A good buy price if flipping. Be concise, 3 lines max. Format: Range: $X-$Y | List at: $Z | Buy under: $W`
-        }]
-      })
+      body: JSON.stringify({ itemName })
     });
     const data = await response.json();
-    const text = data.content?.[0]?.text || 'Could not fetch price.';
+    const text = data.price || 'Could not fetch price.';
     result.style.display = 'block';
     result.innerHTML = '🤖 <strong>AI Market Price:</strong><br>' + text;
     // Try to auto-fill listed price
