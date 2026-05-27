@@ -4,126 +4,159 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Flip Log">
 <title>Flip Log</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: #f5f5f5; color: #111; font-family: 'Courier New', monospace; max-width: 480px; margin: 0 auto; padding-bottom: 100px; min-height: 100vh; }
- 
-  #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; background: #fff; }
+  body { background: #f5f5f5; color: #111; font-family: 'Courier New', monospace; min-height: 100vh; }
+
+  /* LOGIN */
+  #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 24px; background: #fff; max-width: 480px; margin: 0 auto; }
   .login-sub { font-size: 10px; color: #999; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
   .login-title { font-size: 36px; font-weight: 900; color: #f5c842; letter-spacing: -1px; margin-bottom: 40px; text-shadow: 2px 2px 0px #e0a800; }
   .login-field { width: 100%; margin-bottom: 14px; }
   .login-field label { display: block; font-size: 9px; color: #999; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
   .login-field input { width: 100%; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 14px 16px; color: #111; font-family: inherit; font-size: 16px; outline: none; }
   .login-field input:focus { border-color: #f5c842; }
-  .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; box-shadow: 0 2px 8px rgba(245,200,66,0.4); }
+  .btn-login { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 15px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 6px; }
   .login-error { color: #e53e3e; font-size: 11px; text-align: center; margin-top: 12px; letter-spacing: 1px; display: none; }
- 
+
+  /* APP */
   #appScreen { display: none; }
-  .header { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px 16px 12px; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+
+  /* HEADER */
+  .header { background: #fff; border-bottom: 1.5px solid #eee; padding: 14px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .header-top { display: flex; justify-content: space-between; align-items: center; }
-  .header-sub { font-size: 10px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
-  .header-title { font-size: 22px; font-weight: 900; color: #f5c842; letter-spacing: -1px; text-shadow: 1px 1px 0px #e0a800; }
-  .header-right { display: flex; gap: 8px; align-items: center; }
-  .btn-add { background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 10px 16px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(245,200,66,0.3); }
-  .btn-add.cancel { background: #f0f0f0; color: #888; box-shadow: none; }
-  .btn-logout { background: none; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 8px; padding: 10px 10px; font-size: 10px; font-family: inherit; cursor: pointer; }
- 
+  .header-sub { font-size: 9px; color: #aaa; letter-spacing: 3px; text-transform: uppercase; }
+  .header-title { font-size: 20px; font-weight: 900; color: #f5c842; letter-spacing: -1px; text-shadow: 1px 1px 0 #e0a800; }
+  .header-right { display: flex; gap: 6px; align-items: center; }
+  .btn-sm { background: #f5c842; color: #000; border: none; border-radius: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; white-space: nowrap; }
+  .btn-sm.cancel { background: #f0f0f0; color: #888; }
+  .btn-sm.outline { background: none; border: 1.5px solid #e0e0e0; color: #666; }
+
+  /* DASHBOARD */
   .dashboard { background: #fff; border-bottom: 1.5px solid #eee; padding: 12px 16px; }
   .dash-row1 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
   .dash-row2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .dash-card { background: #f9f9f9; border: 1.5px solid #eee; border-radius: 10px; padding: 10px 12px; }
-  .dash-card.highlight { background: #fffbeb; border-color: #fde68a; }
   .dash-card.green { background: #f0fff4; border-color: #c6f6d5; }
-  .dash-card.blue { background: #ebf8ff; border-color: #bee3f8; }
   .dash-card.red { background: #fff5f5; border-color: #fed7d7; }
+  .dash-card.yellow { background: #fffbeb; border-color: #fde68a; }
+  .dash-card.blue { background: #ebf8ff; border-color: #bee3f8; }
+  .dash-card.purple { background: #faf5ff; border-color: #e9d8fd; }
   .dash-label { font-size: 8px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
-  .dash-val { font-size: 16px; font-weight: 900; color: #111; letter-spacing: -0.5px; }
-  .dash-val.green { color: #38a169; }
-  .dash-val.yellow { color: #d97706; }
-  .dash-val.blue { color: #3182ce; }
-  .dash-val.red { color: #e53e3e; }
+  .dash-val { font-size: 15px; font-weight: 900; letter-spacing: -0.5px; }
   .dash-sub { font-size: 9px; color: #bbb; margin-top: 2px; }
- 
-  .projections { background: #fff; border-bottom: 1.5px solid #eee; padding: 12px 16px; }
+
+  /* PROJECTIONS */
+  .projections { background: #fff; border-bottom: 1.5px solid #eee; padding: 10px 16px; }
   .proj-title { font-size: 9px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
   .proj-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .proj-card { background: #f9f9f9; border: 1.5px solid #eee; border-radius: 10px; padding: 10px 12px; text-align: center; }
-  .proj-period { font-size: 8px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-  .proj-val { font-size: 15px; font-weight: 900; color: #38a169; }
-  .proj-note { font-size: 8px; color: #ccc; margin-top: 2px; }
- 
-  .tabs { display: flex; background: #fff; border-bottom: 1.5px solid #eee; }
-  .tab { flex: 1; padding: 12px 0; background: none; border: none; color: #bbb; cursor: pointer; font-family: inherit; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; border-bottom: 2.5px solid transparent; }
-  .tab.active { color: #f5c842; border-bottom: 2.5px solid #f5c842; }
- 
-  .form-wrap { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .proj-card { background: #f9f9f9; border: 1.5px solid #eee; border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .proj-period { font-size: 8px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+  .proj-val { font-size: 13px; font-weight: 900; color: #38a169; }
+
+  /* NAV TABS */
+  .nav-tabs { display: flex; background: #fff; border-bottom: 1.5px solid #eee; overflow-x: auto; }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab { flex: 1; min-width: 70px; padding: 11px 8px; background: none; border: none; color: #bbb; cursor: pointer; font-family: inherit; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; border-bottom: 2.5px solid transparent; white-space: nowrap; }
+  .nav-tab.active { color: #f5c842; border-bottom: 2.5px solid #f5c842; }
+
+  /* FORM */
+  .form-wrap { background: #fff; border-bottom: 1.5px solid #eee; padding: 16px; display: none; }
   .form-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
   .field { margin-bottom: 12px; }
   .field label { display: block; font-size: 9px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
   .field input, .field select, .field textarea { width: 100%; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 11px 12px; color: #111; font-family: inherit; font-size: 15px; outline: none; appearance: none; -webkit-appearance: none; }
   .field textarea { resize: none; }
   .field input:focus, .field select:focus { border-color: #f5c842; }
-  .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; box-shadow: 0 2px 8px rgba(245,200,66,0.3); }
- 
-  .filters { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn-save { width: 100%; background: #f5c842; color: #000; border: none; border-radius: 8px; padding: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-top: 4px; }
+  .ai-lookup-btn { width: 100%; background: #ebf8ff; color: #3182ce; border: 1.5px solid #bee3f8; border-radius: 6px; padding: 10px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .ai-lookup-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .price-result { background: #f0fff4; border: 1.5px solid #c6f6d5; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 11px; color: #276749; display: none; line-height: 1.5; }
+
+  /* KANBAN */
+  .kanban-wrap { padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban-board { display: flex; gap: 12px; min-width: max-content; padding-bottom: 8px; }
+  .kanban-col { width: 240px; flex-shrink: 0; }
+  @media (max-width: 600px) { .kanban-col { width: 200px; } }
+  .kanban-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; }
+  .kanban-title { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .kanban-count { font-size: 10px; font-weight: 700; opacity: 0.7; }
+  .kanban-drop { min-height: 100px; border-radius: 8px; padding: 6px; border: 2px dashed transparent; transition: border-color 0.2s, background 0.2s; }
+  .kanban-drop.drag-over { border-color: #f5c842; background: #fffbeb; }
+  .kanban-card { background: #fff; border: 1.5px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 8px; cursor: grab; box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: box-shadow 0.2s, transform 0.15s; user-select: none; touch-action: none; }
+  .kanban-card:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(0,0,0,0.15); transform: rotate(1deg) scale(1.02); }
+  .kanban-card.dragging { opacity: 0.4; }
+  .kcard-name { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 6px; line-height: 1.3; }
+  .kcard-cost { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .kcard-profit { font-size: 12px; font-weight: 700; }
+  .kcard-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .kcard-btn { flex: 1; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 5px; padding: 6px; font-size: 9px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; color: #888; }
+  .kcard-btn.del { color: #e53e3e; border-color: #fecaca; background: #fff5f5; }
+
+  /* LIST VIEW */
+  .list-wrap { padding: 0 16px; padding-bottom: 80px; }
+  .filters { display: flex; gap: 6px; padding: 12px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .filters::-webkit-scrollbar { display: none; }
-  .chip { background: #fff; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 20px; padding: 6px 14px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
+  .chip { background: #fff; border: 1.5px solid #e0e0e0; color: #aaa; border-radius: 20px; padding: 5px 12px; font-size: 9px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; letter-spacing: 1px; }
   .chip.active { background: #f5c842; border-color: #f5c842; color: #000; }
- 
-  .items { padding: 0 16px; }
-  .card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .card-name { font-size: 15px; font-weight: 700; color: #111; flex: 1; padding-right: 8px; line-height: 1.3; }
-  .badge { border-radius: 20px; padding: 4px 10px; font-size: 9px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 10px; }
-  .grid-item label { display: block; font-size: 9px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
-  .grid-item span { font-size: 13px; color: #555; }
-  .profit-row { border-radius: 8px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .profit-label { font-size: 10px; color: #888; letter-spacing: 1px; }
-  .profit-val { font-size: 18px; font-weight: 700; }
-  .card-notes { font-size: 11px; color: #aaa; border-top: 1.5px solid #f0f0f0; padding-top: 8px; margin-bottom: 10px; }
+  .list-card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .lcard-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .lcard-name { font-size: 14px; font-weight: 700; color: #111; flex: 1; padding-right: 8px; }
+  .badge { border-radius: 20px; padding: 3px 10px; font-size: 9px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin-bottom: 8px; }
+  .gi label { display: block; font-size: 8px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1px; }
+  .gi span { font-size: 12px; color: #555; }
+  .profit-row { border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-notes { font-size: 11px; color: #aaa; border-top: 1px solid #f0f0f0; padding-top: 6px; margin-bottom: 8px; }
   .card-actions { display: flex; gap: 8px; }
-  .btn-action { flex: 1; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 9px; font-size: 10px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; }
-  .btn-edit { color: #888; }
-  .btn-delete { color: #e53e3e; border-color: #fecaca; background: #fff5f5; }
- 
-  .empty { text-align: center; padding: 50px 0; color: #ccc; }
-  .empty-icon { font-size: 36px; margin-bottom: 8px; }
-  .empty-text { font-size: 11px; letter-spacing: 2px; }
-  .loading { text-align: center; padding: 40px 0; color: #ccc; font-size: 11px; letter-spacing: 2px; }
- 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111; color: #fff; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-  .toast.show { opacity: 1; }
-  .toast.error { background: #e53e3e; }
-  .toast.success { background: #38a169; }
- 
-  .stats { padding: 16px; }
-  .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 14px; text-transform: uppercase; font-weight: 700; }
-  .stat-card { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .btn-action { flex: 1; background: #f9f9f9; border: 1.5px solid #e0e0e0; border-radius: 6px; padding: 8px; font-size: 10px; font-family: inherit; cursor: pointer; letter-spacing: 1px; font-weight: 700; color: #888; }
+  .btn-action.del { color: #e53e3e; border-color: #fecaca; background: #fff5f5; }
+
+  /* STATS */
+  .stats-wrap { padding: 16px; padding-bottom: 80px; }
+  .stats-title { font-size: 10px; color: #f5c842; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; font-weight: 700; }
+  .stat-card { background: #fff; border: 1.5px solid #eee; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   .stat-label { font-size: 10px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; }
   .stat-val { font-size: 18px; font-weight: 700; }
-  .stat-val.big { font-size: 24px; }
-  .breakdown { background: #fff; border: 1.5px solid #eee; border-radius: 12px; padding: 16px; margin-top: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-  .breakdown-title { font-size: 10px; color: #bbb; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
-  .breakdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .breakdown-left { display: flex; align-items: center; gap: 8px; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; }
-  .breakdown-name { font-size: 12px; color: #777; }
-  .breakdown-count { font-size: 14px; font-weight: 700; }
-  .footer-note { font-size: 9px; color: #ccc; text-align: center; letter-spacing: 1px; margin-top: 14px; }
- 
+  .breakdown { background: #fff; border: 1.5px solid #eee; border-radius: 10px; padding: 14px; margin-top: 8px; }
+  .bd-title { font-size: 9px; color: #bbb; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
+  .bd-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .bd-left { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* MISC */
+  .empty { text-align: center; padding: 40px 0; color: #ccc; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .empty-text { font-size: 11px; letter-spacing: 2px; }
+  .loading { text-align: center; padding: 30px 0; color: #ccc; font-size: 11px; letter-spacing: 2px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #111; color: #fff; border-radius: 8px; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .toast.success { background: #38a169; }
+  .toast.error { background: #e53e3e; }
+
   .status-listed   { background: #f0fff4; color: #38a169; }
   .status-sold     { background: #ebf8ff; color: #3182ce; }
   .status-pending  { background: #fffbeb; color: #d97706; }
-  .status-unlisted { background: #fff5f5; color: #e53e3e; }
   .status-personal { background: #faf5ff; color: #805ad5; }
+  .status-unlisted { background: #fff5f5; color: #e53e3e; }
+
+  .kanban-listed   { background: #f0fff4; }
+  .kanban-listed .kanban-title { color: #38a169; }
+  .kanban-sold     { background: #ebf8ff; }
+  .kanban-sold .kanban-title { color: #3182ce; }
+  .kanban-pending  { background: #fffbeb; }
+  .kanban-pending .kanban-title { color: #d97706; }
+  .kanban-personal { background: #faf5ff; }
+  .kanban-personal .kanban-title { color: #805ad5; }
+  .kanban-unlisted { background: #fff5f5; }
+  .kanban-unlisted .kanban-title { color: #e53e3e; }
 </style>
 </head>
 <body>
- 
+
 <div id="loginScreen">
   <div class="login-sub">resale tracker</div>
   <div class="login-title">FLIP LOG</div>
@@ -134,7 +167,7 @@
   <button class="btn-login" onclick="doLogin()">ENTER</button>
   <div class="login-error" id="loginError">Incorrect password. Try again.</div>
 </div>
- 
+
 <div id="appScreen">
   <div class="header">
     <div class="header-top">
@@ -143,385 +176,502 @@
         <div class="header-title">FLIP LOG</div>
       </div>
       <div class="header-right">
-        <button class="btn-logout" onclick="doLogout()">LOCK</button>
-        <button class="btn-add" id="btnAdd" onclick="toggleForm()">+ ADD</button>
+        <button class="btn-sm outline" onclick="doLogout()">LOCK</button>
+        <button class="btn-sm" id="btnAdd" onclick="toggleForm()">+ ADD</button>
       </div>
     </div>
   </div>
- 
+
   <div class="dashboard" id="dashboard"></div>
   <div class="projections" id="projections"></div>
- 
-  <div class="tabs">
-    <button class="tab active" id="tab-inventory" onclick="switchTab('inventory')">Inventory</button>
-    <button class="tab" id="tab-stats" onclick="switchTab('stats')">Stats</button>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="ntab-board" onclick="switchNav('board')">📋 Board</button>
+    <button class="nav-tab" id="ntab-list" onclick="switchNav('list')">📦 List</button>
+    <button class="nav-tab" id="ntab-stats" onclick="switchNav('stats')">📊 Stats</button>
   </div>
- 
+
+  <!-- ADD/EDIT FORM -->
   <div id="formWrap" class="form-wrap">
     <div class="form-title" id="formTitle">New Item</div>
-    <div class="field"><label>Item Name *</label><input type="text" id="f-item" placeholder="e.g. Nintendo Switch OLED"></div>
-    <div class="field"><label>Purchase Date *</label><input type="date" id="f-purchaseDate"></div>
-    <div class="field"><label>Cost *</label><input type="number" id="f-cost" placeholder="0.00" step="0.01"></div>
-    <div class="field"><label>Listed Price</label><input type="number" id="f-listedPrice" placeholder="0.00" step="0.01"></div>
-    <div class="field"><label>Sale Price</label><input type="number" id="f-salePrice" placeholder="0.00" step="0.01"></div>
-    <div class="field"><label>Sale Date</label><input type="date" id="f-saleDate"></div>
-    <div class="field"><label>Miles Driven</label><input type="number" id="f-miles" placeholder="0"></div>
+
     <div class="field">
-      <label>Platform</label>
-      <select id="f-platform">
-        <option>Facebook Marketplace</option><option>OfferUp</option>
-        <option>eBay</option><option>Craigslist</option><option>Other</option>
-      </select>
+      <label>Item Name *</label>
+      <input type="text" id="f-item" placeholder="e.g. Nintendo Switch OLED" oninput="onItemNameChange()">
     </div>
-    <div class="field">
-      <label>Status</label>
-      <select id="f-status">
-        <option>Listed</option>
-        <option>Sold</option>
-        <option>Pending</option>
-        <option>Personal</option>
-        <option>Unlisted</option>
-      </select>
+
+    <button class="ai-lookup-btn" id="aiLookupBtn" onclick="fetchMarketPrice()" disabled>
+      <span id="aiLookupText">🤖 Type item name to get AI market price</span>
+    </button>
+    <div class="price-result" id="priceResult"></div>
+
+    <div class="field-row">
+      <div class="field"><label>Purchase Date *</label><input type="date" id="f-purchaseDate"></div>
+      <div class="field"><label>Cost *</label><input type="number" id="f-cost" placeholder="0.00" step="0.01"></div>
     </div>
-    <div class="field"><label>Notes</label><textarea id="f-notes" rows="2" placeholder="Condition, source, etc."></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Listed Price</label><input type="number" id="f-listedPrice" placeholder="0.00" step="0.01"></div>
+      <div class="field"><label>Sale Price</label><input type="number" id="f-salePrice" placeholder="0.00" step="0.01"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Sale Date</label><input type="date" id="f-saleDate"></div>
+      <div class="field"><label>Miles Driven</label><input type="number" id="f-miles" placeholder="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Platform</label>
+        <select id="f-platform">
+          <option>Facebook Marketplace</option><option>OfferUp</option>
+          <option>eBay</option><option>Craigslist</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="f-status">
+          <option>Listed</option><option>Sold</option><option>Pending</option>
+          <option>Personal</option><option>Unlisted</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="f-notes" rows="2" placeholder="Condition, source, bundle info, etc."></textarea></div>
     <button class="btn-save" id="btnSave" onclick="saveItem()">ADD ITEM</button>
   </div>
- 
-  <div id="tab-inventory-content">
-    <div class="filters" id="filters"></div>
-    <div class="items" id="itemsList"><div class="loading">LOADING...</div></div>
+
+  <!-- BOARD VIEW -->
+  <div id="view-board" style="padding-bottom:80px">
+    <div class="kanban-wrap">
+      <div class="kanban-board" id="kanbanBoard"></div>
+    </div>
   </div>
-  <div id="tab-stats-content" style="display:none">
-    <div class="stats" id="statsContent"></div>
+
+  <!-- LIST VIEW -->
+  <div id="view-list" style="display:none">
+    <div class="list-wrap">
+      <div class="filters" id="filters"></div>
+      <div id="itemsList"><div class="loading">LOADING...</div></div>
+    </div>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div id="view-stats" style="display:none">
+    <div class="stats-wrap" id="statsContent"></div>
   </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
-  const APP_PASSWORD = 'flip559';
-  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-  const TABLE = 'flip_log';
-  const SESSION_KEY = 'fliplog_auth';
- 
-  let items = [];
-  let editId = null;
-  let activeFilter = 'All';
- 
-  const statusColors = {
-    Listed:   { cls:'status-listed',  dot:'#38a169' },
-    Sold:     { cls:'status-sold',    dot:'#3182ce' },
-    Pending:  { cls:'status-pending', dot:'#d97706' },
-    Personal: { cls:'status-personal',dot:'#805ad5' },
-    Unlisted: { cls:'status-unlisted',dot:'#e53e3e' },
-  };
- 
-  const STATUSES = ['Listed','Sold','Pending','Personal','Unlisted'];
- 
-  async function sbFetch(path, method='GET', body=null) {
-    const opts = {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
+const APP_PASSWORD = 'flip559';
+const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const TABLE = 'flip_log';
+const SESSION_KEY = 'fliplog_auth';
+const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+
+let items = [];
+let editId = null;
+let activeFilter = 'All';
+let activeNav = 'board';
+let dragItem = null;
+let dragItemId = null;
+
+const STATUSES = ['Listed','Sold','Pending','Personal','Unlisted'];
+const statusColors = {
+  Listed:   { cls:'status-listed',  dot:'#38a169', kanban:'kanban-listed' },
+  Sold:     { cls:'status-sold',    dot:'#3182ce', kanban:'kanban-sold' },
+  Pending:  { cls:'status-pending', dot:'#d97706', kanban:'kanban-pending' },
+  Personal: { cls:'status-personal',dot:'#805ad5', kanban:'kanban-personal' },
+  Unlisted: { cls:'status-unlisted',dot:'#e53e3e', kanban:'kanban-unlisted' },
+};
+
+// SUPABASE
+async function sbFetch(path, method='GET', body=null) {
+  const opts = { method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': method==='POST'?'return=representation':'' }};
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SUPABASE_URL+'/rest/v1/'+path, opts);
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadItems() {
+  try {
+    const data = await sbFetch(TABLE+'?order=created_at.desc');
+    items = data || [];
+    render();
+  } catch(e) { showToast('Error loading data','error'); }
+}
+
+function toRow(obj) {
+  return { item:obj.item, purchase_date:obj.purchaseDate||null, cost:parseFloat(obj.cost)||0, listed_price:parseFloat(obj.listedPrice)||null, sale_price:parseFloat(obj.salePrice)||null, sale_date:obj.saleDate||null, miles:parseFloat(obj.miles)||null, platform:obj.platform||null, status:obj.status||'Listed', notes:obj.notes||null };
+}
+function fromRow(row) {
+  return { id:row.id, item:row.item, purchaseDate:row.purchase_date, cost:row.cost, listedPrice:row.listed_price, salePrice:row.sale_price, saleDate:row.sale_date, miles:row.miles, platform:row.platform, status:row.status, notes:row.notes };
+}
+
+// AUTH
+function doLogin() {
+  if (document.getElementById('passwordInput').value === APP_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY,'1');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appScreen').style.display='block';
+    loadItems();
+  } else {
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('passwordInput').value='';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('passwordInput').value='';
+}
+window.onload = () => {
+  if (sessionStorage.getItem(SESSION_KEY)==='1') {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appScreen').style.display='block';
+    loadItems();
+  }
+};
+
+// AI PRICE LOOKUP
+let lookupTimeout = null;
+function onItemNameChange() {
+  const val = document.getElementById('f-item').value.trim();
+  const btn = document.getElementById('aiLookupBtn');
+  const txt = document.getElementById('aiLookupText');
+  if (val.length > 3) {
+    btn.disabled = false;
+    txt.textContent = `🤖 Get AI market price for "${val}"`;
+  } else {
+    btn.disabled = true;
+    txt.textContent = '🤖 Type item name to get AI market price';
+    document.getElementById('priceResult').style.display = 'none';
+  }
+}
+
+async function fetchMarketPrice() {
+  const itemName = document.getElementById('f-item').value.trim();
+  if (!itemName) return;
+  const btn = document.getElementById('aiLookupBtn');
+  const txt = document.getElementById('aiLookupText');
+  const result = document.getElementById('priceResult');
+  btn.disabled = true;
+  txt.textContent = '⏳ Looking up current market price...';
+  result.style.display = 'none';
+  try {
+    const response = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: `What is the current used resale market value for "${itemName}" on Facebook Marketplace in 2025? Give me: 1) A price range (low-high), 2) A recommended listing price, 3) A good buy price if flipping. Be concise, 3 lines max. Format: Range: $X-$Y | List at: $Z | Buy under: $W`
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'Could not fetch price.';
+    result.style.display = 'block';
+    result.innerHTML = '🤖 <strong>AI Market Price:</strong><br>' + text;
+    // Try to auto-fill listed price
+    const listMatch = text.match(/List at:\s*\$?([\d,]+)/i);
+    if (listMatch) {
+      const price = listMatch[1].replace(',','');
+      if (!document.getElementById('f-listedPrice').value) {
+        document.getElementById('f-listedPrice').value = price;
       }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
-    if (!res.ok) throw new Error(await res.text());
-    const text = await res.text();
-    return text ? JSON.parse(text) : null;
-  }
- 
-  async function loadItems() {
-    try {
-      const data = await sbFetch(TABLE + '?order=created_at.desc');
-      items = data || [];
-      render();
-    } catch(e) {
-      showToast('Error loading data', 'error');
     }
+    txt.textContent = `🤖 Get AI market price for "${itemName}"`;
+    btn.disabled = false;
+  } catch(e) {
+    result.style.display = 'block';
+    result.innerHTML = '⚠️ Could not fetch price — check connection.';
+    txt.textContent = `🤖 Get AI market price for "${itemName}"`;
+    btn.disabled = false;
   }
- 
-  function toRow(obj) {
-    return {
-      item: obj.item, purchase_date: obj.purchaseDate || null,
-      cost: parseFloat(obj.cost) || 0,
-      listed_price: parseFloat(obj.listedPrice) || null,
-      sale_price: parseFloat(obj.salePrice) || null,
-      sale_date: obj.saleDate || null,
-      miles: parseFloat(obj.miles) || null,
-      platform: obj.platform || null,
-      status: obj.status || 'Listed',
-      notes: obj.notes || null,
-    };
+}
+
+// FORM
+function fmt(v) { return (v!=null&&v!=='')? '$'+parseFloat(v).toFixed(2):'—'; }
+function fmtDate(d) { if(!d) return '—'; const[y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
+
+function toggleForm() {
+  const wrap = document.getElementById('formWrap');
+  const btn = document.getElementById('btnAdd');
+  if (wrap.style.display==='block') {
+    wrap.style.display='none'; btn.textContent='+ ADD'; btn.classList.remove('cancel');
+    clearForm(); editId=null;
+  } else {
+    wrap.style.display='block'; btn.textContent='CANCEL'; btn.classList.add('cancel');
+    document.getElementById('formTitle').textContent = editId?'Edit Item':'New Item';
+    document.getElementById('btnSave').textContent = editId?'SAVE CHANGES':'ADD ITEM';
+    document.getElementById('priceResult').style.display='none';
   }
- 
-  function fromRow(row) {
-    return {
-      id: row.id, item: row.item, purchaseDate: row.purchase_date,
-      cost: row.cost, listedPrice: row.listed_price, salePrice: row.sale_price,
-      saleDate: row.sale_date, miles: row.miles, platform: row.platform,
-      status: row.status, notes: row.notes,
-    };
-  }
- 
-  function doLogin() {
-    if (document.getElementById('passwordInput').value === APP_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, '1');
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appScreen').style.display = 'block';
-      loadItems();
+}
+function clearForm() {
+  ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k=>document.getElementById('f-'+k).value='');
+  document.getElementById('f-platform').value='Facebook Marketplace';
+  document.getElementById('f-status').value='Listed';
+  document.getElementById('aiLookupBtn').disabled=true;
+  document.getElementById('aiLookupText').textContent='🤖 Type item name to get AI market price';
+  document.getElementById('priceResult').style.display='none';
+}
+
+async function saveItem() {
+  const item = document.getElementById('f-item').value.trim();
+  const purchaseDate = document.getElementById('f-purchaseDate').value;
+  const cost = document.getElementById('f-cost').value;
+  if (!item||!purchaseDate||!cost) { alert('Item name, purchase date, and cost are required.'); return; }
+  const obj = { item, purchaseDate, cost, listedPrice:document.getElementById('f-listedPrice').value, salePrice:document.getElementById('f-salePrice').value, saleDate:document.getElementById('f-saleDate').value, miles:document.getElementById('f-miles').value, platform:document.getElementById('f-platform').value, status:document.getElementById('f-status').value, notes:document.getElementById('f-notes').value.trim() };
+  document.getElementById('btnSave').textContent='SAVING...';
+  try {
+    if (editId) {
+      await sbFetch(TABLE+'?id=eq.'+editId,'PATCH',toRow(obj));
+      items = items.map(i=>i.id===editId?{...toRow(obj),id:editId,purchase_date:obj.purchaseDate,listed_price:obj.listedPrice,sale_price:obj.salePrice,sale_date:obj.saleDate}:i);
+      editId=null; showToast('ITEM UPDATED ✓','success');
     } else {
-      document.getElementById('loginError').style.display = 'block';
-      document.getElementById('passwordInput').value = '';
+      const res = await sbFetch(TABLE,'POST',toRow(obj));
+      items.unshift(Array.isArray(res)?res[0]:res);
+      showToast('ITEM ADDED ✓','success');
     }
-  }
- 
-  function doLogout() {
-    sessionStorage.removeItem(SESSION_KEY);
-    document.getElementById('appScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('passwordInput').value = '';
-  }
- 
-  window.onload = () => {
-    if (sessionStorage.getItem(SESSION_KEY) === '1') {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appScreen').style.display = 'block';
-      loadItems();
-    }
-  };
- 
-  function showToast(msg, type='success') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + type;
-    setTimeout(() => t.className = 'toast', 2500);
-  }
- 
-  function fmt(v) { return (v!=null && v!=='') ? '$'+parseFloat(v).toFixed(2) : '—'; }
-  function fmtDate(d) { if(!d) return '—'; const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; }
- 
-  function calcStats() {
-    const mapped = items.map(fromRow);
-    const sold = mapped.filter(i => i.status === 'Sold');
-    const totalProfit = sold.reduce((a,i) => a + (parseFloat(i.salePrice)||0) - (parseFloat(i.cost)||0), 0);
-    const tiedUp = mapped.filter(i => !['Sold','Personal'].includes(i.status)).reduce((a,i) => a + (parseFloat(i.cost)||0), 0);
-    const personalValue = mapped.filter(i => i.status === 'Personal').reduce((a,i) => a + (parseFloat(i.cost)||0), 0);
-    const totalMiles = mapped.reduce((a,i) => a + (parseFloat(i.miles)||0), 0);
-    const mileageDeduction = totalMiles * 0.67;
-    let weeklyAvg = 0;
-    if (sold.length > 0) {
-      const saleDates = sold.filter(i => i.saleDate).map(i => new Date(i.saleDate).getTime());
-      if (saleDates.length > 0) {
-        const earliest = Math.min(...saleDates);
-        const weeksElapsed = Math.max(1, (Date.now() - earliest) / (7*24*60*60*1000));
-        weeklyAvg = totalProfit / weeksElapsed;
-      }
-    }
-    return { mapped, sold, totalProfit, tiedUp, personalValue, totalMiles, mileageDeduction, weeklyAvg };
-  }
- 
-  function renderDashboard() {
-    const { totalProfit, tiedUp, personalValue, sold, mapped, weeklyAvg, mileageDeduction } = calcStats();
-    const active = mapped.filter(i => ['Listed','Pending'].includes(i.status)).length;
-    const profitClass = totalProfit >= 0 ? 'green' : 'red';
-    document.getElementById('dashboard').innerHTML = `
-      <div class="dash-row1">
-        <div class="dash-card ${profitClass}">
-          <div class="dash-label">Total Profit</div>
-          <div class="dash-val ${profitClass}">${totalProfit >= 0 ? '+' : ''}${fmt(totalProfit)}</div>
-          <div class="dash-sub">${sold.length} item${sold.length !== 1 ? 's' : ''} sold</div>
+    clearForm(); toggleForm(); render();
+  } catch(e) { showToast('Save failed','error'); document.getElementById('btnSave').textContent=editId?'SAVE CHANGES':'ADD ITEM'; }
+}
+
+async function deleteItem(id) {
+  if (!confirm('Delete this item?')) return;
+  try { await sbFetch(TABLE+'?id=eq.'+id,'DELETE'); items=items.filter(i=>i.id!==id); showToast('DELETED'); render(); }
+  catch(e) { showToast('Delete failed','error'); }
+}
+
+async function updateStatus(id, newStatus) {
+  try {
+    await sbFetch(TABLE+'?id=eq.'+id,'PATCH',{status:newStatus});
+    items = items.map(i=>i.id===id?{...i,status:newStatus}:i);
+    render();
+    showToast(`Moved to ${newStatus}`,'success');
+  } catch(e) { showToast('Update failed','error'); }
+}
+
+function editItem(id) {
+  const item = items.find(i=>i.id===id); if(!item) return;
+  const mapped = fromRow(item);
+  editId=id;
+  ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k=>document.getElementById('f-'+k).value=mapped[k]||'');
+  document.getElementById('f-platform').value=mapped.platform||'Facebook Marketplace';
+  document.getElementById('f-status').value=mapped.status||'Listed';
+  const wrap=document.getElementById('formWrap');
+  if(wrap.style.display!=='block') toggleForm();
+  else { document.getElementById('formTitle').textContent='Edit Item'; document.getElementById('btnSave').textContent='SAVE CHANGES'; }
+  window.scrollTo({top:0,behavior:'smooth'});
+  onItemNameChange();
+}
+
+// NAV
+function switchNav(tab) {
+  activeNav = tab;
+  ['board','list','stats'].forEach(t=>{
+    document.getElementById('view-'+t).style.display = t===tab?'block':'none';
+    document.getElementById('ntab-'+t).classList.toggle('active',t===tab);
+  });
+  if (tab==='stats') renderStats();
+}
+
+// TOAST
+function showToast(msg,type='') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',2500);
+}
+
+// STATS CALC
+function calcStats() {
+  const mapped=items.map(fromRow);
+  const sold=mapped.filter(i=>i.status==='Sold');
+  const totalProfit=sold.reduce((a,i)=>a+(parseFloat(i.salePrice)||0)-(parseFloat(i.cost)||0),0);
+  const tiedUp=mapped.filter(i=>!['Sold','Personal'].includes(i.status)).reduce((a,i)=>a+(parseFloat(i.cost)||0),0);
+  const personalValue=mapped.filter(i=>i.status==='Personal').reduce((a,i)=>a+(parseFloat(i.cost)||0),0);
+  const totalMiles=mapped.reduce((a,i)=>a+(parseFloat(i.miles)||0),0);
+  const mileageDeduction=totalMiles*0.67;
+  let weeklyAvg=0;
+  if(sold.length>0){const dates=sold.filter(i=>i.saleDate).map(i=>new Date(i.saleDate).getTime());if(dates.length>0){const earliest=Math.min(...dates);const weeks=Math.max(1,(Date.now()-earliest)/(7*24*60*60*1000));weeklyAvg=totalProfit/weeks;}}
+  return {mapped,sold,totalProfit,tiedUp,personalValue,totalMiles,mileageDeduction,weeklyAvg};
+}
+
+// DASHBOARD
+function renderDashboard() {
+  const {totalProfit,tiedUp,sold,mapped,weeklyAvg,mileageDeduction,personalValue}=calcStats();
+  const active=mapped.filter(i=>['Listed','Pending'].includes(i.status)).length;
+  const pc=totalProfit>=0?'green':'red';
+  document.getElementById('dashboard').innerHTML=`
+    <div class="dash-row1">
+      <div class="dash-card ${pc}"><div class="dash-label">Total Profit</div><div class="dash-val" style="color:${totalProfit>=0?'#38a169':'#e53e3e'}">${totalProfit>=0?'+':''}${fmt(totalProfit)}</div><div class="dash-sub">${sold.length} sold</div></div>
+      <div class="dash-card red"><div class="dash-label">Tied Up</div><div class="dash-val" style="color:#e53e3e">${fmt(tiedUp)}</div><div class="dash-sub">${active} active</div></div>
+    </div>
+    <div class="dash-row2">
+      <div class="dash-card yellow"><div class="dash-label">Wk Avg</div><div class="dash-val" style="color:#d97706">${weeklyAvg>0?fmt(weeklyAvg):'—'}</div></div>
+      <div class="dash-card purple"><div class="dash-label">Personal</div><div class="dash-val" style="color:#805ad5">${fmt(personalValue)}</div></div>
+      <div class="dash-card green"><div class="dash-label">Mi Deduct</div><div class="dash-val" style="color:#38a169">${fmt(mileageDeduction)}</div></div>
+    </div>`;
+}
+
+function renderProjections() {
+  const {weeklyAvg}=calcStats();
+  document.getElementById('projections').innerHTML=`
+    <div class="proj-title">📈 Projected (based on weekly avg)</div>
+    <div class="proj-grid">
+      <div class="proj-card"><div class="proj-period">Monthly</div><div class="proj-val">${weeklyAvg>0?fmt(weeklyAvg*4.33):'—'}</div></div>
+      <div class="proj-card"><div class="proj-period">Quarterly</div><div class="proj-val">${weeklyAvg>0?fmt(weeklyAvg*13):'—'}</div></div>
+      <div class="proj-card"><div class="proj-period">Yearly</div><div class="proj-val">${weeklyAvg>0?fmt(weeklyAvg*52):'—'}</div></div>
+    </div>`;
+}
+
+// KANBAN BOARD
+function renderKanban() {
+  const board = document.getElementById('kanbanBoard');
+  const mapped = items.map(fromRow);
+  board.innerHTML = STATUSES.map(status => {
+    const colItems = mapped.filter(i=>i.status===status);
+    const sc = statusColors[status];
+    const cards = colItems.map(item => {
+      const profit = status==='Sold'?(parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0):null;
+      return `<div class="kanban-card" draggable="true" data-id="${item.id}" ontouchstart="touchStart(event,${item.id})" ontouchmove="touchMove(event)" ontouchend="touchEnd(event)">
+        <div class="kcard-name">${item.item}</div>
+        <div class="kcard-cost">Cost: ${fmt(item.cost)}${item.listedPrice?` · Listed: ${fmt(item.listedPrice)}`:''}${item.salePrice?` · Sold: ${fmt(item.salePrice)}`:''}</div>
+        ${profit!==null?`<div class="kcard-profit" style="color:${profit>=0?'#38a169':'#e53e3e'}">${profit>=0?'+':''}${fmt(profit)} profit</div>`:''}
+        ${item.notes?`<div style="font-size:10px;color:#aaa;margin-top:4px">${item.notes}</div>`:''}
+        <div class="kcard-actions">
+          <button class="kcard-btn" onclick="editItem(${item.id});switchNav('board')">EDIT</button>
+          <button class="kcard-btn del" onclick="deleteItem(${item.id})">DEL</button>
         </div>
-        <div class="dash-card red">
-          <div class="dash-label">Tied Up Funds</div>
-          <div class="dash-val red">${fmt(tiedUp)}</div>
-          <div class="dash-sub">${active} active listing${active !== 1 ? 's' : ''}</div>
-        </div>
-      </div>
-      <div class="dash-row2">
-        <div class="dash-card highlight">
-          <div class="dash-label">Weekly Avg</div>
-          <div class="dash-val yellow">${weeklyAvg > 0 ? fmt(weeklyAvg) : '—'}</div>
-        </div>
-        <div class="dash-card" style="background:#faf5ff;border-color:#e9d8fd">
-          <div class="dash-label">Personal</div>
-          <div class="dash-val" style="color:#805ad5">${fmt(personalValue)}</div>
-        </div>
-        <div class="dash-card green">
-          <div class="dash-label">Miles Deduct</div>
-          <div class="dash-val green">${fmt(mileageDeduction)}</div>
-        </div>
-      </div>`;
-  }
- 
-  function renderProjections() {
-    const { weeklyAvg } = calcStats();
-    document.getElementById('projections').innerHTML = `
-      <div class="proj-title">📈 Projected Earnings (based on avg)</div>
-      <div class="proj-grid">
-        <div class="proj-card">
-          <div class="proj-period">Monthly</div>
-          <div class="proj-val">${weeklyAvg > 0 ? fmt(weeklyAvg*4.33) : '—'}</div>
-          <div class="proj-note">4.33 wks</div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-period">Quarterly</div>
-          <div class="proj-val">${weeklyAvg > 0 ? fmt(weeklyAvg*13) : '—'}</div>
-          <div class="proj-note">13 wks</div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-period">Yearly</div>
-          <div class="proj-val">${weeklyAvg > 0 ? fmt(weeklyAvg*52) : '—'}</div>
-          <div class="proj-note">52 wks</div>
-        </div>
-      </div>`;
-  }
- 
-  function toggleForm() {
-    const wrap = document.getElementById('formWrap');
-    const btn = document.getElementById('btnAdd');
-    if (wrap.style.display === 'block') {
-      wrap.style.display='none'; btn.textContent='+ ADD'; btn.classList.remove('cancel');
-      clearForm(); editId=null;
-    } else {
-      wrap.style.display='block'; btn.textContent='CANCEL'; btn.classList.add('cancel');
-      document.getElementById('formTitle').textContent = editId ? 'Edit Item' : 'New Item';
-      document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
-    }
-  }
- 
-  function clearForm() {
-    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value='');
-    document.getElementById('f-platform').value='Facebook Marketplace';
-    document.getElementById('f-status').value='Listed';
-  }
- 
-  async function saveItem() {
-    const item = document.getElementById('f-item').value.trim();
-    const purchaseDate = document.getElementById('f-purchaseDate').value;
-    const cost = document.getElementById('f-cost').value;
-    if (!item || !purchaseDate || !cost) { alert('Item name, purchase date, and cost are required.'); return; }
-    const obj = {
-      item, purchaseDate, cost,
-      listedPrice: document.getElementById('f-listedPrice').value,
-      salePrice: document.getElementById('f-salePrice').value,
-      saleDate: document.getElementById('f-saleDate').value,
-      miles: document.getElementById('f-miles').value,
-      platform: document.getElementById('f-platform').value,
-      status: document.getElementById('f-status').value,
-      notes: document.getElementById('f-notes').value.trim(),
-    };
-    document.getElementById('btnSave').textContent = 'SAVING...';
-    try {
-      if (editId) {
-        await sbFetch(TABLE + '?id=eq.' + editId, 'PATCH', toRow(obj));
-        items = items.map(i => i.id===editId ? {...toRow(obj), id:editId, purchase_date:obj.purchaseDate, listed_price:obj.listedPrice, sale_price:obj.salePrice, sale_date:obj.saleDate} : i);
-        editId=null; showToast('ITEM UPDATED ✓');
-      } else {
-        const res = await sbFetch(TABLE, 'POST', toRow(obj));
-        const newRow = Array.isArray(res) ? res[0] : res;
-        items.unshift(newRow);
-        showToast('ITEM ADDED ✓');
-      }
-      clearForm(); toggleForm(); render();
-    } catch(e) {
-      showToast('Save failed — check connection', 'error');
-      document.getElementById('btnSave').textContent = editId ? 'SAVE CHANGES' : 'ADD ITEM';
-    }
-  }
- 
-  async function deleteItem(id) {
-    if (!confirm('Delete this item?')) return;
-    try {
-      await sbFetch(TABLE + '?id=eq.' + id, 'DELETE');
-      items = items.filter(i=>i.id!==id);
-      showToast('DELETED'); render();
-    } catch(e) { showToast('Delete failed', 'error'); }
-  }
- 
-  function editItem(id) {
-    const item = items.find(i=>i.id===id); if(!item) return;
-    const mapped = fromRow(item);
-    editId=id;
-    ['item','purchaseDate','cost','listedPrice','salePrice','saleDate','miles','notes'].forEach(k => document.getElementById('f-'+k).value=mapped[k]||'');
-    document.getElementById('f-platform').value=mapped.platform||'Facebook Marketplace';
-    document.getElementById('f-status').value=mapped.status||'Listed';
-    const wrap=document.getElementById('formWrap');
-    if(wrap.style.display!=='block') toggleForm();
-    else { document.getElementById('formTitle').textContent='Edit Item'; document.getElementById('btnSave').textContent='SAVE CHANGES'; }
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
- 
-  function switchTab(tab) {
-    document.getElementById('tab-inventory-content').style.display=tab==='inventory'?'block':'none';
-    document.getElementById('tab-stats-content').style.display=tab==='stats'?'block':'none';
-    document.getElementById('tab-inventory').classList.toggle('active',tab==='inventory');
-    document.getElementById('tab-stats').classList.toggle('active',tab==='stats');
-    if(tab==='stats') renderStats();
-  }
- 
-  function setFilter(s) { activeFilter=s; renderFilters(); renderItems(); }
- 
-  function renderFilters() {
-    document.getElementById('filters').innerHTML=['All',...STATUSES].map(s=>
-      `<button class="chip ${activeFilter===s?'active':''}" onclick="setFilter('${s}')">${s.toUpperCase()}</button>`
-    ).join('');
-  }
- 
-  function renderItems() {
-    const mapped = items.map(fromRow);
-    const filtered = activeFilter==='All' ? mapped : mapped.filter(i=>i.status===activeFilter);
-    const el=document.getElementById('itemsList');
-    if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">NO ITEMS YET</div></div>';return;}
-    el.innerHTML=filtered.map(item=>{
-      const sc=statusColors[item.status]||statusColors.Listed;
-      const profit=item.status==='Sold'?(parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0):null;
-      const fields=[
-        {label:'Bought',val:fmtDate(item.purchaseDate)},{label:'Cost',val:fmt(item.cost)},
-        {label:'Listed',val:fmt(item.listedPrice)},{label:'Platform',val:(item.platform||'').split(' ')[0]||'—'},
-        ...(item.status==='Sold'?[{label:'Sold',val:fmtDate(item.saleDate)},{label:'Sale Price',val:fmt(item.salePrice)}]:[]),
-        ...(item.miles?[{label:'Miles',val:item.miles+' mi'}]:[]),
-      ];
-      return `<div class="card">
-        <div class="card-top"><div class="card-name">${item.item}</div><div class="badge ${sc.cls}">${item.status.toUpperCase()}</div></div>
-        <div class="grid2">${fields.map(f=>`<div class="grid-item"><label>${f.label}</label><span>${f.val}</span></div>`).join('')}</div>
-        ${profit!==null?`<div class="profit-row" style="background:${profit>=0?'#f0fff4':'#fff5f5'}"><span class="profit-label">PROFIT</span><span class="profit-val" style="color:${profit>=0?'#38a169':'#e53e3e'}">${profit>=0?'+':''}${fmt(profit)}</span></div>`:''}
-        ${item.notes?`<div class="card-notes">${item.notes}</div>`:''}
-        <div class="card-actions"><button class="btn-action btn-edit" onclick="editItem(${item.id})">EDIT</button><button class="btn-action btn-delete" onclick="deleteItem(${item.id})">DELETE</button></div>
       </div>`;
     }).join('');
-  }
- 
-  function renderStats() {
-    const { mapped, sold, totalProfit, tiedUp, personalValue, totalMiles, mileageDeduction, weeklyAvg } = calcStats();
-    const rows=[
-      {label:'Total Items',val:mapped.length,color:'#111'},
-      {label:'Items Sold',val:sold.length,color:'#3182ce'},
-      {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#38a169':'#e53e3e',big:true},
-      {label:'Tied Up Funds',val:fmt(tiedUp),color:'#e53e3e'},
-      {label:'Personal Items Value',val:fmt(personalValue),color:'#805ad5'},
-      {label:'Weekly Avg Profit',val:weeklyAvg>0?fmt(weeklyAvg):'—',color:'#d97706'},
-      {label:'Projected Monthly',val:weeklyAvg>0?fmt(weeklyAvg*4.33):'—',color:'#38a169'},
-      {label:'Projected Yearly',val:weeklyAvg>0?fmt(weeklyAvg*52):'—',color:'#38a169'},
-      {label:'Miles Logged',val:totalMiles+' mi',color:'#111'},
-      {label:'Mileage Deduction',val:fmt(mileageDeduction),color:'#38a169'},
-    ];
-    document.getElementById('statsContent').innerHTML=`
-      <div class="stats-title">Full Summary</div>
-      ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
-      <div class="breakdown"><div class="breakdown-title">By Status</div>
-        ${STATUSES.map(s=>{const sc=statusColors[s];return`<div class="breakdown-row"><div class="breakdown-left"><div class="dot" style="background:${sc.dot}"></div><span class="breakdown-name">${s}</span></div><span class="breakdown-count" style="color:${sc.dot}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
+    return `<div class="kanban-col">
+      <div class="kanban-header ${sc.kanban}">
+        <span class="kanban-title">${status}</span>
+        <span class="kanban-count">${colItems.length}</span>
       </div>
-      <div class="footer-note">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
-  }
- 
-  function render() { renderDashboard(); renderProjections(); renderFilters(); renderItems(); }
+      <div class="kanban-drop" data-status="${status}" ondragover="dragOver(event)" ondrop="drop(event)" ondragleave="dragLeave(event)">
+        ${cards||`<div style="text-align:center;padding:20px 0;font-size:10px;color:#ccc">DROP HERE</div>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Add drag listeners
+  board.querySelectorAll('.kanban-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      dragItemId=parseInt(card.dataset.id);
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',e=>{ card.classList.remove('dragging'); dragItemId=null; });
+  });
+}
+
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+async function drop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const newStatus = e.currentTarget.dataset.status;
+  if (dragItemId && newStatus) { await updateStatus(dragItemId, newStatus); }
+}
+
+// TOUCH DRAG
+let touchDragEl = null, touchClone = null, touchOffX = 0, touchOffY = 0;
+function touchStart(e, id) {
+  dragItemId = id;
+  touchDragEl = e.currentTarget;
+  const rect = touchDragEl.getBoundingClientRect();
+  touchOffX = e.touches[0].clientX - rect.left;
+  touchOffY = e.touches[0].clientY - rect.top;
+  touchClone = touchDragEl.cloneNode(true);
+  touchClone.style.cssText = `position:fixed;width:${rect.width}px;opacity:0.8;pointer-events:none;z-index:9999;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);`;
+  document.body.appendChild(touchClone);
+}
+function touchMove(e) {
+  if (!touchClone) return;
+  e.preventDefault();
+  const x = e.touches[0].clientX - touchOffX;
+  const y = e.touches[0].clientY - touchOffY;
+  touchClone.style.left = x+'px';
+  touchClone.style.top = y+'px';
+  document.querySelectorAll('.kanban-drop').forEach(drop=>{
+    const r = drop.getBoundingClientRect();
+    if (e.touches[0].clientX>=r.left&&e.touches[0].clientX<=r.right&&e.touches[0].clientY>=r.top&&e.touches[0].clientY<=r.bottom) drop.classList.add('drag-over');
+    else drop.classList.remove('drag-over');
+  });
+}
+async function touchEnd(e) {
+  if (touchClone) { document.body.removeChild(touchClone); touchClone=null; }
+  const cx = e.changedTouches[0].clientX, cy = e.changedTouches[0].clientY;
+  document.querySelectorAll('.kanban-drop').forEach(drop=>{
+    drop.classList.remove('drag-over');
+    const r = drop.getBoundingClientRect();
+    if (cx>=r.left&&cx<=r.right&&cy>=r.top&&cy<=r.bottom&&dragItemId) updateStatus(dragItemId,drop.dataset.status);
+  });
+  dragItemId=null;
+}
+
+// LIST VIEW
+function setFilter(s) { activeFilter=s; renderFilters(); renderList(); }
+function renderFilters() {
+  document.getElementById('filters').innerHTML=['All',...STATUSES].map(s=>`<button class="chip ${activeFilter===s?'active':''}" onclick="setFilter('${s}')">${s.toUpperCase()}</button>`).join('');
+}
+function renderList() {
+  const mapped=items.map(fromRow);
+  const filtered=activeFilter==='All'?mapped:mapped.filter(i=>i.status===activeFilter);
+  const el=document.getElementById('itemsList');
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">NO ITEMS YET</div></div>';return;}
+  el.innerHTML=filtered.map(item=>{
+    const sc=statusColors[item.status]||statusColors.Listed;
+    const profit=item.status==='Sold'?(parseFloat(item.salePrice)||0)-(parseFloat(item.cost)||0):null;
+    const fields=[{label:'Bought',val:fmtDate(item.purchaseDate)},{label:'Cost',val:fmt(item.cost)},{label:'Listed',val:fmt(item.listedPrice)},{label:'Platform',val:(item.platform||'').split(' ')[0]||'—'},...(item.status==='Sold'?[{label:'Sold',val:fmtDate(item.saleDate)},{label:'Sale',val:fmt(item.salePrice)}]:[]),...(item.miles?[{label:'Miles',val:item.miles+' mi'}]:[])];
+    return `<div class="list-card">
+      <div class="lcard-top"><div class="lcard-name">${item.item}</div><div class="badge ${sc.cls}">${item.status.toUpperCase()}</div></div>
+      <div class="grid2">${fields.map(f=>`<div class="gi"><label>${f.label}</label><span>${f.val}</span></div>`).join('')}</div>
+      ${profit!==null?`<div class="profit-row" style="background:${profit>=0?'#f0fff4':'#fff5f5'}"><span style="font-size:10px;color:#888">PROFIT</span><span style="font-size:16px;font-weight:700;color:${profit>=0?'#38a169':'#e53e3e'}">${profit>=0?'+':''}${fmt(profit)}</span></div>`:''}
+      ${item.notes?`<div class="card-notes">${item.notes}</div>`:''}
+      <div class="card-actions"><button class="btn-action" onclick="editItem(${item.id})">EDIT</button><button class="btn-action del" onclick="deleteItem(${item.id})">DELETE</button></div>
+    </div>`;
+  }).join('');
+}
+
+// STATS
+function renderStats() {
+  const {mapped,sold,totalProfit,tiedUp,personalValue,totalMiles,mileageDeduction,weeklyAvg}=calcStats();
+  const rows=[
+    {label:'Total Items',val:mapped.length,color:'#111'},
+    {label:'Items Sold',val:sold.length,color:'#3182ce'},
+    {label:'Total Profit',val:fmt(totalProfit),color:totalProfit>=0?'#38a169':'#e53e3e',big:true},
+    {label:'Tied Up Funds',val:fmt(tiedUp),color:'#e53e3e'},
+    {label:'Personal Items',val:fmt(personalValue),color:'#805ad5'},
+    {label:'Weekly Avg',val:weeklyAvg>0?fmt(weeklyAvg):'—',color:'#d97706'},
+    {label:'Projected Monthly',val:weeklyAvg>0?fmt(weeklyAvg*4.33):'—',color:'#38a169'},
+    {label:'Projected Yearly',val:weeklyAvg>0?fmt(weeklyAvg*52):'—',color:'#38a169'},
+    {label:'Miles Logged',val:totalMiles+' mi',color:'#111'},
+    {label:'Mileage Deduction',val:fmt(mileageDeduction),color:'#38a169'},
+  ];
+  document.getElementById('statsContent').innerHTML=`
+    <div class="stats-title">Full Summary</div>
+    ${rows.map(s=>`<div class="stat-card"><span class="stat-label">${s.label}</span><span class="stat-val ${s.big?'big':''}" style="color:${s.color}">${s.val}</span></div>`).join('')}
+    <div class="breakdown"><div class="bd-title">By Status</div>
+      ${STATUSES.map(s=>{const sc=statusColors[s];return`<div class="bd-row"><div class="bd-left"><div class="dot" style="background:${sc.dot}"></div><span style="font-size:12px;color:#777">${s}</span></div><span style="font-size:13px;font-weight:700;color:${sc.dot}">${mapped.filter(i=>i.status===s).length}</span></div>`;}).join('')}
+    </div>
+    <div style="font-size:9px;color:#ccc;text-align:center;letter-spacing:1px;margin-top:14px">MILEAGE RATE: $0.67/MI · IRS STANDARD</div>`;
+}
+
+function render() {
+  renderDashboard();
+  renderProjections();
+  renderKanban();
+  renderFilters();
+  renderList();
+}
 </script>
 </body>
 </html>
- 
