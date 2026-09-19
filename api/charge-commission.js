@@ -4,7 +4,7 @@
 // Charges 15% commission on confirmed catering
 // ============================================
 
-const STRIPE_SK = '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';
+const STRIPE_SK = process.env.STRIPE_SECRET_KEY;
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 const COMMISSION_RATE = 0.15;
