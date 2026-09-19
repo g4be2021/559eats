@@ -24,7 +24,7 @@ async function supabase(path, method = 'GET', body = null) {
   return res.json();
 }
 
-const { sendSms: sendViaProvider } = require('./lib/sms');
+const { sendSms: sendViaProvider } = require('./_lib/sms');
 
 async function sendSMS(to, message) {
   return sendViaProvider(to, message);

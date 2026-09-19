@@ -4,7 +4,7 @@
 // checked in within the last 20 days, so repeated or unauthorized calls
 // cannot spam owners. No owner data is returned.
 // ============================================
-const { sendSms } = require('./lib/sms');
+const { sendSms } = require('./_lib/sms');
 
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';

@@ -4,9 +4,9 @@
 //   https://559eats.com/api/sms-inbound?key=YOUR_SMS_WEBHOOK_KEY
 // CONFIRM/DECLINE texts go to booking-confirm, everything else to sms-reply.
 // ============================================
-const { parseInbound, webhookAllowed } = require('./lib/sms');
-const smsReply = require('./sms-reply');
-const bookingConfirm = require('./booking-confirm');
+const { parseInbound, webhookAllowed } = require('./_lib/sms');
+const smsReply = require('./_handlers/sms-reply');
+const bookingConfirm = require('./_handlers/booking-confirm');
 
 module.exports = async (req, res) => {
   if (!webhookAllowed(req)) return res.status(401).json({ error: 'unauthorized' });
