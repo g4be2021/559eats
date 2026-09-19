@@ -4,7 +4,7 @@
 // This runs as a Vercel serverless function
 // ============================================
 
-const stripe = require('stripe')('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');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
