@@ -4,9 +4,6 @@
 // Handles new requests + auto commission on confirm
 // ============================================
 
-const TWILIO_SID   = 'AC0311f54c34a54414ddd04c4e6b387b59';
-const TWILIO_TOKEN = '525516f7020ffe6c2d30269212ebf7b7';
-const TWILIO_FROM  = '+15593773665';
 const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 const COMMISSION_RATE = 0.15;
@@ -27,20 +24,10 @@ async function supabase(path, method = 'GET', body = null) {
   return res.json();
 }
 
+const { sendSms: sendViaProvider } = require('./lib/sms');
+
 async function sendSMS(to, message) {
-  const creds = Buffer.from(`${TWILIO_SID}:${TWILIO_TOKEN}`).toString('base64');
-  const res = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${creds}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({ To: to, From: TWILIO_FROM, Body: message }).toString()
-    }
-  );
-  return res.json();
+  return sendViaProvider(to, message);
 }
 
 async function triggerCommission(bookingId) {
