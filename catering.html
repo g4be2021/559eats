@@ -92,7 +92,7 @@
 <script>
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
 const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjI2NDE4NjYsImV4cCI6MjAzODIxNzg2Nn0.Hm1fKAYvNiWHxTl3nNR0-ZhXsJjMaQ8TnLaREOv7Yio';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 (async()=>{
   try{
     const r=await fetch(SUPA+'/rest/v1/restaurants?select=*&order=name.asc&limit=12',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
