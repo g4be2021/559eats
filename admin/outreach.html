@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>559eats - SMS Outreach</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #222; }
+  #login { display: flex; align-items: center; justify-content: center; height: 100vh; }
+  #login-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 2px 20px rgba(0,0,0,.1); width: 340px; }
+  #login-box h1 { font-size: 22px; margin-bottom: 6px; color: #c0392b; }
+  #login-box p { color: #666; font-size: 14px; margin-bottom: 20px; }
+  input[type=password] { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 12px; }
+  button { width: 100%; padding: 11px; background: #c0392b; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: 600; }
+  button:hover { background: #a93226; }
+  #app { display: none; height: 100vh; flex-direction: column; }
+  .topbar { background: #fff; padding: 14px 24px; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 20px; }
+  .topbar h1 { font-size: 18px; color: #c0392b; flex: 1; }
+  .stat { font-size: 13px; color: #666; }
+  .stat strong { color: #222; }
+  .send-btn { padding: 9px 20px; background: #c0392b; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+  .send-btn:hover { background: #a93226; }
+  .send-btn:disabled { background: #ccc; cursor: default; }
+  .main { display: flex; flex: 1; overflow: hidden; }
+  .sidebar { width: 320px; border-right: 1px solid #e5e5e5; background: #fff; overflow-y: auto; flex-shrink: 0; }
+  .sidebar-header { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #999; }
+  .prospect { padding: 14px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: background .15s; }
+  .prospect:hover { background: #fafafa; }
+  .prospect.active { background: #fff5f5; border-left: 3px solid #c0392b; }
+  .prospect-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .prospect-phone { font-size: 12px; color: #888; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+  .badge-pending { background: #f0f0f0; color: #666; }
+  .badge-contacted { background: #dbeafe; color: #1d4ed8; }
+  .badge-waiting_yes,.badge-waiting_name,.badge-waiting_items,.badge-waiting_location { background: #fef3c7; color: #d97706; }
+  .badge-done { background: #d1fae5; color: #065f46; }
+  .badge-opted_out { background: #f0f0f0; color: #999; }
+  .badge-invalid { background: #fee2e2; color: #991b1b; }
+  .detail { flex: 1; overflow-y: auto; padding: 24px; }
+  .detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #aaa; font-size: 15px; }
+  .detail-header { margin-bottom: 20px; }
+  .detail-header h2 { font-size: 20px; }
+  .detail-header p { color: #666; font-size: 14px; margin-top: 4px; }
+  .thread { display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 72%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
+  .msg-out { background: #c0392b; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg-in { background: #f0f0f0; color: #222; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg-time { font-size: 11px; opacity: .65; margin-top: 4px; }
+  .approve-btn { margin-top: 20px; padding: 10px 24px; background: #065f46; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
+  .approve-btn:hover { background: #047857; }
+  #toast { position: fixed; bottom: 24px; right: 24px; background: #222; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; display: none; z-index: 999; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div id="login-box">
+    <h1>559eats Admin</h1>
+    <p>SMS Outreach Dashboard</p>
+    <input type="password" id="pwd" placeholder="Admin password" />
+    <button onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <h1>SMS Outreach</h1>
+    <span class="stat">Total: <strong id="st-total">-</strong></span>
+    <span class="stat">Pending: <strong id="st-pending">-</strong></span>
+    <span class="stat">Done: <strong id="st-done">-</strong></span>
+    <span class="stat">Opted out: <strong id="st-opted">-</strong></span>
+    <button class="send-btn" id="send-btn" onclick="sendBatch()">Send Next Batch (10)</button>
+  </div>
+  <div class="main">
+    <div class="sidebar">
+      <div class="sidebar-header">Prospects</div>
+      <div id="prospect-list"></div>
+    </div>
+    <div class="detail" id="detail">
+      <div class="detail-empty">Select a prospect to view conversation</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let secret = '';
+let prospects = [];
+let selected = null;
+
+function doLogin() {
+  secret = document.getElementById('pwd').value.trim();
+  if (!secret) return;
+  loadProspects();
+}
+
+document.getElementById('pwd').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function loadProspects() {
+  try {
+    const r = await fetch('/api/admin/prospects', { headers: { 'x-admin-secret': secret } });
+    if (r.status === 401) { alert('Wrong password'); return; }
+    prospects = await r.json();
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    renderList();
+    updateStats();
+  } catch(e) { alert('Error loading: ' + e.message); }
+}
+
+function renderList() {
+  const el = document.getElementById('prospect-list');
+  el.innerHTML = prospects.map((p, i) => `
+    <div class="prospect ${selected === i ? 'active' : ''}" onclick="selectProspect(${i})">
+      <div class="prospect-name">${p.name || p.phone} <span class="badge badge-${p.status}">${p.status}</span></div>
+      <div class="prospect-phone">${p.phone}</div>
+    </div>
+  `).join('');
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = prospects.length;
+  document.getElementById('st-pending').textContent = prospects.filter(p => p.status === 'pending').length;
+  document.getElementById('st-done').textContent = prospects.filter(p => p.status === 'done').length;
+  document.getElementById('st-opted').textContent = prospects.filter(p => p.status === 'opted_out').length;
+}
+
+function selectProspect(i) {
+  selected = i;
+  renderList();
+  renderDetail();
+}
+
+function renderDetail() {
+  const p = prospects[selected];
+  if (!p) return;
+  const conv = p.conversation || [];
+  const msgs = conv.map(m => `
+    <div class="msg msg-${m.direction === 'outbound' ? 'out' : 'in'}">
+      ${m.text}
+      <div class="msg-time">${new Date(m.ts).toLocaleString()}</div>
+    </div>
+  `).join('');
+  const approveBtn = p.status === 'done' && !p.restaurant_id
+    ? `<button class="approve-btn" onclick="approveListing()">Approve Listing</button>`
+    : '';
+  document.getElementById('detail').innerHTML = `
+    <div class="detail-header">
+      <h2>${p.name || 'Unknown'}</h2>
+      <p>${p.phone} &bull; ${p.address || 'No address'} &bull; Status: ${p.status}</p>
+    </div>
+    <div class="thread">${msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>'}</div>
+    ${approveBtn}
+  `;
+}
+
+async function sendBatch() {
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const r = await fetch('/api/sms-outreach', {
+      method: 'POST',
+      headers: { 'x-admin-secret': secret, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ limit: 10 })
+    });
+    const d = await r.json();
+    showToast(d.message || `Sent ${d.sent || 0} messages`);
+    await loadProspects();
+  } catch(e) { showToast('Error: ' + e.message); }
+  btn.disabled = false;
+  btn.textContent = 'Send Next Batch (10)';
+}
+
+async function approveListing() {
+  const p = prospects[selected];
+  try {
+    const r = await fetch('/api/admin/approve-listing', {
+      method: 'POST',
+      headers: { 'x-admin-secret': secret, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prospectId: p.id })
+    });
+    const d = await r.json();
+    showToast(d.message || 'Listing approved!');
+    await loadProspects();
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+</body>
+</html>
