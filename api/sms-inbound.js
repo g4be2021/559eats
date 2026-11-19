@@ -1,16 +1,70 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+  process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-async function sendSMS(to, text) {
+const VONAGE_API_KEY = process.env.VONAGE_API_KEY;
+const VONAGE_API_SECRET = process.env.VONAGE_API_SECRET;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
+// Questions in English
+const QUESTIONS_EN = [
+  { key: 'truck_name', ask: "Great! What's the name of your food truck?" },
+  { key: 'cuisine', ask: 'What type of food do you serve? (e.g. Mexican, BBQ, Filipino, etc.)' },
+  { key: 'location', ask: 'What area or neighborhood do you usually serve in Fresno / Central Valley?' },
+  { key: 'instagram', ask: "Do you have an Instagram or website? If not, just reply NONE." },
+  { key: 'hours', ask: 'What are your usual hours or days? (e.g. Fri-Sun 11am-8pm)' },
+];
+
+// Questions in Spanish
+const QUESTIONS_ES = [
+  { key: 'truck_name', ask: '\u00a1Genial! \u00bfCu\u00e1l es el nombre de tu food truck?' },
+  { key: 'cuisine', ask: '\u00bfQu\u00e9 tipo de comida sirves? (ej. Mexicana, BBQ, Filipina, etc.)' },
+  { key: 'location', ask: '\u00bfEn qu\u00e9 \u00e1rea o vecindario del Valle Central / Fresno sueles atender?' },
+  { key: 'instagram', ask: '\u00bfTienes Instagram o p\u00e1gina web? Si no, solo responde NINGUNO.' },
+  { key: 'hours', ask: '\u00bfCu\u00e1les son tus horarios o d\u00edas? (ej. Vie-Dom 11am-8pm)' },
+];
+
+const YES_KEYWORDS = ['yes', 'si', 'si\u0301', 'yeah', 'yep', 'ok', 'okay', 'sure', 'claro', 'dale', '\u00e1ndale', 'andale', 'bueno', 'simon', 'sim\u00f3n'];
+const OPT_OUT_KEYWORDS = ['stop', 'unsubscribe', 'cancel', 'quit', 'end', 'alto', 'parar', 'detener', 'baja'];
+
+// Spanish-coded trigger words
+const SPANISH_TRIGGERS = ['si', 'si\u0301', 'claro', 'dale', '\u00e1ndale', 'andale', 'bueno', 'simon', 'sim\u00f3n', 'hola', 'gracias', 'buenos', 'orale', '\u00f3rale'];
+
+function isSpanishReply(text) {
+  const lower = text.toLowerCase().trim();
+  return SPANISH_TRIGGERS.some(w => lower === w || lower.startsWith(w + ' ') || lower.endsWith(' ' + w));
+}
+
+const STATUS_QUESTION_MAP = {
+  'waiting_name':      0,
+  'waiting_cuisine':   1,
+  'waiting_location':  2,
+  'waiting_instagram': 3,
+  'waiting_hours':     4,
+};
+
+const NEXT_STATUS = [
+  'waiting_cuisine',
+  'waiting_location',
+  'waiting_instagram',
+  'waiting_hours',
+  'waiting_review',
+];
+
+const DONE_MESSAGE_EN =
+  "Thanks! I'm putting together your listing now. Gabriel will review it and reach out if anything looks off. You should be live on 559eats.com soon! \ud83c\udf89";
+const DONE_MESSAGE_ES =
+  "\u00a1Gracias! Ya estoy preparando tu listing. Gabriel lo revisar\u00e1 y te contactar\u00e1 si algo no est\u00e1 bien. \u00a1Pronto estar\u00e1s en 559eats.com! \ud83c\udf89";
+
+async function sendVonageSMS(to, text) {
   const params = new URLSearchParams({
-    api_key: process.env.VONAGE_API_KEY,
-    api_secret: process.env.VONAGE_API_SECRET,
+    api_key: VONAGE_API_KEY,
+    api_secret: VONAGE_API_SECRET,
     to,
-    from: process.env.VONAGE_FROM || '17579703964',
+    from: process.env.VONAGE_FROM_NUMBER || '15592983338',
     text,
   });
   const res = await fetch('https://rest.nexmo.com/sms/json', {
@@ -21,140 +75,92 @@ async function sendSMS(to, text) {
   return res.json();
 }
 
-const QUESTIONS = [
-  { key: 'truck_name', ask: "Great! What's the name of your food truck?" },
-  { key: 'cuisine', ask: 'What type of food do you serve? (e.g. Mexican, BBQ, Filipino, etc.)' },
-  { key: 'location', ask: 'What area or neighborhood do you usually serve in Fresno / Central Valley?' },
-  { key: 'instagram', ask: "Do you have an Instagram or website? If not, just reply NONE." },
-  { key: 'hours', ask: 'What are your usual hours or days? (e.g. Fri-Sun 11am-8pm)' },
-];
+async function generateListingDraft(data) {
+  const prompt = `You are helping create a food truck listing for a local directory called 559eats.com (Fresno & Central Valley, CA).
 
-const DONE_MESSAGE =
-  "You're all set! I'll review your info and get your truck listed on 559eats.com within 24 hours. " +
-  "We'll text you once you're live. Thanks for being part of the Fresno food scene!\n\n" +
-  "¡Listo! Revisaré tu información y publicaré tu truck en 559eats.com en 24 horas. " +
-  "Te avisaremos por texto cuando estés en línea. ¡Gracias!";
+Based on the following info provided by the food truck owner, write a friendly, engaging 2-3 sentence description for their listing. Keep it casual and local. Do not make up details not provided.
 
-const OPT_OUT_KEYWORDS = ['stop', 'unsubscribe', 'cancel', 'quit', 'end'];
-const YES_KEYWORDS = ['yes', 'si', 'sí', 'yeah', 'yep', 'ok', 'okay', 'sure', 'claro', 'dale'];
+Truck name: ${data.truck_name || 'N/A'}
+Cuisine: ${data.cuisine || 'N/A'}
+Area: ${data.location || 'N/A'}
+Instagram/Website: ${data.instagram || 'N/A'}
+Hours/Days: ${data.hours || 'N/A'}
 
-function normalizeText(text) {
-  return (text || '').trim().toLowerCase().replace(/[^\w\s]/g, '');
-}
-
-function getNextQuestion(collectedData) {
-  for (const q of QUESTIONS) {
-    if (!collectedData[q.key]) return q;
-  }
-  return null;
-}
-
-export default async function handler(req, res) {
-  const body = req.method === 'POST' ? req.body : req.query;
-  const from = body?.msisdn || body?.from;
-  const text = (body?.text || '').trim();
-
-  if (!from) return res.status(400).json({ error: 'Missing from number' });
-
-  const phone = from.startsWith('+') ? from : `+${from}`;
-  const normalized = normalizeText(text);
-
-  const { data: prospects } = await supabase
-    .from('prospects')
-    .select('*')
-    .eq('phone', phone)
-    .limit(1);
-
-  const prospect = prospects?.[0];
-
-  if (OPT_OUT_KEYWORDS.some((kw) => normalized === kw || normalized.startsWith(kw + ' '))) {
-    if (prospect) {
-      await supabase.from('prospects').update({ status: 'opted_out' }).eq('id', prospect.id);
-    }
-    return res.status(200).end();
-  }
-
-  if (!prospect) {
-    console.log(`Inbound from unknown number ${phone}: ${text}`);
-    return res.status(200).end();
-  }
-
-  const conversation = Array.isArray(prospect.conversation) ? [...prospect.conversation] : [];
-  conversation.push({ role: 'inbound', text, ts: new Date().toISOString() });
-
-  if (prospect.status === 'contacted') {
-    if (YES_KEYWORDS.some((kw) => normalized === kw || normalized.startsWith(kw))) {
-      const firstQ = QUESTIONS[0];
-      conversation.push({ role: 'outbound', text: firstQ.ask, ts: new Date().toISOString() });
-      await supabase.from('prospects').update({
-        status: 'waiting_name',
-        conversation,
-        collected_data: {},
-      }).eq('id', prospect.id);
-      await sendSMS(phone, firstQ.ask);
-    } else {
-      await supabase.from('prospects').update({ conversation }).eq('id', prospect.id);
-    }
-    return res.status(200).end();
-  }
-
-  if (prospect.status?.startsWith('waiting_')) {
-    const collectedData = prospect.collected_data || {};
-    const currentKey = prospect.status.replace('waiting_', '');
-    collectedData[currentKey] = text;
-
-    const nextQ = getNextQuestion(collectedData);
-
-    if (nextQ) {
-      conversation.push({ role: 'outbound', text: nextQ.ask, ts: new Date().toISOString() });
-      await supabase.from('prospects').update({
-        status: `waiting_${nextQ.key}`,
-        conversation,
-        collected_data: collectedData,
-      }).eq('id', prospect.id);
-      await sendSMS(phone, nextQ.ask);
-    } else {
-      let listingDraft = null;
-      try { listingDraft = await generateListingDraft(collectedData, prospect); } catch (e) {}
-
-      conversation.push({ role: 'outbound', text: DONE_MESSAGE, ts: new Date().toISOString() });
-      await supabase.from('prospects').update({
-        status: 'waiting_review',
-        conversation,
-        collected_data: collectedData,
-        listing_draft: listingDraft,
-      }).eq('id', prospect.id);
-      await sendSMS(phone, DONE_MESSAGE);
-    }
-    return res.status(200).end();
-  }
-
-  await supabase.from('prospects').update({ conversation }).eq('id', prospect.id);
-  return res.status(200).end();
-}
-
-async function generateListingDraft(data, prospect) {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
-  const prompt = `Write a 2-3 sentence food truck directory listing description for 559eats.com (Fresno/Central Valley).
-Truck: ${data.truck_name || prospect.name}
-Cuisine: ${data.cuisine || 'Not specified'}
-Location: ${data.location || 'Fresno area'}
-Hours: ${data.hours || 'Not specified'}
-Write only the description, no preamble. Make it appealing to hungry locals.`;
+Write just the description, nothing else.`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
       'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
-      max_tokens: 200,
+      max_tokens: 300,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
-  const json = await res.json();
-  return json?.content?.[0]?.text || null;
+  const result = await res.json();
+  return result.content?.[0]?.text || '';
 }
+
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const body = req.body || {};
+  const msisdn = body.msisdn || req.query.msisdn;
+  const text = (body.text || req.query.text || '').trim();
+
+  if (!msisdn || !text) return res.status(200).json({ ok: true });
+
+  const lower = text.toLowerCase();
+
+  if (OPT_OUT_KEYWORDS.some(w => lower.includes(w))) {
+    await supabase.from('prospects').update({ status: 'opted_out' }).eq('phone', msisdn);
+    return res.status(200).json({ ok: true });
+  }
+
+  const { data: prospect } = await supabase
+    .from('prospects').select('*').eq('phone', msisdn).single();
+
+  if (!prospect) return res.status(200).json({ ok: true });
+
+  const currentStatus = prospect.status;
+  const collected = prospect.collected_data || {};
+
+  let usesSpanish = prospect.uses_spanish || false;
+  if (isSpanishReply(text) && !usesSpanish) {
+    usesSpanish = true;
+    await supabase.from('prospects').update({ uses_spanish: true }).eq('phone', msisdn);
+  }
+
+  const QUESTIONS = usesSpanish ? QUESTIONS_ES : QUESTIONS_EN;
+  const DONE_MESSAGE = usesSpanish ? DONE_MESSAGE_ES : DONE_MESSAGE_EN;
+
+  if (currentStatus === 'contacted' && YES_KEYWORDS.some(w => lower === w || lower.startsWith(w + ' '))) {
+    await supabase.from('prospects').update({ status: 'waiting_name', uses_spanish: usesSpanish }).eq('phone', msisdn);
+    await sendVonageSMS(msisdn, QUESTIONS[0].ask);
+    return res.status(200).json({ ok: true });
+  }
+
+  const qIndex = STATUS_QUESTION_MAP[currentStatus];
+  if (qIndex === undefined) return res.status(200).json({ ok: true });
+
+  const questionKey = QUESTIONS[qIndex].key;
+  const updatedData = { ...collected, [questionKey]: text };
+  const nextStatus = NEXT_STATUS[qIndex];
+
+  await supabase.from('prospects').update({ collected_data: updatedData, status: nextStatus }).eq('phone', msisdn);
+
+  if (nextStatus === 'waiting_review') {
+    const draft = await generateListingDraft(updatedData);
+    await supabase.from('prospects').update({ listing_draft: draft }).eq('phone', msisdn);
+    await sendVonageSMS(msisdn, DONE_MESSAGE);
+  } else {
+    const nextQIndex = STATUS_QUESTION_MAP[nextStatus];
+    await sendVonageSMS(msisdn, QUESTIONS[nextQIndex].ask);
+  }
+
+  return res.status(200).json({ ok: true });
+};
