@@ -100,24 +100,22 @@ document.getElementById('pwd').addEventListener('keydown', e => { if (e.key === 
 
 async function loadProspects() {
   try {
-    const r = await fetch('/api/admin/prospects', { headers: { 'x-admin-secret': secret } });
+    const r = await fetch('/api/admin-prospects', { headers: { 'x-admin-secret': secret } });
     if (r.status === 401) { alert('Wrong password'); return; }
+    if (!r.ok) { alert('API error ' + r.status); return; }
     prospects = await r.json();
     document.getElementById('login').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     renderList();
     updateStats();
-  } catch(e) { alert('Error loading: ' + e.message); }
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 function renderList() {
   const el = document.getElementById('prospect-list');
-  el.innerHTML = prospects.map((p, i) => `
-    <div class="prospect ${selected === i ? 'active' : ''}" onclick="selectProspect(${i})">
-      <div class="prospect-name">${p.name || p.phone} <span class="badge badge-${p.status}">${p.status}</span></div>
-      <div class="prospect-phone">${p.phone}</div>
-    </div>
-  `).join('');
+  el.innerHTML = prospects.map((p, i) => '<div class="prospect ' + (selected === i ? 'active' : '') + '" onclick="selectProspect(' + i + ')">' +
+    '<div class="prospect-name">' + (p.name || p.phone) + ' <span class="badge badge-' + p.status + '">' + p.status + '</span></div>' +
+    '<div class="prospect-phone">' + p.phone + '</div></div>').join('');
 }
 
 function updateStats() {
@@ -137,23 +135,18 @@ function renderDetail() {
   const p = prospects[selected];
   if (!p) return;
   const conv = p.conversation || [];
-  const msgs = conv.map(m => `
-    <div class="msg msg-${m.direction === 'outbound' ? 'out' : 'in'}">
-      ${m.text}
-      <div class="msg-time">${new Date(m.ts).toLocaleString()}</div>
-    </div>
-  `).join('');
+  const msgs = conv.map(m =>
+    '<div class="msg msg-' + (m.direction === 'outbound' ? 'out' : 'in') + '">' +
+    m.text + '<div class="msg-time">' + new Date(m.ts).toLocaleString() + '</div></div>'
+  ).join('');
   const approveBtn = p.status === 'done' && !p.restaurant_id
-    ? `<button class="approve-btn" onclick="approveListing()">Approve Listing</button>`
+    ? '<button class="approve-btn" onclick="approveListing()">Approve Listing</button>'
     : '';
-  document.getElementById('detail').innerHTML = `
-    <div class="detail-header">
-      <h2>${p.name || 'Unknown'}</h2>
-      <p>${p.phone} &bull; ${p.address || 'No address'} &bull; Status: ${p.status}</p>
-    </div>
-    <div class="thread">${msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>'}</div>
-    ${approveBtn}
-  `;
+  document.getElementById('detail').innerHTML =
+    '<div class="detail-header"><h2>' + (p.name || 'Unknown') + '</h2>' +
+    '<p>' + p.phone + ' &bull; ' + (p.address || 'No address') + ' &bull; Status: ' + p.status + '</p></div>' +
+    '<div class="thread">' + (msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>') + '</div>' +
+    approveBtn;
 }
 
 async function sendBatch() {
@@ -167,7 +160,7 @@ async function sendBatch() {
       body: JSON.stringify({ limit: 10 })
     });
     const d = await r.json();
-    showToast(d.message || `Sent ${d.sent || 0} messages`);
+    showToast(d.message || 'Sent ' + (d.sent || 0) + ' messages');
     await loadProspects();
   } catch(e) { showToast('Error: ' + e.message); }
   btn.disabled = false;
@@ -177,7 +170,7 @@ async function sendBatch() {
 async function approveListing() {
   const p = prospects[selected];
   try {
-    const r = await fetch('/api/admin/approve-listing', {
+    const r = await fetch('/api/admin-approve', {
       method: 'POST',
       headers: { 'x-admin-secret': secret, 'Content-Type': 'application/json' },
       body: JSON.stringify({ prospectId: p.id })
