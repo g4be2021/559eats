@@ -1,213 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>559eats · Contact</title>
-  <meta name="description" content="Get in touch with the 559eats team. We'd love to hear from you." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
-      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
-      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
-      --radius: 14px; --radius-sm: 8px;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
-
-    nav {
-      background: rgba(251,247,242,0.95); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--card-border);
-      padding: 0 2rem; height: 60px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--coral); text-decoration: none; }
-    .nav-links { display: flex; align-items: center; gap: 20px; }
-    .nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--ink); }
-    .nav-cta { background: var(--coral); color: var(--white) !important; padding: 7px 16px; border-radius: 20px; }
-    .nav-cta:hover { background: var(--coral-dark) !important; }
-    .nav-mobile-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--ink); }
-    .nav-drawer { display: none; position: fixed; top: 60px; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--card-border); padding: 1rem 2rem; z-index: 99; flex-direction: column; gap: 16px; }
-    .nav-drawer.open { display: flex; }
-    .nav-drawer a { font-size: 15px; color: var(--ink-muted); text-decoration: none; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
-    .nav-drawer a:last-child { border-bottom: none; }
-
-    .hero {
-      background: var(--coral-dark); padding: 4rem 2rem 3rem; text-align: center;
-    }
-    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px,5vw,44px); font-weight: 900; color: var(--white); margin-bottom: 12px; }
-    .hero p { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 420px; margin: 0 auto; line-height: 1.6; }
-
-    main { max-width: 560px; margin: 0 auto; padding: 3rem 2rem; }
-
-    .card { background: var(--white); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 2rem; }
-
-    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
-    label { font-size: 12px; font-weight: 500; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    input, select, textarea {
-      padding: 10px 12px; border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif;
-      font-size: 14px; color: var(--ink); background: var(--cream);
-      outline: none; transition: border-color 0.2s; width: 100%;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--coral); background: var(--white); }
-    textarea { resize: vertical; min-height: 130px; }
-
-    .submit-btn {
-      width: 100%; padding: 13px; background: var(--coral); color: var(--white);
-      border: none; border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
-      cursor: pointer; transition: background 0.2s; margin-top: 4px;
-    }
-    .submit-btn:hover { background: var(--coral-dark); }
-    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
-
-    .error-box { background: #FCEBEB; border: 1px solid #F09595; border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: #791F1F; margin-top: 10px; display: none; }
-
-    .success-card { text-align: center; padding: 2rem 1rem; display: none; }
-    .success-card .icon { font-size: 48px; margin-bottom: 1rem; }
-    .success-card h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
-    .success-card p { font-size: 14px; color: var(--ink-muted); line-height: 1.6; }
-    .back-link { display: inline-block; margin-top: 1.5rem; color: var(--coral); font-size: 14px; font-weight: 500; text-decoration: none; }
-
-    footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; font-size: 12px; color: var(--ink-muted); margin-top: 4rem; }
-    footer a { color: var(--coral); text-decoration: none; }
-
-    @media (max-width: 600px) {
-      .nav-links { display: none; }
-      .nav-mobile-btn { display: block; }
-      main { padding: 2rem 1rem; }
-    }
-  </style>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-SM0VBC86SK');</script>
-</head>
-<body>
-
-<nav>
-  <a href="index.html" class="nav-logo">559eats</a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="map.html">Map</a>
-    <a href="catering.html">Catering</a>
-    <a href="pricing.html" class="nav-cta">List your spot</a>
-  </div>
-  <button class="nav-mobile-btn" onclick="toggleMobileNav()" id="mobile-btn">☰</button>
-</nav>
-<div class="nav-drawer" id="nav-drawer">
-  <a href="index.html">Home</a>
-  <a href="map.html">Map</a>
-  <a href="catering.html">Catering</a>
-  <a href="pricing.html">Get listed</a>
-  <a href="login.html">Owner login</a>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact &mdash; 559eats</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --orange:#E8512A; --orange-dark:#c73e18; --orange-light:#f9ede8; --cream:#faf7f4; --dark:#1a1310; --text:#2d2420; --muted:#7a6e6a; --border:#e8e0da; --white:#fff; --shadow:0 2px 12px rgba(0,0,0,.08); }
+    html{scroll-behavior:smooth} body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);line-height:1.5}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:rgba(250,247,244,.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid rgba(232,224,218,.6);transition:background .3s,box-shadow .3s}
+    nav.scrolled{background:rgba(250,247,244,.97);box-shadow:0 2px 20px rgba(0,0,0,.08)}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:var(--orange);text-decoration:none}
+    .nav-links{display:flex;align-items:center;gap:8px}
+    .nav-links a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:999px;transition:color .2s,background .2s}
+    .nav-links a:hover{color:var(--text);background:var(--border)}
+    .nav-cta{background:var(--orange)!important;color:var(--white)!important;padding:8px 20px!important;border-radius:999px!important;font-weight:600!important}
+    .nav-cta:hover{background:var(--orange-dark)!important}
+    .page-hero{padding:120px 24px 60px;text-align:center;background:linear-gradient(160deg,#2d1a14 0%,#4a2218 60%,#E8512A 100%)}
+    .page-hero .eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:12px;display:block}
+    .page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.1}
+    .page-hero p{font-size:1.05rem;color:rgba(255,255,255,.8);max-width:520px;margin:0 auto}
+    .container{max-width:1100px;margin:0 auto;padding:60px 24px}
+    footer{background:var(--dark);color:rgba(255,255,255,.55);text-align:center;padding:36px 24px;font-size:.875rem}
+    footer a{color:rgba(255,255,255,.75);text-decoration:none}
+    footer a:hover{color:var(--orange)}
+    .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+    @media(max-width:768px){nav{padding:0 16px}.nav-links a:not(.nav-cta){display:none}}
+  .contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;align-items:start}
+  .contact-info h2{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;margin-bottom:16px}
+  .contact-info p{color:var(--muted);margin-bottom:32px}
+  .contact-item{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px;padding:20px;background:var(--white);border-radius:14px;box-shadow:var(--shadow)}
+  .contact-item .ci-icon{font-size:1.6rem;flex-shrink:0}
+  .contact-item strong{display:block;font-weight:700;margin-bottom:2px}
+  .contact-item a{color:var(--orange);text-decoration:none;font-size:.9rem}
+  .contact-item span{font-size:.88rem;color:var(--muted)}
+  .contact-form{background:var(--white);border-radius:20px;padding:40px;box-shadow:var(--shadow)}
+  .contact-form h3{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:24px}
+  .fg{margin-bottom:18px}
+  .fg label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}
+  .fg input,.fg select,.fg textarea{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:inherit;color:var(--text);outline:none;transition:border-color .2s}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--orange)}
+  .fg textarea{resize:vertical;min-height:110px}
+  .btn-send{width:100%;background:var(--orange);color:#fff;border:none;padding:16px;border-radius:999px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s,transform .15s}
+  .btn-send:hover{background:var(--orange-dark);transform:translateY(-1px)}
+  .sent-msg{display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:20px;text-align:center;color:#166534;font-weight:600}
+  @media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
+</style></head>
+<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/food-trucks.html">Food trucks</a><a href="/apply.html" class="nav-cta">List your spot</a></div></nav>
+<div class="page-hero">
+  <span class="eyebrow">Get in touch</span>
+  <h1>We&rsquo;d love to hear from you</h1>
+  <p>Questions, partnerships, media inquiries &mdash; we&rsquo;re here.</p>
 </div>
-
-<div class="hero">
-  <h1>Get in touch</h1>
-  <p>Have a question, a restaurant tip, or just want to say hi? We'd love to hear from you.</p>
-</div>
-
-<main>
-  <div class="card">
-    <div id="form-wrap">
-      <div class="form-group">
-        <label>Your name *</label>
-        <input type="text" id="c-name" placeholder="Full name" />
-      </div>
-      <div class="form-group">
-        <label>Email address *</label>
-        <input type="email" id="c-email" placeholder="you@email.com" />
-      </div>
-      <div class="form-group">
-        <label>Topic</label>
-        <select id="c-topic">
-          <option value="General question">General question</option>
-          <option value="List my restaurant">List my restaurant</option>
-          <option value="Report an issue">Report an issue</option>
-          <option value="Partnership">Partnership</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Message *</label>
-        <textarea id="c-message" placeholder="Tell us what's on your mind..."></textarea>
-      </div>
-      <div class="error-box" id="error-box"></div>
-      <button class="submit-btn" id="submit-btn" onclick="submitContact()">Send message</button>
+<div class="container">
+  <div class="contact-grid">
+    <div class="contact-info">
+      <h2>Say hello</h2>
+      <p>Whether you have a question about a listing, want to partner with us, or just love local food &mdash; reach out.</p>
+      <div class="contact-item"><div class="ci-icon">&#128140;</div><div><strong>General inquiries</strong><a href="mailto:hello@559eats.com">hello@559eats.com</a></div></div>
+      <div class="contact-item"><div class="ci-icon">&#127860;</div><div><strong>List your restaurant or truck</strong><span>Use our free listing form &mdash; we&rsquo;ll text you to get started.</span><br><a href="/apply.html">Apply now &rarr;</a></div></div>
+      <div class="contact-item"><div class="ci-icon">&#128247;</div><div><strong>Media &amp; press</strong><a href="mailto:press@559eats.com">press@559eats.com</a></div></div>
+      <div class="contact-item"><div class="ci-icon">&#127758;</div><div><strong>Fresno &amp; Central Valley</strong><span>559eats is proud to be local. We cover Fresno, Clovis, Visalia, and beyond.</span></div></div>
     </div>
-
-    <div class="success-card" id="success-card">
-      <div class="icon">📬</div>
-      <h3>Message sent!</h3>
-      <p>Thanks for reaching out. We'll get back to you within 1–2 business days.</p>
-      <a href="index.html" class="back-link">← Back to 559eats</a>
+    <div class="contact-form">
+      <h3>Send a message</h3>
+      <div id="cForm">
+        <div class="fg"><label>Your name</label><input type="text" id="cName" placeholder="Gabriel Garcia"></div>
+        <div class="fg"><label>Email</label><input type="email" id="cEmail" placeholder="you@example.com"></div>
+        <div class="fg"><label>Subject</label><select id="cSubject"><option>General question</option><option>Listing inquiry</option><option>Partnership</option><option>Media / press</option><option>Bug report</option><option>Other</option></select></div>
+        <div class="fg"><label>Message</label><textarea id="cMessage" placeholder="What&rsquo;s on your mind?"></textarea></div>
+        <button class="btn-send" onclick="sendContact()">Send message &rarr;</button>
+      </div>
+      <div class="sent-msg" id="sentMsg">&#10003; Message sent! We&rsquo;ll get back to you within 1&ndash;2 business days.</div>
     </div>
   </div>
-</main>
-
-<footer>
-  <p>559eats · Celebrating local food in the Central Valley</p>
-  <p style="margin-top:6px"><a href="pricing.html">List your restaurant</a> · <a href="contact.html">Contact</a> · <a href="about.html">About</a></p>
-</footer>
-
+</div>
+<footer><div class="footer-links"><a href="/apply.html">List your restaurant</a><a href="/contact.html">Contact</a><a href="/about.html">About</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 <script>
-  const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-
-  async function submitContact() {
-    const name = document.getElementById('c-name').value.trim();
-    const email = document.getElementById('c-email').value.trim();
-    const topic = document.getElementById('c-topic').value;
-    const message = document.getElementById('c-message').value.trim();
-    const btn = document.getElementById('submit-btn');
-    const errEl = document.getElementById('error-box');
-
-    if (!name) { showError('Please enter your name.'); return; }
-    if (!email || !email.includes('@')) { showError('Please enter a valid email address.'); return; }
-    if (!message) { showError('Please enter a message.'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-    errEl.style.display = 'none';
-
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/contact_messages`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ name, email, topic, message })
-      });
-
-      document.getElementById('form-wrap').style.display = 'none';
-      document.getElementById('success-card').style.display = 'block';
-    } catch(e) {
-      showError('Something went wrong. Please try again.');
-      btn.disabled = false;
-      btn.textContent = 'Send message';
-    }
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('error-box');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
-
-  function toggleMobileNav() {
-    const drawer = document.getElementById('nav-drawer');
-    const btn = document.getElementById('mobile-btn');
-    const open = drawer.classList.toggle('open');
-    btn.textContent = open ? '✕' : '☰';
-  }
-</script>
-</body>
-</html>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
+function sendContact(){
+  const msg=document.getElementById('cMessage').value.trim();
+  if(!msg){alert('Please add a message.');return;}
+  document.getElementById('cForm').style.display='none';
+  document.getElementById('sentMsg').style.display='block';
+}
+</script></body></html>
