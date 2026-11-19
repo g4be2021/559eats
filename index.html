@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>559eats Â· Discover Fresno's Best Food</title>
+  <title>559eats  Discover Fresno's Best Food</title>
   <meta name="description" content="Discover the best restaurants, food trucks, and hidden gems in Fresno & the Central Valley." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -141,42 +141,42 @@
     <h1>Eat local.<br>Eat 559.</h1>
     <p>Discover the best restaurants, food trucks, and hidden gems in the 559.</p>
     <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Search restaurants, cuisines, neighborhoodsâ¦" autocomplete="off" />
+      <input type="text" id="searchInput" placeholder="Search restaurants, cuisines, neighborhoods" autocomplete="off" />
       <button onclick="doSearch()">Search</button>
     </div>
     <div class="hero-stats">
-      <div class="stat"><strong id="statRestaurants">â</strong><span>Restaurants</span></div>
-      <div class="stat"><strong id="statTrucks">â</strong><span>Food trucks</span></div>
-      <div class="stat"><strong id="statNeighborhoods">â</strong><span>Neighborhoods</span></div>
+      <div class="stat"><strong id="statRestaurants">-</strong><span>Restaurants</span></div>
+      <div class="stat"><strong id="statTrucks">-</strong><span>Food trucks</span></div>
+      <div class="stat"><strong id="statNeighborhoods">-</strong><span>Neighborhoods</span></div>
     </div>
   </div>
 </section>
 <div class="section" style="padding-bottom:0">
   <div class="pill-row" id="filterPills">
-    <a href="#" class="pill active">ð½ï¸ All</a>
-    <a href="#" class="pill">ð® Mexican</a>
-    <a href="#" class="pill">ð¥ BBQ</a>
-    <a href="#" class="pill">ð Asian</a>
-    <a href="#" class="pill">ð Burgers</a>
-    <a href="#" class="pill">ð¯ Wraps</a>
-    <a href="#" class="pill">ð Pizza</a>
-    <a href="#" class="pill">ð Food Trucks</a>
-    <a href="#" class="pill">â Cafes</a>
+    <a href="#" class="pill active" data-filter="all">All</a>
+    <a href="#" class="pill" data-filter="Mexican">Mexican</a>
+    <a href="#" class="pill" data-filter="BBQ">BBQ</a>
+    <a href="#" class="pill" data-filter="Asian">Asian</a>
+    <a href="#" class="pill" data-filter="Burgers">Burgers</a>
+    <a href="#" class="pill" data-filter="Wraps">Wraps</a>
+    <a href="#" class="pill" data-filter="Pizza">Pizza</a>
+    <a href="#" class="pill" data-filter="truck">Food Trucks</a>
+    <a href="#" class="pill" data-filter="Cafes">Cafes</a>
   </div>
 </div>
 <div class="section">
   <div class="section-header">
-    <h2 class="section-title"><span>ð</span> Food trucks near you</h2>
-    <a href="/food-trucks.html" class="see-all">See all â</a>
+    <h2 class="section-title">Food Trucks Near You</h2>
+    <a href="/food-trucks.html" class="see-all">See all &rarr;</a>
   </div>
   <div class="scroll-row" id="truckCards">
-    <div class="card"><div class="card-img"><div class="card-img-placeholder">ð®</div></div><div class="card-body"><div class="card-name">Loadingâ¦</div></div></div>
+    <div class="card"><div class="card-img"><div class="card-img-placeholder"></div></div><div class="card-body"><div class="card-name">Loading</div></div></div>
   </div>
 </div>
 <div class="section" style="padding-top:0">
   <div class="map-cta">
     <div>
-      <h2>ð Whatâs near me?</h2>
+      <h2> Whats near me?</h2>
       <p>Find restaurants and food trucks within walking or driving distance right now.</p>
     </div>
     <a href="/map.html">Open map view</a>
@@ -184,8 +184,8 @@
 </div>
 <div class="section">
   <div class="section-header">
-    <h2 class="section-title"><span>ð´</span> Browse all spots</h2>
-    <a href="/browse.html" class="see-all">See all â</a>
+    <h2 class="section-title">Browse All Spots</h2>
+    <a href="/browse.html" class="see-all">See all &rarr;</a>
   </div>
   <div class="pill-row" id="cuisinePills"></div>
   <div class="cards-grid" id="allCards"></div>
@@ -193,12 +193,12 @@
 <div class="section" style="padding-top:0">
   <div class="catering-section">
     <div class="catering-text">
-      <h2>ðª Need catering for your next event?</h2>
+      <h2> Need catering for your next event?</h2>
       <p>Book a local food truck for weddings, corporate lunches, birthday parties, and more.</p>
       <div class="event-pills">
-        <span>ð Weddings</span><span>ð¼ Corporate</span><span>ð Birthdays</span><span>ð Graduations</span>
+        <span>Weddings</span><span>Corporate</span><span>Birthdays</span><span>Graduations</span>
       </div>
-      <a href="/catering.html" class="btn-primary">Browse catering trucks â</a>
+      <a href="/catering.html" class="btn-primary">Browse catering trucks &rarr;</a>
     </div>
   </div>
 </div>
@@ -223,7 +223,7 @@
     <a href="/contact.html">Contact</a>
     <a href="/about.html">About</a>
   </div>
-  <p>559eats Â· Celebrating local food in the Central Valley</p>
+  <p>559eats  Celebrating local food in the Central Valley</p>
 </footer>
 <script>
   const nav = document.getElementById('nav');
@@ -233,6 +233,13 @@
       e.preventDefault();
       document.querySelectorAll('#filterPills .pill').forEach(x => x.classList.remove('active'));
       p.classList.add('active');
+      const filter = p.dataset.filter || 'all';
+      const ac = document.getElementById('allCards');
+      if (!window._allData) return;
+      const filtered = filter === 'all' ? window._allData
+        : filter === 'truck' ? window._allData.filter(isTruck)
+        : window._allData.filter(r => (r.cuisine_type||'').toLowerCase().includes(filter.toLowerCase()));
+      ac.innerHTML = filtered.slice(0,12).map(r=>cardHTML(r,'')).join('') || '<p style="color:var(--muted);font-size:.9rem;grid-column:1/-1">No results.</p>';
     });
   });
   function doSearch() {
@@ -249,23 +256,24 @@
     } catch { return []; }
   }
   function cLabel(r) { return r.cuisine_type||r.cuisine||r.category||''; }
-  function isTruck(r) { return (r.type||'').toLowerCase().includes('truck')||(r.category||'').toLowerCase().includes('truck'); }
+  function isTruck(r) { return r.is_food_truck === true || (r.type||'').toLowerCase().includes('truck')||(r.category||'').toLowerCase().includes('truck'); }
   function cardHTML(r, badge) {
     const name = r.name||'Unknown', cuisine = cLabel(r), loc = r.neighborhood||r.location||r.area||'';
-    const truck = isTruck(r), tagEmoji = truck?'ð':'ð½ï¸', tagLabel = truck?'Food truck':'Restaurant';
+    const truck = isTruck(r), tagEmoji = truck?'':'', tagLabel = truck?'Food truck':'Restaurant';
     const img = r.image_url||r.photo_url||'';
-    const imgHTML = img ? `<img src="${img}" alt="${name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"card-img-placeholder\">${truck?'ð':'ð®'}</div>'">` : `<div class="card-img-placeholder">${truck?'ð':'ð®'}</div>`;
+    const imgHTML = img ? `<img src="${img}" alt="${name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"card-img-placeholder\">${truck?'':''}</div>'">` : `<div class="card-img-placeholder">${truck?'':''}</div>`;
     const badgeHTML = badge ? `<div class="card-badge${badge==='Open'?' open':''}">${badge}</div>` : '';
     const href = r.slug ? '/trucks/'+r.slug : '#';
     return `<a href="${href}" class="card"><div class="card-img">${imgHTML}${badgeHTML}</div><div class="card-body"><div class="card-name">${name}</div><div class="card-meta">${cuisine?`<span>${cuisine}</span>`:''}${cuisine&&loc?'<span class="dot"></span>':''}${loc?`<span>${loc}</span>`:''}</div><div class="card-tags"><span class="card-tag">${tagEmoji} ${tagLabel}</span></div></div></a>`;
   }
   async function init() {
     const data = await fetchAll();
+    window._allData = data;
     const trucks = data.filter(isTruck), restaurants = data.filter(r => !isTruck(r));
     const hoods = [...new Set(data.map(r=>r.neighborhood||r.area).filter(Boolean))];
-    document.getElementById('statRestaurants').textContent = restaurants.length||'â';
-    document.getElementById('statTrucks').textContent = trucks.length||'â';
-    document.getElementById('statNeighborhoods').textContent = hoods.length||'â';
+    document.getElementById('statRestaurants').textContent = restaurants.length||'';
+    document.getElementById('statTrucks').textContent = trucks.length||'';
+    document.getElementById('statNeighborhoods').textContent = hoods.length||'';
     const tc = document.getElementById('truckCards');
     tc.innerHTML = (trucks.length?trucks:data).slice(0,10).map((r,i)=>cardHTML(r,i<2?'Featured':'')).join('')||'<p style="color:var(--muted);font-size:.9rem">No listings yet.</p>';
     const ac = document.getElementById('allCards');
@@ -281,10 +289,10 @@
       }));
     }
     const nbhdMap = {}; data.forEach(r=>{ const n=r.neighborhood||r.area; if(n) nbhdMap[n]=(nbhdMap[n]||0)+1; });
-    const icons = {Downtown:'ðï¸','Tower District':'ð­',Clovis:'ð¿','Fig Garden':'ð³','Fresno State':'ðï¸','North Fresno':'ðï¸',Visalia:'ð¡',Southeast:'ð'};
+    const icons = {Downtown:'','Tower District':'',Clovis:'','Fig Garden':'','Fresno State':'','North Fresno':'',Visalia:'',Southeast:''};
     const ng = document.getElementById('nbhdGrid');
     const entries = Object.entries(nbhdMap);
-    ng.innerHTML = (entries.length?entries:[['Downtown',''],['Tower District',''],['Clovis',''],['Fig Garden',''],['Fresno State','']]).map(([n,c])=>`<a href="/browse.html?neighborhood=${encodeURIComponent(n)}" class="nbhd-card"><span class="nbhd-icon">${icons[n]||'ð'}</span><span class="nbhd-name">${n}</span><span class="nbhd-count">${c?c+' spot'+(c!==1?'s':''):'Browse'}</span></a>`).join('');
+    ng.innerHTML = (entries.length?entries:[['Downtown',''],['Tower District',''],['Clovis',''],['Fig Garden',''],['Fresno State','']]).map(([n,c])=>`<a href="/browse.html?neighborhood=${encodeURIComponent(n)}" class="nbhd-card"><span class="nbhd-icon">${icons[n]||''}</span><span class="nbhd-name">${n}</span><span class="nbhd-count">${c?c+' spot'+(c!==1?'s':''):'Browse'}</span></a>`).join('');
   }
   init();
 </script>
