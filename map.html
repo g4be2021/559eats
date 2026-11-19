@@ -113,8 +113,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(map);
     function makeIcon(truck){return L.divIcon({className:'',html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:'+(truck?'#1a1310':'#E8512A')+';transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>',iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-30]});}
     let allData=[],markers=[],activeFilter='all';
-    function isTruck(r){return r.is_food_truck===true||(r.type||'').toLowerCase().includes('truck')||(r.category||'').toLowerCase().includes('truck');}
-    function cLabel(r){return r.cuisine_type||r.cuisine||r.category||'';}
+    function isTruck(r){return r.is_food_truck===true;}
+    function cLabel(r){return r.cuisine_type||'';}
     function matchesFilter(r){if(activeFilter==='all')return true;if(activeFilter==='truck')return isTruck(r);return(cLabel(r)||'').toLowerCase().includes(activeFilter.toLowerCase());}
     function matchesSearch(r,q){if(!q)return true;const s=q.toLowerCase();return(r.name||'').toLowerCase().includes(s)||(r.neighborhood||'').toLowerCase().includes(s)||(cLabel(r)||'').toLowerCase().includes(s);}
     function renderList(data){
@@ -122,7 +122,7 @@
       if(!data.length){lw.innerHTML='<div class="empty-state">No results found.</div>';return;}
       lw.innerHTML=data.map(r=>{
         const truck=isTruck(r),cuisine=cLabel(r),hood=r.neighborhood||r.location||'';
-        const img=r.image_url||r.photo_url||'';
+        const img='';
         const imgEl=img?'<img src="'+img+'" alt="'+r.name+'" loading="lazy" onerror="this.parentElement.innerHTML=''+(truck?'[Truck]':'[Food]')+''">':(truck?'[T]':'[F]');
         const href=r.slug?'/trucks/'+r.slug:(r.id?'restaurant.html?id='+r.id:'#');
         return '<a class="map-card" data-id="'+r.id+'" href="'+href+'"><div class="map-card-img">'+imgEl+'</div><div class="map-card-body"><div class="map-card-name">'+r.name+'</div><div class="map-card-meta">'+[cuisine,hood].filter(Boolean).join(' &middot; ')+'</div><span class="map-card-tag">'+(truck?'Food Truck':'Restaurant')+'</span></div></a>';
@@ -167,7 +167,7 @@
     });
     async function init(){
       try{
-        const res=await fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,cuisine,category,neighborhood,location,latitude,longitude,image_url,photo_url,is_food_truck,type,slug,is_active&is_active=eq.true&order=name.asc&limit=500',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
+        const res=await fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,neighborhood,latitude,longitude,is_food_truck,is_active&is_active=eq.true&order=name.asc&limit=500',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
         allData=await res.json();
         applyFilters();
         const pts=allData.filter(r=>r.latitude&&r.longitude).map(r=>[r.latitude,r.longitude]);
