@@ -1,50 +1,76 @@
 import { createClient } from '@supabase/supabase-js';
 
-const VONAGE_API_KEY = process.env.VONAGE_API_KEY;
-const VONAGE_API_SECRET = process.env.VONAGE_API_SECRET;
-const FROM = process.env.VONAGE_FROM || '17579703964';
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-async function sendSMS(to, text) {
-  const r = await fetch('https://rest.nexmo.com/sms/json', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ api_key: VONAGE_API_KEY, api_secret: VONAGE_API_SECRET, from: FROM, to: to.replace('+',''), text })
+async function sendVonageSMS(to, text) {
+  const params = new URLSearchParams({
+    api_key: process.env.VONAGE_API_KEY,
+    api_secret: process.env.VONAGE_API_SECRET,
+    to,
+    from: process.env.VONAGE_FROM || '17579703964',
+    text,
   });
-  return r.json();
+  const res = await fetch('https://rest.nexmo.com/sms/json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  return res.json();
 }
+
+const OUTREACH_MESSAGE =
+  "Hi! I'm Gabriel with 559eats.com — a free food directory for Fresno & the Central Valley. " +
+  "Want a free listing for your food truck? Just reply YES and I'll ask you a few quick questions by text. Reply STOP to opt out.\n\n" +
+  "Hola! Soy Gabriel de 559eats.com — un directorio gratuito de comida en Fresno y el Valle Central. " +
+  "¿Quieres un listing gratuito para tu food truck? Responde SÍ y te haré unas preguntas rápidas por texto. Responde STOP para no recibir más mensajes.";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-  if (req.headers['x-admin-secret'] !== process.env.ADMIN_SECRET) {
+  if (req.headers['x-admin-secret'] !== process.env.ADMIN_SECRET)
     return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-  );
-  const limit = req.body?.limit || 10;
-  const { data: prospects } = await supabase
+
+  const limit = parseInt(req.body?.limit || req.query?.limit || '10', 10);
+
+  const { data: prospects, error } = await supabase
     .from('prospects')
     .select('*')
     .eq('status', 'pending')
     .limit(limit);
 
+  if (error) return res.status(500).json({ error: error.message });
   if (!prospects?.length) return res.status(200).json({ sent: 0, message: 'No pending prospects' });
 
-  let sent = 0;
-  for (const p of prospects) {
-    const msg = `Hi! I'm Gabriel from 559eats.com - the go-to food directory for the Fresno area. We'd love to feature your food truck for free! Reply YES to get listed and reach more customers. Reply STOP to opt out.`;
+  const results = [];
+  for (const prospect of prospects) {
     try {
-      await sendSMS(p.phone, msg);
-      await supabase.from('prospects').update({
-        status: 'contacted',
-        contacted_at: new Date().toISOString(),
-        conversation: [{ direction: 'outbound', text: msg, ts: new Date().toISOString() }]
-      }).eq('id', p.id);
-      sent++;
-    } catch(e) {
-      await supabase.from('prospects').update({ status: 'invalid' }).eq('id', p.id);
+      const vonageRes = await sendVonageSMS(prospect.phone, OUTREACH_MESSAGE);
+      const success = vonageRes?.messages?.[0]?.status === '0';
+
+      const conversation = [
+        {
+          role: 'outbound',
+          text: OUTREACH_MESSAGE,
+          ts: new Date().toISOString(),
+        },
+      ];
+
+      await supabase
+        .from('prospects')
+        .update({
+          status: success ? 'contacted' : 'invalid',
+          conversation,
+          contacted_at: new Date().toISOString(),
+        })
+        .eq('id', prospect.id);
+
+      results.push({ id: prospect.id, phone: prospect.phone, success });
+    } catch (err) {
+      results.push({ id: prospect.id, phone: prospect.phone, success: false, error: err.message });
     }
   }
-  return res.status(200).json({ sent, message: `Sent ${sent} messages` });
+
+  return res.status(200).json({ sent: results.filter((r) => r.success).length, results });
 }
