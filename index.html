@@ -263,7 +263,7 @@
     const img = r.image_url||r.photo_url||'';
     const imgHTML = img ? `<img src="${img}" alt="${name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"card-img-placeholder\">${truck?'':''}</div>'">` : `<div class="card-img-placeholder">${truck?'':''}</div>`;
     const badgeHTML = badge ? `<div class="card-badge${badge==='Open'?' open':''}">${badge}</div>` : '';
-    const href = r.slug ? '/trucks/'+r.slug : '#';
+    const href = r.slug ? '/trucks/'+r.slug : (r.id ? 'restaurant.html?id='+r.id : '#');
     return `<a href="${href}" class="card"><div class="card-img">${imgHTML}${badgeHTML}</div><div class="card-body"><div class="card-name">${name}</div><div class="card-meta">${cuisine?`<span>${cuisine}</span>`:''}${cuisine&&loc?'<span class="dot"></span>':''}${loc?`<span>${loc}</span>`:''}</div><div class="card-tags"><span class="card-tag">${tagEmoji} ${tagLabel}</span></div></div></a>`;
   }
   async function init() {
