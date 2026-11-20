@@ -66,7 +66,7 @@ window.addEventListener('scroll',()=>document.getElementById('nav').classList.to
 const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
 const params=new URLSearchParams(location.search);
-const slug=params.get('slug')||location.pathname.split('/').pop().replace('.html','');
+const slug=params.get('id')||params.get('slug')||location.pathname.split('/').pop().replace('.html','');
 (async()=>{
   try{
     const r=await fetch(SUPA+'/rest/v1/restaurants?id=eq.'+(idParam||slug)+'&limit=1',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
