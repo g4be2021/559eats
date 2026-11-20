@@ -181,11 +181,11 @@ function render(){
   const filtered=sortData(allData.filter(r=>matchesFilter(r)&&matchesSearch(r)));
   document.getElementById('resultCount').textContent=filtered.length;
   const grid=document.getElementById('grid');
-  if(filtered.length===0){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🍽️</div><h3>'+(allData.length===0?'No listings yet':'No results found')+'</h3><p>'+(allData.length===0?'Be the first to <a href="/apply.html" style="color:var(--orange)">add your spot</a>!':'Try a different search or filter.')+'</p></div>';return;}
+  if(filtered.length===0){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">ð½ï¸</div><h3>'+(allData.length===0?'No listings yet':'No results found')+'</h3><p>'+(allData.length===0?'Be the first to <a href="/apply.html" style="color:var(--orange)">add your spot</a>!':'Try a different search or filter.')+'</p></div>';return;}
   grid.innerHTML=filtered.map(r=>{
     const slug=getSlug(r),photo=getPhoto(r);
     const badges=[r.is_food_truck?'<span class="badge badge-truck">Food Truck</span>':'',r.is_featured?'<span class="badge badge-featured">Featured</span>':'',r.is_sponsored?'<span class="badge badge-sponsored">Sponsored</span>':''].filter(Boolean).join('');
-    return '<a class="card" href="/restaurant.html?id='+r.id+'"><img class="card-img" src="'+photo+'" alt="'+r.name+'" loading="lazy" onerror="this.src=''+FOOD_PHOTOS.default+''"><div class="card-body">'+(badges?'<div class="card-badges">'+badges+'</div>':'')+'<div class="card-name">'+r.name+'</div>'+(r.cuisine_type?'<div class="card-cuisine">'+r.cuisine_type+'</div>':'')+'<div class="card-meta">'+(r.neighborhood?'<span>📍 '+r.neighborhood+'</span>':'')+(r.phone?'<span>📞 '+r.phone+'</span>':'')+'</div></div></a>';
+    return '<a class="card" href="/restaurant.html?id='+r.id+'"><img class="card-img" src="'+photo+'" alt="'+r.name+'" loading="lazy" onerror="this.style.display='none'"><div class="card-body">'+(badges?'<div class="card-badges">'+badges+'</div>':'')+'<div class="card-name">'+r.name+'</div>'+(r.cuisine_type?'<div class="card-cuisine">'+r.cuisine_type+'</div>':'')+'<div class="card-meta">'+(r.neighborhood?'<span>ð '+r.neighborhood+'</span>':'')+(r.phone?'<span>ð '+r.phone+'</span>':'')+'</div></div></a>';
   }).join('');
 }
 document.getElementById('pills').addEventListener('click',e=>{const p=e.target.closest('.pill');if(!p)return;document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');activeFilter=p.dataset.filter;render();});
