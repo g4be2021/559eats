@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Map — Find Food Near You — 559eats</title>
+  <title>Map â Find Food Near You â 559eats</title>
   <meta name="description" content="Find food trucks and restaurants near you on the 559eats map." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -123,8 +123,8 @@
       lw.innerHTML=data.map(r=>{
         const truck=isTruck(r),cuisine=cLabel(r),hood=r.neighborhood||r.location||'';
         const img='';
-        const imgEl=img?'<img src="'+img+'" alt="'+r.name+'" loading="lazy" onerror="this.parentElement.innerHTML=''+(truck?'[Truck]':'[Food]')+''">':(truck?'[T]':'[F]');
-        const href=r.slug?'/trucks/'+r.slug:(r.id?'restaurant.html?id='+r.id:'#');
+        const imgEl=img?'<img src="'+img+'" alt="'+r.name+'" loading="lazy" onerror="this.style.display=\"none\"">':''
+        const href=r.id?'/restaurant?id='+r.id:'#';
         return '<a class="map-card" data-id="'+r.id+'" href="'+href+'"><div class="map-card-img">'+imgEl+'</div><div class="map-card-body"><div class="map-card-name">'+r.name+'</div><div class="map-card-meta">'+[cuisine,hood].filter(Boolean).join(' &middot; ')+'</div><span class="map-card-tag">'+(truck?'Food Truck':'Restaurant')+'</span></div></a>';
       }).join('');
       lw.querySelectorAll('.map-card').forEach(card=>{
@@ -142,7 +142,7 @@
       data.forEach(r=>{
         if(!r.latitude||!r.longitude)return;
         const truck=isTruck(r),cuisine=cLabel(r),hood=r.neighborhood||'';
-        const href=r.slug?'/trucks/'+r.slug:(r.id?'restaurant.html?id='+r.id:'#');
+        const href=r.id?'/restaurant?id='+r.id:'#';
         const mk=L.marker([r.latitude,r.longitude],{icon:makeIcon(truck)});
         mk._rid=r.id;
         mk.bindPopup('<div class="popup-inner"><div class="popup-name">'+r.name+'</div><div class="popup-meta">'+[cuisine,hood].filter(Boolean).join(' &middot; ')+'</div><a class="popup-btn" href="'+href+'">View Details</a></div>');
