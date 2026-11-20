@@ -9,14 +9,12 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--orange:#E8512A;--dark:#1a1a2e;--card-bg:#fff;--radius:12px}
+:root{--orange:#E8512A;--dark:#1a1a2e;--radius:12px}
 html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
-
-/* Full-screen map */
 #map{position:fixed;inset:0;z-index:0}
 
-/* Floating nav */
-#nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(26,26,46,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+/* Nav */
+#nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(26,26,46,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 #nav .logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:#fff;text-decoration:none}
 #nav .logo span{color:var(--orange)}
 #nav-links{display:flex;gap:20px;align-items:center}
@@ -24,29 +22,29 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
 #nav-links a:hover{color:#fff}
 #nav-links a.active{color:var(--orange)}
 
-/* Search bar */
+/* Search */
 #searchWrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:900;width:min(480px,90vw)}
 #searchInput{width:100%;padding:12px 18px 12px 42px;border-radius:50px;border:none;font-size:.95rem;font-family:'Inter',sans-serif;background:rgba(255,255,255,0.97);box-shadow:0 4px 20px rgba(0,0,0,0.25);outline:none}
 #searchInput::placeholder{color:#999}
-#searchIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999;pointer-events:none;font-size:1rem}
+#searchIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999;pointer-events:none}
 
-/* Filter pills */
+/* Filters */
 #filters{position:fixed;top:130px;left:50%;transform:translateX(-50%);z-index:900;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;max-width:95vw;padding:0 4px;scrollbar-width:none}
 #filters::-webkit-scrollbar{display:none}
 .pill{padding:7px 16px;border-radius:50px;border:none;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;background:rgba(255,255,255,0.92);color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:all .2s}
 .pill:hover{background:#fff;transform:translateY(-1px)}
 .pill.active{background:var(--orange);color:#fff}
 
-/* Map legend */
+/* Legend */
 #legend{position:fixed;bottom:24px;left:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 14px;color:#fff;font-size:.75rem}
 #legend div{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 #legend div:last-child{margin-bottom:0}
 .leg-dot{width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;flex-shrink:0}
 
-/* Spot count badge */
+/* Spot count */
 #spotCount{position:fixed;bottom:24px;right:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 16px;color:#fff;font-size:.8rem;font-weight:600}
 
-/* Leaflet popup overrides */
+/* Popup overrides */
 .leaflet-popup-content-wrapper{border-radius:var(--radius)!important;padding:0!important;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.2)!important;min-width:240px}
 .leaflet-popup-content{margin:0!important;width:auto!important}
 .leaflet-popup-tip-container{display:none}
@@ -61,11 +59,71 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
 .sp-btn.primary{background:var(--orange);color:#fff}
 .sp-btn.secondary{background:#f5f5f5;color:var(--dark)}
 .sp-btn:hover{opacity:.85}
+
+/* ===== WELCOME MODAL ===== */
+#welcomeOverlay{position:fixed;inset:0;z-index:2000;background:rgba(10,10,20,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px}
+#welcomeModal{background:#fff;border-radius:20px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.4);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+.wm-header{background:var(--dark);padding:28px 28px 20px;text-align:center}
+.wm-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;margin-bottom:4px}
+.wm-header h1 span{color:var(--orange)}
+.wm-header p{color:rgba(255,255,255,0.65);font-size:.9rem}
+.wm-body{padding:24px 28px}
+.wm-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
+.wm-step{display:flex;align-items:flex-start;gap:14px}
+.wm-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.wm-step-text strong{display:block;font-size:.88rem;font-weight:700;color:var(--dark);margin-bottom:2px}
+.wm-step-text span{font-size:.82rem;color:#666;line-height:1.4}
+.wm-pins{display:flex;gap:16px;background:#f8f8f8;border-radius:12px;padding:12px 16px;margin-bottom:22px}
+.wm-pin{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#444;font-weight:500}
+.pin-dot{width:14px;height:14px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(0,0,0,0.15);flex-shrink:0}
+#exploreBtn{width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+#exploreBtn:hover{opacity:.9}
 </style>
 </head>
 <body>
 
 <div id="map"></div>
+
+<!-- WELCOME MODAL -->
+<div id="welcomeOverlay">
+  <div id="welcomeModal">
+    <div class="wm-header">
+      <h1><span>559</span>eats</h1>
+      <p>Fresno &amp; The Central Valley's Food Map</p>
+    </div>
+    <div class="wm-body">
+      <div class="wm-steps">
+        <div class="wm-step">
+          <div class="wm-icon" style="background:#fff3ee">📍</div>
+          <div class="wm-step-text">
+            <strong>Tap any pin on the map</strong>
+            <span>See the name, cuisine, address, phone, and get directions</span>
+          </div>
+        </div>
+        <div class="wm-step">
+          <div class="wm-icon" style="background:#f0f4ff">🔍</div>
+          <div class="wm-step-text">
+            <strong>Search or filter</strong>
+            <span>Find spots by name, neighborhood, or cuisine type</span>
+          </div>
+        </div>
+        <div class="wm-step">
+          <div class="wm-icon" style="background:#f0fff4">🗺️</div>
+          <div class="wm-step-text">
+            <strong>Browse the full list</strong>
+            <span>Hit Browse in the nav for photos, details, and more</span>
+          </div>
+        </div>
+      </div>
+      <div class="wm-pins">
+        <div class="wm-pin"><div class="pin-dot" style="background:#E8512A"></div> Food Truck</div>
+        <div class="wm-pin"><div class="pin-dot" style="background:#1a1310"></div> Restaurant</div>
+      </div>
+      <button id="exploreBtn">Explore the Map →</button>
+    </div>
+  </div>
+</div>
 
 <nav id="nav">
   <a class="logo" href="/"><span>559</span>eats</a>
@@ -96,7 +154,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
 </div>
 
 <div id="legend">
-  <div><span class="leg-dot" style="background:var(--orange)"></span>Food Truck</div>
+  <div><span class="leg-dot" style="background:#E8512A"></span>Food Truck</div>
   <div><span class="leg-dot" style="background:#1a1310"></span>Restaurant</div>
 </div>
 
@@ -105,26 +163,31 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMzI1MzgsImV4cCI6MjA1OTkwODUzOH0.PxDHgCSIBMkNkMbSYj0JBQHM7JRNnhvCnJWzWxYG04g';
 
-// Init map centered on Fresno
-const map = L.map('map',{zoomControl:false}).setView([36.7378,-119.7871],13);
+// Dismiss welcome modal
+document.getElementById('exploreBtn').addEventListener('click',()=>{
+  const overlay=document.getElementById('welcomeOverlay');
+  overlay.style.transition='opacity .3s';
+  overlay.style.opacity='0';
+  setTimeout(()=>overlay.remove(),300);
+});
+
+const map=L.map('map',{zoomControl:false}).setView([36.7378,-119.7871],13);
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
   attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   maxZoom:19
 }).addTo(map);
 
-let allSpots=[], activeFilter='all', searchQuery='', markers=[];
+let allSpots=[],activeFilter='all',searchQuery='',markers=[];
 
 function makeIcon(truck){
   const color=truck?'#E8512A':'#1a1310';
   return L.divIcon({
     className:'',
     html:'<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+color+';border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
-    iconSize:[22,22],
-    iconAnchor:[11,22],
-    popupAnchor:[0,-24]
+    iconSize:[22,22],iconAnchor:[11,22],popupAnchor:[0,-24]
   });
 }
 
@@ -144,20 +207,19 @@ function makePopup(r){
     +'<div class="sp-btns">'
     +'<a class="sp-btn primary" href="/restaurant?id='+r.id+'" target="_blank">View Details</a>'
     +(r.address?'<a class="sp-btn secondary" href="'+mapsUrl+'" target="_blank">Directions</a>':'')
-    +'</div>'
-    +'</div>';
+    +'</div></div>';
 }
 
 function matches(r){
-  if(activeFilter==='food_truck' && !r.is_food_truck) return false;
-  if(activeFilter!=='all' && activeFilter!=='food_truck'){
+  if(activeFilter==='food_truck'&&!r.is_food_truck) return false;
+  if(activeFilter!=='all'&&activeFilter!=='food_truck'){
     const c=(r.cuisine_type||'').toLowerCase();
     if(!c.includes(activeFilter)) return false;
   }
   if(searchQuery){
     const q=searchQuery.toLowerCase();
-    const haystack=(r.name+' '+(r.cuisine_type||'')+' '+(r.neighborhood||'')).toLowerCase();
-    if(!haystack.includes(q)) return false;
+    const hay=(r.name+' '+(r.cuisine_type||'')+' '+(r.neighborhood||'')).toLowerCase();
+    if(!hay.includes(q)) return false;
   }
   return true;
 }
@@ -178,17 +240,16 @@ function renderMarkers(){
 
 async function loadSpots(){
   try{
-    const r=await fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,is_food_truck,is_active&is_active=eq.true&order=name.asc&limit=500',{
+    const res=await fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,is_food_truck,is_active&is_active=eq.true&order=name.asc&limit=500',{
       headers:{apikey:KEY,Authorization:'Bearer '+KEY}
     });
-    allSpots=await r.json();
+    allSpots=await res.json();
     renderMarkers();
   }catch(e){
     document.getElementById('spotCount').textContent='Could not load spots';
   }
 }
 
-// Filter pills
 document.querySelectorAll('.pill').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
@@ -198,14 +259,10 @@ document.querySelectorAll('.pill').forEach(btn=>{
   });
 });
 
-// Search
 let searchTimer;
 document.getElementById('searchInput').addEventListener('input',e=>{
   clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>{
-    searchQuery=e.target.value.trim();
-    renderMarkers();
-  },200);
+  searchTimer=setTimeout(()=>{searchQuery=e.target.value.trim();renderMarkers();},200);
 });
 
 loadSpots();
