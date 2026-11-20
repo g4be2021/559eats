@@ -99,13 +99,7 @@ module.exports = async (req, res) => {
 
     await sendSMS(ADMIN_PHONE, adminMsg);
 
-    // 5. SMS claimant confirmation
-    const claimantMsg =
-      `Hi ${owner_name}! We received your claim request for ${restaurant.name} on 559eats.\n\n` +
-      `Our team will review your info and get back to you within 24–48 hours.\n\n` +
-      `Questions? Reply to this message or visit 559eats.com`;
-
-    await sendSMS(owner_phone, claimantMsg);
+    // The claimant is not texted: the number is unverified form input (prevents text abuse).
 
     return res.json({
       success: true,

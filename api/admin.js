@@ -3,6 +3,7 @@
 // The browser gets a signed token after login; every data call is checked here
 // and run with the service key, so the public anon key no longer needs write access.
 const crypto = require('crypto');
+const { signAdmin, verifyAdminToken } = require('./_lib/admin-auth');
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://wlpugteoycouvvnhamnm.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,27 +21,8 @@ const fails = new Map();
 const FAIL_LIMIT = 8;
 const FAIL_WINDOW_MS = 15 * 60 * 1000;
 
-function sign(payload) {
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const sig = crypto.createHmac('sha256', SECRET).update(body).digest('base64url');
-  return `${body}.${sig}`;
-}
-
-function verify(token) {
-  if (!token || !SECRET) return null;
-  const [body, sig] = token.split('.');
-  if (!body || !sig) return null;
-  const expected = crypto.createHmac('sha256', SECRET).update(body).digest('base64url');
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-  try {
-    const p = JSON.parse(Buffer.from(body, 'base64url').toString());
-    return p.exp > Date.now() ? p : null;
-  } catch {
-    return null;
-  }
-}
+const sign = signAdmin;
+const verify = verifyAdminToken;
 
 function passwordMatches(password, stored) {
   if (typeof password !== 'string' || !stored || !stored.includes(':')) return false;

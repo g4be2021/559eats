@@ -1,4 +1,5 @@
-// Provider-agnostic SMS for 559eats. Set SMS_PROVIDER to "telnyx" (default) or "plivo".
+// Provider-agnostic SMS for 559eats. Set SMS_PROVIDER to "vonage" (default), "telnyx" or "plivo".
+//   VONAGE_API_KEY, VONAGE_API_SECRET, VONAGE_FROM (vonage; VONAGE_FROM like 17579703964)
 // Env vars (set in Vercel, never in code):
 //   SMS_FROM_NUMBER            your texting number in +1XXXXXXXXXX format
 //   TELNYX_API_KEY             (telnyx) API v2 key
@@ -21,11 +22,27 @@ function result(ok, id, error) {
 async function sendSms(to, text) {
   const dst = toE164(to);
   if (!dst) return result(false, null, 'bad phone number');
-  const from = process.env.SMS_FROM_NUMBER;
-  if (!from) return result(false, null, 'SMS_FROM_NUMBER is not set');
-  const provider = (process.env.SMS_PROVIDER || 'telnyx').toLowerCase();
+  const provider = (process.env.SMS_PROVIDER || 'vonage').toLowerCase();
 
   try {
+    if (provider === 'vonage') {
+      const vFrom = process.env.VONAGE_FROM;
+      if (!vFrom || !process.env.VONAGE_API_KEY) return result(false, null, 'Vonage is not configured');
+      const form = new URLSearchParams({
+        api_key: process.env.VONAGE_API_KEY, api_secret: process.env.VONAGE_API_SECRET,
+        from: vFrom.replace(/\D/g, ''), to: dst.replace(/^\+/, ''), text,
+      });
+      if (/[^\x00-\x7F]/.test(text)) form.set('type', 'unicode');
+      const res = await fetch('https://rest.nexmo.com/sms/json', { method: 'POST', body: form });
+      const data = await res.json().catch(() => ({}));
+      const m = data.messages && data.messages[0];
+      if (!m || m.status !== '0') return result(false, null, (m && m['error-text']) || `Vonage error ${res.status}`);
+      return result(true, m['message-id']);
+    }
+
+    const from = process.env.SMS_FROM_NUMBER;
+    if (!from) return result(false, null, 'SMS_FROM_NUMBER is not set');
+
     if (provider === 'plivo') {
       const authId = process.env.PLIVO_AUTH_ID;
       const res = await fetch(`https://api.plivo.com/v1/Account/${authId}/Message/`, {
