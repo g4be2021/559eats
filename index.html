@@ -1,300 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>559eats  Discover Fresno's Best Food</title>
-  <meta name="description" content="Discover the best restaurants, food trucks, and hidden gems in Fresno & the Central Valley." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --orange: #E8512A; --orange-dark: #c73e18; --orange-light: #f9ede8;
-      --cream: #faf7f4; --dark: #1a1310; --text: #2d2420; --muted: #7a6e6a;
-      --border: #e8e0da; --white: #fff;
-      --card-radius: 14px;
-      --shadow: 0 2px 12px rgba(0,0,0,.08);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,.14);
-    }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); line-height: 1.5; }
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 64px;
-      background: rgba(250,247,244,.85);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border-bottom: 1px solid rgba(232,224,218,.6);
-      transition: background .3s, box-shadow .3s;
-    }
-    nav.scrolled { background: rgba(250,247,244,.97); box-shadow: 0 2px 20px rgba(0,0,0,.08); }
-    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 800; color: var(--orange); text-decoration: none; letter-spacing: -.5px; }
-    .nav-links { display: flex; align-items: center; gap: 8px; }
-    .nav-links a { font-size: .9rem; font-weight: 500; color: var(--muted); text-decoration: none; padding: 6px 14px; border-radius: 999px; transition: color .2s, background .2s; }
-    .nav-links a:hover { color: var(--text); background: var(--border); }
-    .nav-cta { background: var(--orange) !important; color: var(--white) !important; padding: 8px 20px !important; border-radius: 999px !important; font-weight: 600 !important; }
-    .nav-cta:hover { background: var(--orange-dark) !important; transform: translateY(-1px); }
-    .hero {
-      position: relative; min-height: 560px; display: flex; align-items: center; justify-content: center;
-      padding: 100px 24px 64px; overflow: hidden; text-align: center;
-    }
-    .hero-bg { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=1600&q=80&auto=format') center/cover no-repeat; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(26,8,2,.75) 0%, rgba(180,50,15,.55) 100%); }
-    .hero-content { position: relative; z-index: 1; max-width: 680px; }
-    .hero-eyebrow { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: 16px; }
-    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 5.2rem); font-weight: 800; color: #fff; line-height: 1.08; margin-bottom: 20px; text-shadow: 0 2px 24px rgba(0,0,0,.35); }
-    .hero p { font-size: 1.1rem; color: rgba(255,255,255,.85); margin-bottom: 36px; max-width: 460px; margin-left: auto; margin-right: auto; }
-    .search-wrap { display: flex; background: #fff; border-radius: 999px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.28); max-width: 520px; margin: 0 auto 32px; }
-    .search-wrap input { flex: 1; border: none; outline: none; padding: 16px 24px; font-size: 1rem; font-family: inherit; color: var(--text); background: transparent; }
-    .search-wrap input::placeholder { color: #aaa; }
-    .search-wrap button { background: var(--orange); color: #fff; border: none; padding: 14px 28px; font-weight: 700; font-size: .95rem; cursor: pointer; transition: background .2s; white-space: nowrap; }
-    .search-wrap button:hover { background: var(--orange-dark); }
-    .hero-stats { display: flex; gap: 40px; justify-content: center; }
-    .hero-stats .stat { color: rgba(255,255,255,.9); }
-    .hero-stats .stat strong { display: block; font-size: 2rem; font-weight: 800; color: #fff; line-height: 1; }
-    .hero-stats .stat span { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
-    .section { max-width: 1200px; margin: 0 auto; padding: 60px 24px; }
-    .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
-    .section-title { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--text); }
-    .see-all { font-size: .9rem; font-weight: 600; color: var(--orange); text-decoration: none; }
-    .see-all:hover { text-decoration: underline; }
-    .pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
-    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--white); font-size: .875rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all .18s; white-space: nowrap; text-decoration: none; }
-    .pill:hover, .pill.active { background: var(--orange); border-color: var(--orange); color: #fff; }
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-    .card { background: var(--white); border-radius: var(--card-radius); overflow: hidden; box-shadow: var(--shadow); text-decoration: none; color: inherit; transition: transform .22s, box-shadow .22s; display: flex; flex-direction: column; }
-    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
-    .card-img { position: relative; height: 185px; background: var(--orange-light); overflow: hidden; }
-    .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
-    .card:hover .card-img img { transform: scale(1.06); }
-    .card-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: linear-gradient(135deg, #fde8df 0%, #f9d4c4 100%); }
-    .card-badge { position: absolute; top: 10px; left: 10px; background: rgba(26,19,16,.75); backdrop-filter: blur(6px); color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }
-    .card-badge.open { background: rgba(22,163,74,.85); }
-    .card-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
-    .card-name { font-weight: 700; font-size: 1rem; color: var(--text); }
-    .card-meta { font-size: .82rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-    .card-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
-    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-    .card-tag { font-size: .72rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--orange-light); color: var(--orange-dark); }
-    .scroll-row { display: flex; gap: 18px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none; scroll-snap-type: x mandatory; }
-    .scroll-row::-webkit-scrollbar { display: none; }
-    .scroll-row .card { min-width: 240px; scroll-snap-align: start; flex-shrink: 0; }
-    .promo-banner { background: linear-gradient(135deg, #2d1a14 0%, #4a2218 100%); border-radius: 20px; padding: 44px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-    .promo-banner h2 { font-family: 'Playfair Display', serif; font-size: 1.65rem; color: #fff; margin-bottom: 8px; }
-    .promo-banner p { color: rgba(255,255,255,.7); font-size: .95rem; max-width: 400px; }
-    .promo-banner a { display: inline-block; background: var(--orange); color: #fff; font-weight: 700; font-size: .95rem; padding: 14px 28px; border-radius: 999px; text-decoration: none; transition: background .2s, transform .15s; white-space: nowrap; }
-    .promo-banner a:hover { background: var(--orange-dark); transform: translateY(-1px); }
-    .map-cta { background: var(--white); border-radius: 20px; padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; box-shadow: var(--shadow); }
-    .map-cta h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text); margin-bottom: 8px; }
-    .map-cta p { color: var(--muted); font-size: .95rem; }
-    .map-cta a { display: inline-block; background: var(--orange); color: #fff; font-weight: 700; font-size: .95rem; padding: 14px 28px; border-radius: 999px; text-decoration: none; white-space: nowrap; transition: background .2s, transform .15s; }
-    .map-cta a:hover { background: var(--orange-dark); transform: translateY(-1px); }
-    .nbhd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
-    .nbhd-card { background: var(--white); border-radius: 14px; padding: 24px 16px; text-align: center; text-decoration: none; color: inherit; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; }
-    .nbhd-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
-    .nbhd-card .nbhd-icon { font-size: 2.2rem; margin-bottom: 10px; display: block; }
-    .nbhd-card .nbhd-name { font-weight: 700; font-size: .95rem; color: var(--text); display: block; margin-bottom: 2px; }
-    .nbhd-card .nbhd-count { font-size: .8rem; color: var(--muted); }
-    .catering-section { background: var(--orange-light); border-radius: 20px; padding: 48px; display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
-    .catering-section .catering-text { flex: 1; min-width: 260px; }
-    .catering-section h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--text); margin-bottom: 12px; }
-    .catering-section p { color: var(--muted); margin-bottom: 20px; }
-    .event-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-    .event-pills span { font-size: .82rem; font-weight: 600; padding: 6px 14px; border-radius: 999px; background: var(--white); color: var(--text); }
-    .btn-primary { display: inline-block; background: var(--orange); color: #fff; font-weight: 700; padding: 14px 28px; border-radius: 999px; text-decoration: none; transition: background .2s, transform .15s; }
-    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-1px); }
-    footer { background: var(--dark); color: rgba(255,255,255,.55); text-align: center; padding: 36px 24px; font-size: .875rem; margin-top: 24px; }
-    footer a { color: rgba(255,255,255,.75); text-decoration: none; }
-    footer a:hover { color: var(--orange); }
-    .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
-    @media (max-width: 768px) {
-      nav { padding: 0 16px; }
-      .nav-links a:not(.nav-cta) { display: none; }
-      .hero { min-height: 480px; padding: 90px 16px 50px; }
-      .hero h1 { font-size: 2.6rem; }
-      .hero-stats { gap: 24px; }
-      .section { padding: 44px 16px; }
-      .promo-banner, .map-cta, .catering-section { padding: 28px 24px; }
-      .nbhd-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>559eats — Fresno's Food Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--orange:#E8512A;--dark:#1a1a2e;--card-bg:#fff;--radius:12px}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
+
+/* Full-screen map */
+#map{position:fixed;inset:0;z-index:0}
+
+/* Floating nav */
+#nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(26,26,46,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#nav .logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:#fff;text-decoration:none}
+#nav .logo span{color:var(--orange)}
+#nav-links{display:flex;gap:20px;align-items:center}
+#nav-links a{color:rgba(255,255,255,0.8);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+#nav-links a:hover{color:#fff}
+#nav-links a.active{color:var(--orange)}
+
+/* Search bar */
+#searchWrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:900;width:min(480px,90vw)}
+#searchInput{width:100%;padding:12px 18px 12px 42px;border-radius:50px;border:none;font-size:.95rem;font-family:'Inter',sans-serif;background:rgba(255,255,255,0.97);box-shadow:0 4px 20px rgba(0,0,0,0.25);outline:none}
+#searchInput::placeholder{color:#999}
+#searchIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999;pointer-events:none;font-size:1rem}
+
+/* Filter pills */
+#filters{position:fixed;top:130px;left:50%;transform:translateX(-50%);z-index:900;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;max-width:95vw;padding:0 4px;scrollbar-width:none}
+#filters::-webkit-scrollbar{display:none}
+.pill{padding:7px 16px;border-radius:50px;border:none;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;background:rgba(255,255,255,0.92);color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:all .2s}
+.pill:hover{background:#fff;transform:translateY(-1px)}
+.pill.active{background:var(--orange);color:#fff}
+
+/* Map legend */
+#legend{position:fixed;bottom:24px;left:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 14px;color:#fff;font-size:.75rem}
+#legend div{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+#legend div:last-child{margin-bottom:0}
+.leg-dot{width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;flex-shrink:0}
+
+/* Spot count badge */
+#spotCount{position:fixed;bottom:24px;right:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 16px;color:#fff;font-size:.8rem;font-weight:600}
+
+/* Leaflet popup overrides */
+.leaflet-popup-content-wrapper{border-radius:var(--radius)!important;padding:0!important;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.2)!important;min-width:240px}
+.leaflet-popup-content{margin:0!important;width:auto!important}
+.leaflet-popup-tip-container{display:none}
+.spot-popup{padding:16px}
+.spot-popup h3{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:4px;line-height:1.3}
+.spot-popup .sp-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.spot-popup .sp-tag{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:50px;background:#f0f0f0;color:#555}
+.spot-popup .sp-tag.truck{background:#fff3ee;color:var(--orange)}
+.spot-popup .sp-info{font-size:.78rem;color:#666;margin-bottom:10px;line-height:1.5}
+.spot-popup .sp-btns{display:flex;gap:8px}
+.sp-btn{flex:1;padding:8px 10px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.sp-btn.primary{background:var(--orange);color:#fff}
+.sp-btn.secondary{background:#f5f5f5;color:var(--dark)}
+.sp-btn:hover{opacity:.85}
+</style>
 </head>
 <body>
+
+<div id="map"></div>
+
 <nav id="nav">
-  <a href="/" class="nav-logo">559eats</a>
-  <div class="nav-links">
-    <a href="/browse.html">Browse</a>
-    <a href="/map.html">Map</a>
+  <a class="logo" href="/"><span>559</span>eats</a>
+  <div id="nav-links">
+    <a href="/" class="active">Map</a>
+    <a href="/browse">Browse</a>
     <a href="/catering.html">Catering</a>
-    <a href="/browse.html#trucks">Food trucks</a>
-    <a href="/apply.html" class="nav-cta">List your spot</a>
+    <a href="/about.html">About</a>
+    <a href="/apply.html" style="background:var(--orange);color:#fff;padding:7px 16px;border-radius:50px;font-size:.82rem">List Your Spot</a>
   </div>
 </nav>
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <span class="hero-eyebrow">Fresno &amp; the Central Valley</span>
-    <h1>Eat local.<br>Eat 559.</h1>
-    <p>Discover the best restaurants, food trucks, and hidden gems in the 559.</p>
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Search restaurants, cuisines, neighborhoods" autocomplete="off" />
-      <button onclick="doSearch()">Search</button>
-    </div>
-    <div class="hero-stats">
-      <div class="stat"><strong id="statRestaurants">-</strong><span>Restaurants</span></div>
-      <div class="stat"><strong id="statTrucks">-</strong><span>Food trucks</span></div>
-      <div class="stat"><strong id="statNeighborhoods">-</strong><span>Neighborhoods</span></div>
-    </div>
-  </div>
-</section>
-<div class="section" style="padding-bottom:0">
-  <div class="pill-row" id="filterPills">
-    <a href="#" class="pill active" data-filter="all">All</a>
-    <a href="#" class="pill" data-filter="Mexican">Mexican</a>
-    <a href="#" class="pill" data-filter="BBQ">BBQ</a>
-    <a href="#" class="pill" data-filter="Asian">Asian</a>
-    <a href="#" class="pill" data-filter="Burgers">Burgers</a>
-    <a href="#" class="pill" data-filter="Wraps">Wraps</a>
-    <a href="#" class="pill" data-filter="Pizza">Pizza</a>
-    <a href="#" class="pill" data-filter="truck">Food Trucks</a>
-    <a href="#" class="pill" data-filter="Cafes">Cafes</a>
-  </div>
+
+<div id="searchWrap">
+  <span id="searchIcon">🔍</span>
+  <input id="searchInput" type="text" placeholder="Search restaurants, cuisine, neighborhood…">
 </div>
-<div class="section">
-  <div class="section-header">
-    <h2 class="section-title">Food Trucks Near You</h2>
-    <a href="/browse.html#trucks" class="see-all">See all &rarr;</a>
-  </div>
-  <div class="scroll-row" id="truckCards">
-    <div class="card"><div class="card-img"><div class="card-img-placeholder"></div></div><div class="card-body"><div class="card-name">Loading</div></div></div>
-  </div>
+
+<div id="filters">
+  <button class="pill active" data-filter="all">All</button>
+  <button class="pill" data-filter="food_truck">Food Trucks</button>
+  <button class="pill" data-filter="mexican">Mexican</button>
+  <button class="pill" data-filter="american">American</button>
+  <button class="pill" data-filter="asian">Asian</button>
+  <button class="pill" data-filter="bbq">BBQ</button>
+  <button class="pill" data-filter="seafood">Seafood</button>
+  <button class="pill" data-filter="italian">Italian</button>
+  <button class="pill" data-filter="dessert">Dessert</button>
 </div>
-<div class="section" style="padding-top:0">
-  <div class="map-cta">
-    <div>
-      <h2> Whats near me?</h2>
-      <p>Find restaurants and food trucks within walking or driving distance right now.</p>
-    </div>
-    <a href="/map.html">Open map view</a>
-  </div>
+
+<div id="legend">
+  <div><span class="leg-dot" style="background:var(--orange)"></span>Food Truck</div>
+  <div><span class="leg-dot" style="background:#1a1310"></span>Restaurant</div>
 </div>
-<div class="section">
-  <div class="section-header">
-    <h2 class="section-title">Browse All Spots</h2>
-    <a href="/browse.html" class="see-all">See all &rarr;</a>
-  </div>
-  <div class="pill-row" id="cuisinePills"></div>
-  <div class="cards-grid" id="allCards"></div>
-</div>
-<div class="section" style="padding-top:0">
-  <div class="catering-section">
-    <div class="catering-text">
-      <h2> Need catering for your next event?</h2>
-      <p>Book a local food truck for weddings, corporate lunches, birthday parties, and more.</p>
-      <div class="event-pills">
-        <span>Weddings</span><span>Corporate</span><span>Birthdays</span><span>Graduations</span>
-      </div>
-      <a href="/catering.html" class="btn-primary">Browse catering trucks &rarr;</a>
-    </div>
-  </div>
-</div>
-<div class="section">
-  <div class="section-header">
-    <h2 class="section-title">Explore by neighborhood</h2>
-  </div>
-  <div class="nbhd-grid" id="nbhdGrid"></div>
-</div>
-<div class="section" style="padding-top:0">
-  <div class="promo-banner">
-    <div>
-      <h2>Own a food truck or restaurant?</h2>
-      <p>Get a free listing on 559eats and reach thousands of hungry locals in Fresno and the Central Valley.</p>
-    </div>
-    <a href="/apply.html">Get listed for free</a>
-  </div>
-</div>
-<footer>
-  <div class="footer-links">
-    <a href="/apply.html">List your restaurant</a>
-    <a href="/contact.html">Contact</a>
-    <a href="/about.html">About</a>
-  </div>
-  <p>559eats  Celebrating local food in the Central Valley</p>
-</footer>
+
+<div id="spotCount">Loading…</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 40); }, { passive: true });
-  document.querySelectorAll('#filterPills .pill').forEach(p => {
-    p.addEventListener('click', e => {
-      e.preventDefault();
-      document.querySelectorAll('#filterPills .pill').forEach(x => x.classList.remove('active'));
-      p.classList.add('active');
-      const filter = p.dataset.filter || 'all';
-      const ac = document.getElementById('allCards');
-      if (!window._allData) return;
-      const filtered = filter === 'all' ? window._allData
-        : filter === 'truck' ? window._allData.filter(isTruck)
-        : window._allData.filter(r => (r.cuisine_type||'').toLowerCase().includes(filter.toLowerCase()));
-      ac.innerHTML = filtered.slice(0,12).map(r=>cardHTML(r,'')).join('') || '<p style="color:var(--muted);font-size:.9rem;grid-column:1/-1">No results.</p>';
-    });
+const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+
+// Init map centered on Fresno
+const map = L.map('map',{zoomControl:false}).setView([36.7378,-119.7871],13);
+L.control.zoom({position:'bottomright'}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom:19
+}).addTo(map);
+
+let allSpots=[], activeFilter='all', searchQuery='', markers=[];
+
+function makeIcon(truck){
+  const color=truck?'#E8512A':'#1a1310';
+  return L.divIcon({
+    className:'',
+    html:'<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+color+';border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',
+    iconSize:[22,22],
+    iconAnchor:[11,22],
+    popupAnchor:[0,-24]
   });
-  function doSearch() {
-    const q = document.getElementById('searchInput').value.trim();
-    if (q) window.location.href = '/browse.html?q=' + encodeURIComponent(q);
+}
+
+function makePopup(r){
+  const tags=[];
+  if(r.is_food_truck) tags.push('<span class="sp-tag truck">Food Truck</span>');
+  if(r.cuisine_type) tags.push('<span class="sp-tag">'+r.cuisine_type+'</span>');
+  if(r.neighborhood) tags.push('<span class="sp-tag">'+r.neighborhood+'</span>');
+  let info='';
+  if(r.address) info+='📍 '+r.address+'<br>';
+  if(r.phone) info+='📞 <a href="tel:'+r.phone+'" style="color:var(--orange);text-decoration:none">'+r.phone+'</a>';
+  const mapsUrl=r.address?'https://maps.google.com/?q='+encodeURIComponent(r.address):'#';
+  return '<div class="spot-popup">'
+    +'<h3>'+r.name+'</h3>'
+    +(tags.length?'<div class="sp-tags">'+tags.join('')+'</div>':'')
+    +(info?'<div class="sp-info">'+info+'</div>':'')
+    +'<div class="sp-btns">'
+    +'<a class="sp-btn primary" href="/restaurant?id='+r.id+'" target="_blank">View Details</a>'
+    +(r.address?'<a class="sp-btn secondary" href="'+mapsUrl+'" target="_blank">Directions</a>':'')
+    +'</div>'
+    +'</div>';
+}
+
+function matches(r){
+  if(activeFilter==='food_truck' && !r.is_food_truck) return false;
+  if(activeFilter!=='all' && activeFilter!=='food_truck'){
+    const c=(r.cuisine_type||'').toLowerCase();
+    if(!c.includes(activeFilter)) return false;
   }
-  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
-  const SUPA = 'https://wlpugteoycouvvnhamnm.supabase.co';
-  const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-  async function fetchAll() {
-    try {
-      const r = await fetch(SUPA+'/rest/v1/restaurants?select=*&order=name.asc&limit=60', { headers: { apikey: KEY, Authorization: 'Bearer '+KEY } });
-      return r.ok ? r.json() : [];
-    } catch { return []; }
+  if(searchQuery){
+    const q=searchQuery.toLowerCase();
+    const haystack=(r.name+' '+(r.cuisine_type||'')+' '+(r.neighborhood||'')).toLowerCase();
+    if(!haystack.includes(q)) return false;
   }
-  function cLabel(r) { return r.cuisine_type||r.cuisine||r.category||''; }
-  function isTruck(r) { return r.is_food_truck === true || (r.type||'').toLowerCase().includes('truck')||(r.category||'').toLowerCase().includes('truck'); }
-  function cardHTML(r, badge) {
-    const name = r.name||'Unknown', cuisine = cLabel(r), loc = r.neighborhood||r.location||r.area||'';
-    const truck = isTruck(r), tagEmoji = truck?'':'', tagLabel = truck?'Food truck':'Restaurant';
-    const img = r.image_url||r.photo_url||'';
-    const imgHTML = img ? `<img src="${img}" alt="${name}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\"card-img-placeholder\">${truck?'':''}</div>'">` : `<div class="card-img-placeholder">${truck?'':''}</div>`;
-    const badgeHTML = badge ? `<div class="card-badge${badge==='Open'?' open':''}">${badge}</div>` : '';
-    const href = r.id ? '/restaurant?id=' + r.id : '#'
-    return `<a href="${href}" class="card"><div class="card-img">${imgHTML}${badgeHTML}</div><div class="card-body"><div class="card-name">${name}</div><div class="card-meta">${cuisine?`<span>${cuisine}</span>`:''}${cuisine&&loc?'<span class="dot"></span>':''}${loc?`<span>${loc}</span>`:''}</div><div class="card-tags"><span class="card-tag">${tagEmoji} ${tagLabel}</span></div></div></a>`;
+  return true;
+}
+
+function renderMarkers(){
+  markers.forEach(m=>map.removeLayer(m));
+  markers=[];
+  const visible=allSpots.filter(matches);
+  visible.forEach(r=>{
+    if(!r.latitude||!r.longitude) return;
+    const m=L.marker([r.latitude,r.longitude],{icon:makeIcon(r.is_food_truck)})
+      .bindPopup(makePopup(r),{maxWidth:280})
+      .addTo(map);
+    markers.push(m);
+  });
+  document.getElementById('spotCount').textContent=visible.length+' spot'+(visible.length!==1?'s':'');
+}
+
+async function loadSpots(){
+  try{
+    const r=await fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,is_food_truck,is_active&is_active=eq.true&order=name.asc&limit=500',{
+      headers:{apikey:KEY,Authorization:'Bearer '+KEY}
+    });
+    allSpots=await r.json();
+    renderMarkers();
+  }catch(e){
+    document.getElementById('spotCount').textContent='Could not load spots';
   }
-  async function init() {
-    const data = await fetchAll();
-    window._allData = data;
-    const trucks = data.filter(isTruck), restaurants = data.filter(r => !isTruck(r));
-    const hoods = [...new Set(data.map(r=>r.neighborhood||r.area).filter(Boolean))];
-    document.getElementById('statRestaurants').textContent = restaurants.length||'';
-    document.getElementById('statTrucks').textContent = trucks.length||'';
-    document.getElementById('statNeighborhoods').textContent = hoods.length||'';
-    const tc = document.getElementById('truckCards');
-    tc.innerHTML = (trucks.length?trucks:data).slice(0,10).map((r,i)=>cardHTML(r,i<2?'Featured':'')).join('')||'<p style="color:var(--muted);font-size:.9rem">No listings yet.</p>';
-    const ac = document.getElementById('allCards');
-    ac.innerHTML = data.slice(0,12).map(r=>cardHTML(r,'')).join('')||'<p style="color:var(--muted);font-size:.9rem;grid-column:1/-1">No listings yet.</p>';
-    const cuisines = [...new Set(data.map(cLabel).filter(Boolean))].slice(0,8);
-    const cp = document.getElementById('cuisinePills');
-    if (cuisines.length) {
-      cp.innerHTML = ['All',...cuisines].map((c,i)=>`<a href="#" class="pill${i===0?' active':''}">${c}</a>`).join('');
-      cp.querySelectorAll('.pill').forEach((p,i)=>p.addEventListener('click',e=>{
-        e.preventDefault(); cp.querySelectorAll('.pill').forEach(x=>x.classList.remove('active')); p.classList.add('active');
-        const c = cuisines[i-1]; const f = c?data.filter(r=>cLabel(r)===c):data;
-        ac.innerHTML = f.slice(0,12).map(r=>cardHTML(r,'')).join('');
-      }));
-    }
-    const nbhdMap = {}; data.forEach(r=>{ const n=r.neighborhood||r.area; if(n) nbhdMap[n]=(nbhdMap[n]||0)+1; });
-    const icons = {Downtown:'','Tower District':'',Clovis:'','Fig Garden':'','Fresno State':'','North Fresno':'',Visalia:'',Southeast:''};
-    const ng = document.getElementById('nbhdGrid');
-    const entries = Object.entries(nbhdMap);
-    ng.innerHTML = (entries.length?entries:[['Downtown',''],['Tower District',''],['Clovis',''],['Fig Garden',''],['Fresno State','']]).map(([n,c])=>`<a href="/browse.html?neighborhood=${encodeURIComponent(n)}" class="nbhd-card"><span class="nbhd-icon">${icons[n]||''}</span><span class="nbhd-name">${n}</span><span class="nbhd-count">${c?c+' spot'+(c!==1?'s':''):'Browse'}</span></a>`).join('');
-  }
-  init();
+}
+
+// Filter pills
+document.querySelectorAll('.pill').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter=btn.dataset.filter;
+    renderMarkers();
+  });
+});
+
+// Search
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
+    searchQuery=e.target.value.trim();
+    renderMarkers();
+  },200);
+});
+
+loadSpots();
 </script>
 </body>
 </html>
