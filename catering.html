@@ -32,7 +32,7 @@
   .sent-banner{display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:20px;text-align:center;color:#166534;font-weight:600;margin-top:16px}
   @media(max-width:768px){.form-row{grid-template-columns:1fr}}
 </style></head>
-<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/food-trucks.html">Food trucks</a><a href="/apply.html" class="nav-cta">List your spot</a></div></nav>
+<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/browse.html">Food trucks</a><a href="/apply.html" class="nav-cta">List your spot</a></div></nav>
 <div class="page-hero">
   <span class="eyebrow">Catering &amp; events</span>
   <h1>Book a food truck<br>for your next event</h1>
@@ -102,7 +102,7 @@ const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
     document.getElementById('cateringTrucks').innerHTML=show.map(r=>{
       const cuisine=r.cuisine_type||r.cuisine||r.category||'';
       const img=r.image_url?'<img src="'+r.image_url+'" style="width:100%;height:100%;object-fit:cover" alt="">':'<div style="font-size:3.5rem;display:flex;align-items:center;justify-content:center;height:100%">&#127868;</div>';
-      return '<a href="'+(r.slug?'/trucks/'+r.slug:'#')+'" class="truck-card"><div class="tc-img">'+img+'</div><div class="tc-body"><div class="tc-name">'+r.name+'</div><div class="tc-meta">'+cuisine+(r.neighborhood?'  &middot;  '+r.neighborhood:'')+'</div><span class="tc-tag">&#127860; Catering available</span></div></a>';
+      return '<a href="'+(r.id?'restaurant.html?id='+r.id:'#')+'" class="truck-card"><div class="tc-img">'+img+'</div><div class="tc-body"><div class="tc-name">'+r.name+'</div><div class="tc-meta">'+cuisine+(r.neighborhood?'  &middot;  '+r.neighborhood:'')+'</div><span class="tc-tag">&#127860; Catering available</span></div></a>';
     }).join('')||'<p style="color:var(--muted)">More trucks coming soon!</p>';
   }catch(e){document.getElementById('cateringTrucks').innerHTML='<p style="color:var(--muted)">Coming soon!</p>';}
 })();
