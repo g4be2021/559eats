@@ -1,20 +1,17 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+// Admin-only Places nearby-search proxy (used by the Discover Local admin tool).
+const { isAdmin } = require('./_lib/admin-auth');
 
+module.exports = async (req, res) => {
+  if (!isAdmin(req)) return res.status(401).json({ error: 'Not signed in' });
   const { lat, lng, radius, type } = req.query;
-  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
-
-  if (!lat || !lng) {
-    return res.status(400).json({ error: 'lat and lng are required' });
-  }
-
+  const la = Number(lat), ln = Number(lng), rad = Math.min(Number(radius) || 5000, 50000);
+  if (!Number.isFinite(la) || !Number.isFinite(ln)) return res.status(400).json({ error: 'lat and lng are required' });
+  const t = /^[a-z_]+$/.test(type || '') ? type : 'restaurant';
+  const key = process.env.GOOGLE_MAPS_API_KEY;
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radius || 5000}&type=${type || 'restaurant'}&key=${MAPS_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return res.status(200).json(data);
+    const r = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${la},${ln}&radius=${rad}&type=${t}&key=${key}`);
+    return res.status(200).json(await r.json());
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-}
+};

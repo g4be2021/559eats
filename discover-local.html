@@ -339,7 +339,7 @@
 
   // ── Geocode ──
   async function geocodeLocation(address) {
-    const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+    const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`, { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
     const data = await res.json();
     if (data.results && data.results[0]) return data.results[0].geometry.location;
     return null;
@@ -347,7 +347,7 @@
 
   // ── Nearby search — direct Google API call, no proxy needed ──
   async function nearbySearch(lat, lng, radius, type) {
-    const res = await fetch(`/api/places-nearby?lat=${lat}&lng=${lng}&radius=${radius}&type=${type}`);
+    const res = await fetch(`/api/places-nearby?lat=${lat}&lng=${lng}&radius=${radius}&type=${type}`, { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
     const data = await res.json();
     return data.results || [];
   }

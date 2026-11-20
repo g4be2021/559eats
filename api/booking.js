@@ -106,18 +106,8 @@ module.exports = async (req, res) => {
       }]);
     }
 
-    // 4. SMS customer confirmation
-    const dateStr = new Date(booking_date + 'T12:00:00').toLocaleDateString('en-US', {
-      weekday: 'long', month: 'long', day: 'numeric'
-    });
-    const customerMsg =
-      `Hi ${customer_name}! Your booking request at ${restaurant.name} has been received.\n\n` +
-      `📅 ${dateStr} at ${booking_time}\n` +
-      `👥 Party of ${party_size}\n\n` +
-      `The restaurant will confirm shortly. You'll get a text when it's confirmed.\n\n` +
-      `Questions? Visit 559eats.com`;
-
-    await sendSMS(customer_phone, customerMsg);
+    // Customers are not texted: this form can't verify the number belongs to them,
+    // and the registered SMS campaign only covers truck owners.
 
     return res.json({
       success: true,

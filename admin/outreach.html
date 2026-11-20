@@ -34,7 +34,19 @@
   .badge-pending { background: #f0f0f0; color: #666; }
   .badge-contacted { background: #dbeafe; color: #1d4ed8; }
   .badge-waiting_yes,.badge-waiting_name,.badge-waiting_items,.badge-waiting_location { background: #fef3c7; color: #d97706; }
-  .badge-done { background: #d1fae5; color: #065f46; }
+  .badge-done,.badge-approved { background: #d1fae5; color: #065f46; }
+  .badge-responded,.badge-collecting,.badge-review { background: #fef3c7; color: #d97706; }
+  .badge-denied,.badge-not_interested { background: #fee2e2; color: #991b1b; }
+  .badge-needs_human { background: #ede9fe; color: #5b21b6; }
+  .filters { display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap; }
+  .filters button { width: auto; padding: 4px 10px; font-size: 12px; background: #f0f0f0; color: #444; font-weight: 500; }
+  .filters button.on { background: #c0392b; color: #fff; }
+  .box { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: 14px; }
+  .box h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: #999; margin-bottom: 8px; }
+  .box dl { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; }
+  .box dt { color: #888; } .box dd { color: #222; }
+  .act { display: inline-block; width: auto; margin: 0 8px 8px 0; padding: 8px 16px; font-size: 13px; }
+  .act.secondary { background: #444; }
   .badge-opted_out { background: #f0f0f0; color: #999; }
   .badge-invalid { background: #fee2e2; color: #991b1b; }
   .detail { flex: 1; overflow-y: auto; padding: 24px; }
@@ -57,135 +69,155 @@
 <div id="login">
   <div id="login-box">
     <h1>559eats Admin</h1>
-    <p>SMS Outreach Dashboard</p>
-    <input type="password" id="pwd" placeholder="Admin password" />
+    <p>Vendor SMS outreach</p>
+    <input type="password" id="pwd" placeholder="Your admin password" />
     <button onclick="doLogin()">Sign In</button>
+    <p id="login-err" style="color:#c0392b;margin-top:10px;display:none"></p>
   </div>
 </div>
 
 <div id="app">
   <div class="topbar">
-    <h1>SMS Outreach</h1>
+    <h1>Vendor SMS outreach</h1>
     <span class="stat">Total: <strong id="st-total">-</strong></span>
-    <span class="stat">Pending: <strong id="st-pending">-</strong></span>
-    <span class="stat">Done: <strong id="st-done">-</strong></span>
-    <span class="stat">Opted out: <strong id="st-opted">-</strong></span>
-    <button class="send-btn" id="send-btn" onclick="sendBatch()">Send Next Batch (10)</button>
+    <span class="stat">In conversation: <strong id="st-talking">-</strong></span>
+    <span class="stat">Approved: <strong id="st-approved">-</strong></span>
+    <span class="stat">Needs you: <strong id="st-human">-</strong></span>
+    <a href="/admin" style="font-size:13px;color:#c0392b">Back to admin</a>
   </div>
   <div class="main">
     <div class="sidebar">
-      <div class="sidebar-header">Prospects</div>
+      <div class="filters" id="filters"></div>
       <div id="prospect-list"></div>
     </div>
     <div class="detail" id="detail">
-      <div class="detail-empty">Select a prospect to view conversation</div>
+      <div class="detail-empty">Select a vendor to see the conversation</div>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
+<script src="/admin-auth.js"></script>
 <script>
-let secret = '';
 let prospects = [];
-let selected = null;
+let selectedId = null;
+let filter = 'all';
+const FILTERS = { all: 'All', needs_human: 'Needs you', review: 'In review', collecting: 'Talking', approved: 'Approved', denied: 'Denied', pending: 'Not texted', opted_out: 'Opted out' };
 
-function doLogin() {
-  secret = document.getElementById('pwd').value.trim();
-  if (!secret) return;
-  loadProspects();
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function doLogin() {
+  const err = document.getElementById('login-err');
+  try { await Admin.login(document.getElementById('pwd').value); showApp(); }
+  catch (e) { err.textContent = e.message; err.style.display = 'block'; }
+}
+document.getElementById('pwd').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+Admin.check().then((ok) => { if (ok) showApp(); });
+
+async function showApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  await loadProspects();
 }
 
-document.getElementById('pwd').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
 async function loadProspects() {
-  try {
-    const r = await fetch('/api/admin-prospects', { headers: { 'x-admin-secret': secret } });
-    if (r.status === 401) { alert('Wrong password'); return; }
-    if (!r.ok) { alert('API error ' + r.status); return; }
-    prospects = await r.json();
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    renderList();
-    updateStats();
-  } catch(e) { alert('Error: ' + e.message); }
+  prospects = (await Admin.api('prospects?select=*&order=updated_at.desc')) || [];
+  renderFilters(); renderList(); updateStats(); renderDetail();
+}
+
+function renderFilters() {
+  document.getElementById('filters').innerHTML = Object.entries(FILTERS).map(([k, v]) =>
+    `<button class="${filter === k ? 'on' : ''}" onclick="filter='${k}';renderFilters();renderList()">${v}</button>`).join('');
+}
+
+function visible() {
+  if (filter === 'all') return prospects;
+  if (filter === 'collecting') return prospects.filter((p) => ['contacted', 'responded', 'collecting'].includes(p.status));
+  return prospects.filter((p) => p.status === filter);
 }
 
 function renderList() {
-  const el = document.getElementById('prospect-list');
-  el.innerHTML = prospects.map((p, i) => '<div class="prospect ' + (selected === i ? 'active' : '') + '" onclick="selectProspect(' + i + ')">' +
-    '<div class="prospect-name">' + (p.name || p.phone) + ' <span class="badge badge-' + p.status + '">' + p.status + '</span></div>' +
-    '<div class="prospect-phone">' + p.phone + '</div></div>').join('');
+  const list = visible();
+  document.getElementById('prospect-list').innerHTML = list.length ? list.map((p) =>
+    `<div class="prospect ${selectedId === p.id ? 'active' : ''}" onclick="selectProspect('${p.id}')">
+      <div class="prospect-name">${esc(p.name || p.collected_data?.business_name || p.phone)} <span class="badge badge-${esc(p.status)}">${esc(p.status)}</span></div>
+      <div class="prospect-phone">${esc(p.phone)} · ${esc(p.source || '')}</div></div>`).join('')
+    : '<p style="padding:16px;color:#aaa;font-size:14px">Nothing here</p>';
 }
 
 function updateStats() {
   document.getElementById('st-total').textContent = prospects.length;
-  document.getElementById('st-pending').textContent = prospects.filter(p => p.status === 'pending').length;
-  document.getElementById('st-done').textContent = prospects.filter(p => p.status === 'done').length;
-  document.getElementById('st-opted').textContent = prospects.filter(p => p.status === 'opted_out').length;
+  document.getElementById('st-talking').textContent = prospects.filter((p) => ['contacted', 'responded', 'collecting', 'review'].includes(p.status)).length;
+  document.getElementById('st-approved').textContent = prospects.filter((p) => p.status === 'approved').length;
+  document.getElementById('st-human').textContent = prospects.filter((p) => p.status === 'needs_human').length;
 }
 
-function selectProspect(i) {
-  selected = i;
-  renderList();
-  renderDetail();
+function selectProspect(id) { selectedId = id; renderList(); renderDetail(); }
+
+function fmtSchedule(s) {
+  if (!Array.isArray(s) || !s.length) return '';
+  return s.map((d) => d.closed ? `${d.day}: closed` : `${d.day} ${d.open || '?'}-${d.close || '?'}`).join(', ');
 }
 
 function renderDetail() {
-  const p = prospects[selected];
+  const p = prospects.find((x) => x.id === selectedId);
   if (!p) return;
+  const c = p.collected_data || {};
+  const app = c.website_application || {};
   const conv = p.conversation || [];
-  const msgs = conv.map(m =>
-    '<div class="msg msg-' + (m.direction === 'outbound' ? 'out' : 'in') + '">' +
-    m.text + '<div class="msg-time">' + new Date(m.ts).toLocaleString() + '</div></div>'
-  ).join('');
-  const approveBtn = p.status === 'done' && !p.restaurant_id
-    ? '<button class="approve-btn" onclick="approveListing()">Approve Listing</button>'
-    : '';
+  const msgs = conv.map((m) => {
+    const out = m.role === 'agent' || m.direction === 'outbound' || m.role === 'outbound';
+    return `<div class="msg msg-${out ? 'out' : 'in'}">${esc(m.text)}<div class="msg-time">${m.at || m.ts ? new Date(m.at || m.ts).toLocaleString() : ''}</div></div>`;
+  }).join('');
+  const rows = [
+    ['Business', c.business_name || p.name], ['Food', c.food_type || app.food_type], ['Schedule', fmtSchedule(c.schedule) || c.schedule_notes],
+    ['Location', c.street_address || c.cross_streets ? `${c.street_address || c.cross_streets}, ${c.city || ''}` : p.address],
+    ['Moves around', c.location_changes == null ? '' : (c.location_changes ? 'Yes' : 'No')], ['Social', c.social || app.instagram],
+    ['Contact', c.contact_name || app.owner_name], ['Email', app.email], ['Notes', app.notes || c.location_notes],
+  ].filter((r) => r[1]);
+  const canText = p.status === 'pending' && !(p.outreach_count > 0);
+  const canReview = ['review', 'needs_human', 'collecting', 'denied'].includes(p.status) && (c.business_name || p.name);
   document.getElementById('detail').innerHTML =
-    '<div class="detail-header"><h2>' + (p.name || 'Unknown') + '</h2>' +
-    '<p>' + p.phone + ' &bull; ' + (p.address || 'No address') + ' &bull; Status: ' + p.status + '</p></div>' +
-    '<div class="thread">' + (msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>') + '</div>' +
-    approveBtn;
+    `<div class="detail-header"><h2>${esc(c.business_name || p.name || 'Unknown')}</h2>
+      <p>${esc(p.phone)} · Status: <span class="badge badge-${esc(p.status)}">${esc(p.status)}</span> · Source: ${esc(p.source || '')}</p></div>
+    ${p.ai_decision ? `<div class="box"><h3>AI decision</h3><strong>${esc(p.ai_decision)}</strong>: ${esc(p.ai_reason || '')}</div>` : (p.ai_reason ? `<div class="box"><h3>Note</h3>${esc(p.ai_reason)}</div>` : '')}
+    ${rows.length ? `<div class="box"><h3>What we have</h3><dl>${rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl></div>` : ''}
+    <div>
+      ${canText ? `<button class="act" onclick="sendIntro('${p.id}')">Send intro text</button>` : ''}
+      ${canReview ? `<button class="act secondary" onclick="rerunReview('${p.id}')">Run AI approval now</button>` : ''}
+      ${p.restaurant_id ? `<a class="act" style="text-decoration:none;color:#fff;background:#065f46;border-radius:8px" href="/restaurant.html?id=${esc(p.restaurant_id)}" target="_blank">View live listing</a>` : ''}
+    </div>
+    <div class="box"><h3>Conversation</h3><div class="thread">${msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>'}</div></div>`;
 }
 
-async function sendBatch() {
-  const btn = document.getElementById('send-btn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  try {
-    const r = await fetch('/api/sms-outreach', {
-      method: 'POST',
-      headers: { 'x-admin-secret': secret, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ limit: 10 })
-    });
-    const d = await r.json();
-    showToast(d.message || 'Sent ' + (d.sent || 0) + ' messages');
-    await loadProspects();
-  } catch(e) { showToast('Error: ' + e.message); }
-  btn.disabled = false;
-  btn.textContent = 'Send Next Batch (10)';
+async function bridge(payload) {
+  const r = await fetch('/api/vendor-sms', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') }, body: JSON.stringify(payload) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || ('Error ' + r.status));
+  return d;
 }
 
-async function approveListing() {
-  const p = prospects[selected];
+async function sendIntro(id) {
+  if (!confirm('Only text vendors who asked to be contacted or texted you first. Send the intro text now?')) return;
   try {
-    const r = await fetch('/api/admin-approve', {
-      method: 'POST',
-      headers: { 'x-admin-secret': secret, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prospectId: p.id })
-    });
-    const d = await r.json();
-    showToast(d.message || 'Listing approved!');
-    await loadProspects();
-  } catch(e) { showToast('Error: ' + e.message); }
+    const d = await bridge({ action: 'outreach', prospect_ids: [id] });
+    const r = (d.results || [])[0];
+    showToast(r && r.ok ? 'Intro text sent' : 'Not sent: ' + ((r && r.err) || d.error || 'unknown'));
+  } catch (e) { showToast(e.message); }
+  await loadProspects();
+}
+
+async function rerunReview(id) {
+  try { const d = await bridge({ action: 'review', prospect_id: id }); showToast('AI decision: ' + (d.decision || d.error || 'done')); }
+  catch (e) { showToast(e.message); }
+  await loadProspects();
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 3000);
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3500);
 }
 </script>
 </body>

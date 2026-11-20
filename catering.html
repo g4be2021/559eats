@@ -68,6 +68,7 @@
     <h2>Request a quote</h2>
     <p class="sub">Fill this out and we&rsquo;ll connect you with the right trucks within 24 hours.</p>
     <div id="quoteFormInner">
+<input type="text" id="website_url" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
       <div class="form-row">
         <div class="fg"><label>Your name *</label><input type="text" id="qName" placeholder="Jane Smith" required></div>
         <div class="fg"><label>Phone *</label><input type="tel" id="qPhone" placeholder="(559) 555-0100" required></div>
@@ -88,7 +89,7 @@
     <div class="sent-banner" id="quoteSent">&#10003; Quote request received! We&rsquo;ll connect you with available trucks within 24 hours.</div>
   </div>
 </div>
-<footer><div class="footer-links"><a href="/apply.html">List your restaurant</a><a href="/contact.html">Contact</a><a href="/about.html">About</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
+<footer><div class="footer-links"><a href="/apply.html">List your food truck</a><a href="/contact.html">Contact</a><a href="/about.html">About</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 <script>
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
 const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
@@ -107,9 +108,19 @@ const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
   }catch(e){document.getElementById('cateringTrucks').innerHTML='<p style="color:var(--muted)">Coming soon!</p>';}
 })();
 async function submitQuote(){
-  const name=document.getElementById('qName').value.trim(),phone=document.getElementById('qPhone').value.trim();
-  if(!name||!phone){alert('Please fill in your name and phone number.');return;}
-  document.getElementById('quoteFormInner').style.display='none';
-  document.getElementById('quoteSent').style.display='block';
+  const v=id=>((document.getElementById(id)||{}).value||'').trim();
+  const name=v('qName'),phone=v('qPhone'),date=v('qDate');
+  if(!name||!phone||!date){alert('Please fill in your name, phone number and event date.');return;}
+  const btn=document.querySelector('.btn-quote'); btn.disabled=true; btn.textContent='Sending...';
+  try{
+    const notes=[v('qType')&&('Event: '+v('qType')),v('qCuisine')&&('Cuisine: '+v('qCuisine')),v('qNotes')].filter(Boolean).join('\n');
+    const r=await fetch('/api/catering-booking',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      customer_name:name,customer_phone:phone,customer_email:v('qEmail'),event_date:date,guest_count:v('qGuests'),
+      event_location:v('qLocation'),notes,website_url:v('website_url')})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.success) throw new Error(d.error||'Could not send. Please try again.');
+    document.getElementById('quoteFormInner').style.display='none';
+    document.getElementById('quoteSent').style.display='block';
+  }catch(e){ alert(e.message); btn.disabled=false; btn.innerHTML='Request catering quote &rarr;'; }
 }
 </script></body></html>

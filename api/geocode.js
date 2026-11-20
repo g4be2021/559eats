@@ -1,20 +1,15 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+// Admin-only geocoding proxy (used by admin tools). Not open to the public, so nobody can run up the Maps bill.
+const { isAdmin } = require('./_lib/admin-auth');
 
+module.exports = async (req, res) => {
+  if (!isAdmin(req)) return res.status(401).json({ error: 'Not signed in' });
   const { address } = req.query;
-  const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
-
-  if (!address) {
-    return res.status(400).json({ error: 'address is required' });
-  }
-
+  if (!address) return res.status(400).json({ error: 'address is required' });
+  const key = process.env.GOOGLE_MAPS_API_KEY;
   try {
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return res.status(200).json(data);
+    const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${key}`);
+    return res.status(200).json(await r.json());
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
-}
+};

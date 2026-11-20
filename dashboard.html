@@ -617,13 +617,13 @@
     try {
       const res = await fetch('/api/catering-booking', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
         body: JSON.stringify({ action: status, booking_id: id })
       });
       const data = await res.json();
       if (data.success) {
         if (status === 'confirmed') {
-          showToast('✅ Confirmed! Commission will be charged automatically.');
+          showToast('✅ Confirmed! Reach out to the customer to finalize details.');
         } else {
           showToast('❌ Catering request declined.');
         }
@@ -664,20 +664,15 @@
 
       const res = await fetch('/api/save-payment-method', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          payment_method_id: paymentMethod.id,
-          owner_id: ownerRecord.id,
-          email: ownerRecord.email,
-          name: restaurant?.name
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ payment_method_id: paymentMethod.id })
       });
 
       const data = await res.json();
       if (data.success) {
         document.getElementById('billing-has-card').style.display = 'flex';
         document.getElementById('billing-no-card').style.display = 'none';
-        showToast('✅ Card saved! Commissions will be charged automatically.');
+        showToast('✅ Card saved.');
         // Update local record
         ownerRecord.stripe_customer_id = data.customer_id;
       } else {

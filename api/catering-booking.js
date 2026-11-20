@@ -25,30 +25,16 @@ async function supabase(path, method = 'GET', body = null) {
 }
 
 const { sendSms: sendViaProvider } = require('./_lib/sms');
+const { isAdmin, ownerFromRequest } = require('./_lib/admin-auth');
 
 async function sendSMS(to, message) {
   return sendViaProvider(to, message);
 }
 
-async function triggerCommission(bookingId) {
-  try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
-    await fetch(`${baseUrl}/api/charge-commission`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ catering_booking_id: bookingId })
-    });
-  } catch (e) {
-    console.error('Commission trigger error:', e);
-  }
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
@@ -72,14 +58,45 @@ module.exports = async (req, res) => {
       if (!['confirmed', 'declined'].includes(action)) {
         return res.status(400).json({ error: 'Invalid action' });
       }
-      await supabase(`catering_bookings?id=eq.${booking_id}`, 'PATCH', { status: action });
-      if (action === 'confirmed') {
-        await triggerCommission(booking_id);
+      // Only the truck's owner (or an admin) can confirm or decline
+      const rows = await supabase(`catering_bookings?id=eq.${encodeURIComponent(booking_id)}&select=id,restaurant_id`);
+      const bk = rows && rows[0];
+      if (!bk) return res.status(404).json({ error: 'Booking not found' });
+      if (!isAdmin(req)) {
+        const owners = await ownerFromRequest(req);
+        if (!owners.some((o) => o.restaurant_id && o.restaurant_id === bk.restaurant_id)) {
+          return res.status(401).json({ error: 'Please sign in again.' });
+        }
       }
+      await supabase(`catering_bookings?id=eq.${encodeURIComponent(booking_id)}`, 'PATCH', { status: action, updated_at: new Date().toISOString() });
       return res.json({ success: true, status: action });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
+  }
+
+  if (req.body.website_url) return res.json({ success: true }); // honeypot
+
+  // ── GENERAL QUOTE (catering page, no truck picked yet) ──
+  if (!restaurant_id) {
+    if (!customer_name || !customer_phone || !event_date) {
+      return res.status(400).json({ error: 'Please fill in your name, phone and event date.' });
+    }
+    const saved = await supabase('catering_bookings', 'POST', [{
+      restaurant_id: null,
+      customer_name: String(customer_name).slice(0, 120),
+      customer_phone: String(customer_phone).slice(0, 30),
+      customer_email: customer_email ? String(customer_email).slice(0, 200) : null,
+      event_date,
+      event_location: event_location ? String(event_location).slice(0, 300) : 'Not given yet',
+      guest_count: parseInt(guest_count) || 0,
+      budget: budget || null,
+      notes: notes ? String(notes).slice(0, 2000) : null,
+      status: 'pending',
+      commission_rate: COMMISSION_RATE
+    }]);
+    if (!Array.isArray(saved) || !saved[0]) return res.status(500).json({ error: 'Could not save your request. Please try again.' });
+    return res.json({ success: true, booking_id: saved[0].id, status: 'pending' });
   }
 
   // ── NEW BOOKING REQUEST ──
@@ -140,14 +157,7 @@ module.exports = async (req, res) => {
       }]);
     }
 
-    const customerMsg =
-      `Hi ${customer_name}! Your catering request for ${restaurant.name} has been received. 🎉\n\n` +
-      `📅 ${dateStr}\n` +
-      `📍 ${event_location}\n` +
-      `👥 ${guest_count} guests\n\n` +
-      `The owner will confirm shortly.\n\nQuestions? Visit 559eats.com`;
-
-    await sendSMS(customer_phone, customerMsg);
+    // Customers are not texted: the registered SMS campaign only covers truck owners.
 
     return res.json({ success: true, booking_id: booking.id, status: 'pending' });
 

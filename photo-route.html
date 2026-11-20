@@ -198,7 +198,7 @@
   }
 
   async function geocodeStart(address) {
-    const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
+    const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`, { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
     const data = await res.json();
     if (data.results && data.results[0]) return data.results[0].geometry.location;
     return null;

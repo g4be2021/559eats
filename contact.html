@@ -55,13 +55,14 @@
       <h2>Say hello</h2>
       <p>Whether you have a question about a listing, want to partner with us, or just love local food &mdash; reach out.</p>
       <div class="contact-item"><div class="ci-icon">&#128140;</div><div><strong>General inquiries</strong><a href="mailto:hello@559eats.com">hello@559eats.com</a></div></div>
-      <div class="contact-item"><div class="ci-icon">&#127860;</div><div><strong>List your restaurant or truck</strong><span>Use our free listing form &mdash; we&rsquo;ll text you to get started.</span><br><a href="/apply.html">Apply now &rarr;</a></div></div>
+      <div class="contact-item"><div class="ci-icon">&#127860;</div><div><strong>List your food truck</strong><span>Use our free listing form &mdash; we&rsquo;ll text you to get started.</span><br><a href="/apply.html">Apply now &rarr;</a></div></div>
       <div class="contact-item"><div class="ci-icon">&#128247;</div><div><strong>Media &amp; press</strong><a href="mailto:press@559eats.com">press@559eats.com</a></div></div>
       <div class="contact-item"><div class="ci-icon">&#127758;</div><div><strong>Fresno &amp; Central Valley</strong><span>559eats is proud to be local. We cover Fresno, Clovis, Visalia, and beyond.</span></div></div>
     </div>
     <div class="contact-form">
       <h3>Send a message</h3>
       <div id="cForm">
+        <input type="text" id="website_url" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
         <div class="fg"><label>Your name</label><input type="text" id="cName" placeholder="Gabriel Garcia"></div>
         <div class="fg"><label>Email</label><input type="email" id="cEmail" placeholder="you@example.com"></div>
         <div class="fg"><label>Subject</label><select id="cSubject"><option>General question</option><option>Listing inquiry</option><option>Partnership</option><option>Media / press</option><option>Bug report</option><option>Other</option></select></div>
@@ -72,13 +73,21 @@
     </div>
   </div>
 </div>
-<footer><div class="footer-links"><a href="/apply.html">List your restaurant</a><a href="/contact.html">Contact</a><a href="/about.html">About</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
+<footer><div class="footer-links"><a href="/apply.html">List your food truck</a><a href="/contact.html">Contact</a><a href="/about.html">About</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 <script>
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
-function sendContact(){
+async function sendContact(){
   const msg=document.getElementById('cMessage').value.trim();
   if(!msg){alert('Please add a message.');return;}
-  document.getElementById('cForm').style.display='none';
-  document.getElementById('sentMsg').style.display='block';
+  const btn=document.querySelector('.btn-send'); btn.disabled=true; btn.textContent='Sending...';
+  try{
+    const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name:document.getElementById('cName').value,email:document.getElementById('cEmail').value,
+      topic:document.getElementById('cSubject').value,message:msg,website_url:(document.getElementById('website_url')||{}).value||''})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error||'Could not send. Please try again.');
+    document.getElementById('cForm').style.display='none';
+    document.getElementById('sentMsg').style.display='block';
+  }catch(e){ alert(e.message); btn.disabled=false; btn.innerHTML='Send message &rarr;'; }
 }
 </script></body></html>
