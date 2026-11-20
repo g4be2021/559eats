@@ -38,7 +38,7 @@
   @media(max-width:768px){.r-layout{grid-template-columns:1fr}.r-hero{height:260px}.r-hero-info{padding:16px}}
 </style></head>
 <body>
-<nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/food-trucks.html">Food trucks</a><a href="/apply.html" class="nav-cta">List your spot</a></div></nav>
+<nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/browse.html">Food trucks</a><a href="/apply.html" class="nav-cta">List your spot</a></div></nav>
 <div id="rHero" class="r-hero"><div class="r-hero-placeholder">&#127860;</div><div class="r-hero-overlay"></div><div class="r-hero-info"><div><div class="r-name" id="rName">Loading&hellip;</div><div class="r-meta-row" id="rMetaRow"></div></div><a href="#" id="rCtaBtn" class="r-cta-btn" style="display:none">Get directions</a></div></div>
 <div class="r-layout">
   <div class="r-main">
@@ -69,7 +69,7 @@ const params=new URLSearchParams(location.search);
 const slug=params.get('slug')||location.pathname.split('/').pop().replace('.html','');
 (async()=>{
   try{
-    const r=await fetch(SUPA+'/rest/v1/restaurants?slug=eq.'+encodeURIComponent(slug)+'&limit=1',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
+    const r=await fetch(SUPA+'/rest/v1/restaurants?id=eq.'+(idParam||slug)+'&limit=1',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
     const [data]=await r.json();
     if(!data){document.getElementById('rName').textContent='Spot not found';document.getElementById('rDesc').textContent='This listing may have moved or been removed.';return;}
     document.title=data.name+' â 559eats';
@@ -94,7 +94,7 @@ const slug=params.get('slug')||location.pathname.split('/').pop().replace('.html
     const nearby=(await r2.json()).filter(x=>x.slug!==slug).slice(0,4);
     document.getElementById('nearbyGrid').innerHTML=nearby.map(x=>{
       const c=x.cuisine_type||x.cuisine||x.category||'';
-      return '<a href="/restaurant.html?slug='+x.slug+'" class="nearby-card"><div class="nearby-card-img">'+(x.image_url?'<img src="'+x.image_url+'" style="width:100%;height:100%;object-fit:cover">':'&#127860;')+'</div><div class="nearby-card-body"><div class="nearby-card-name">'+x.name+'</div><div class="nearby-card-meta">'+c+'</div></div></a>';
+      return '<a href="/restaurant.html?id='+x.id+'" class="nearby-card"><div class="nearby-card-img">'+(x.image_url?'<img src="'+x.image_url+'" style="width:100%;height:100%;object-fit:cover">':'&#127860;')+'</div><div class="nearby-card-body"><div class="nearby-card-name">'+x.name+'</div><div class="nearby-card-meta">'+c+'</div></div></a>';
     }).join('');
   }catch(e){document.getElementById('rDesc').textContent='Could not load listing details.';}
 })();
