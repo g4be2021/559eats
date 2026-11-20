@@ -149,25 +149,28 @@
   </div>
 </div>
 
+<script src="/admin-auth.js"></script>
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
   const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
-  const ADMIN_PASSWORDS = ['559eats-admin-2024', 'admin2-pass-2024'];
 
   let route = [];
   let doneSet = new Set(JSON.parse(localStorage.getItem('photo-done') || '[]'));
 
-  function checkAuth() {
-    if (ADMIN_PASSWORDS.includes(document.getElementById('auth-input').value)) {
+  async function checkAuth() {
+    const input = document.getElementById('auth-input');
+    const error = document.getElementById('auth-error');
+    try {
+      await Admin.login(input.value);
       document.getElementById('auth-gate').style.display = 'none';
-      sessionStorage.setItem('559eats-auth', '1');
-    } else {
-      document.getElementById('auth-error').textContent = 'Incorrect password.';
-      document.getElementById('auth-input').value = '';
+    } catch (e) {
+      error.textContent = e.message === 'Incorrect password' ? 'Incorrect password. Try again.' : e.message;
+      input.value = '';
     }
   }
-  if (sessionStorage.getItem('559eats-auth') === '1') document.getElementById('auth-gate').style.display = 'none';
+  // Auto-unlock if already signed in this session
+  Admin.check().then((ok) => { if (ok) document.getElementById('auth-gate').style.display = 'none'; });
 
   // ── Haversine distance in miles ──
   function dist(a, b) {

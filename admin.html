@@ -439,16 +439,17 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="/admin-auth.js"></script>
 <script>
   const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
   const MAPS_KEY = 'AIzaSyAgV7K00A0_7KCSimsDEfS2y4aJ61nE_Jw';
   // ── ADMIN ACCOUNTS ──
-  // To add/remove admins just edit this list.
-  // initials: shown on notes. password: their personal password.
+  // Names and colors only. Passwords are checked on the server (/api/admin)
+  // against hashed passwords in the admin_users table.
   const ADMINS = [
-    { name: 'G4be',      initials: 'G4be', password: '559eats-admin-2024', color: '#D85A30' },
-    { name: 'SpicyMayo', initials: 'Mayo', password: 'admin2-pass-2024',   color: '#185FA5' },
+    { name: 'G4be',      initials: 'G4be', color: '#D85A30' },
+    { name: 'SpicyMayo', initials: 'Mayo', color: '#185FA5' },
   ];
 
   let currentAdmin = null;
@@ -478,12 +479,13 @@
     document.getElementById('pw-input').focus();
   }
 
-  function checkPw() {
+  async function checkPw() {
     const admin = ADMINS[selectedAdminIdx];
     const entered = document.getElementById('pw-input').value;
-    if (entered === admin.password) {
+    let ok = false, errMsg = 'Incorrect password. Try again.';
+    try { await Admin.login(entered, admin.name); ok = true; } catch (e) { errMsg = e.message === 'Incorrect password' ? errMsg : e.message; }
+    if (ok) {
       currentAdmin = admin;
-      sessionStorage.setItem('559eats-admin', JSON.stringify(admin));
       document.getElementById('admin-pw-wall').style.display = 'none';
       document.getElementById('admin-main').classList.remove('locked');
       document.getElementById('admin-main').style.display = 'block';
@@ -497,7 +499,7 @@
     } else {
       const input = document.getElementById('pw-input');
       const err = document.getElementById('pw-error');
-      err.textContent = 'Incorrect password. Try again.';
+      err.textContent = errMsg;
       input.classList.add('shake');
       input.value = '';
       setTimeout(() => input.classList.remove('shake'), 400);
@@ -505,7 +507,7 @@
   }
 
   function signOut() {
-    sessionStorage.removeItem('559eats-admin');
+    Admin.logout();
     currentAdmin = null;
     document.getElementById('admin-main').style.display = 'none';
     document.getElementById('admin-main').classList.add('locked');
@@ -518,9 +520,9 @@
 
   // Auto-login if session exists
   (function() {
-    const saved = sessionStorage.getItem('559eats-admin');
+    const saved = Admin.isSignedIn() && Admin.info();
     if (saved) {
-      currentAdmin = JSON.parse(saved);
+      currentAdmin = saved;
       const idx = ADMINS.findIndex(a => a.initials === currentAdmin.initials);
       if (idx >= 0) {
         selectAdmin(idx);
@@ -537,12 +539,9 @@
     }
   })();
 
-  async function api(path, method='GET', body=null) {
-    const opts = { method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' } };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
-    if (res.status === 204) return null;
-    return res.json();
+  // All admin data goes through the server, which checks the admin session
+  function api(path, method='GET', body=null) {
+    return Admin.api(path, method, body);
   }
 
   function switchTab(tab, btn) {
@@ -1070,23 +1069,13 @@
         // Resize image to max 1200px wide to keep size manageable
         const resizedUrl = await resizeImage(dataUrl, 1200);
 
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/photos`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation',
-          },
-          body: JSON.stringify({
-            restaurant_id: currentRestaurantId,
-            url: resizedUrl,
-            sort_order: sortOrder,
-            is_primary: sortOrder === 0,
-          }),
+        const saved = await api('photos', 'POST', {
+          restaurant_id: currentRestaurantId,
+          url: resizedUrl,
+          sort_order: sortOrder,
+          is_primary: sortOrder === 0,
         });
-
-        if (!res.ok) throw new Error(await res.text());
+        if (!Array.isArray(saved)) throw new Error((saved && (saved.message || saved.error)) || 'Upload failed');
 
         bar.style.width = `${((i + 1) / files.length) * 100}%`;
         showToast(`✅ ${file.name} uploaded`);
