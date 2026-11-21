@@ -304,7 +304,7 @@
       </table>
     </div>
     <div style="font-size:12px;color:var(--ink-muted);margin-top:-8px;">
-      * A 15% commission is automatically charged to your card on file when you confirm a catering booking.
+      * When you confirm, enter the price you agreed on with the customer. 559eats charges a 15% booking fee to your saved card (never more than 15% of the top of the customer's budget range).
     </div>
   </div>
 
@@ -321,14 +321,14 @@
       <div class="card-title">💳 Payment method</div>
 
       <div id="billing-has-card" class="billing-status has-card" style="display:none">
-        ✅ <strong>Card on file</strong> — commissions are charged automatically when you confirm catering bookings.
+        ✅ <strong>Card on file</strong> — booking fees are charged automatically when you confirm catering bookings.
       </div>
       <div id="billing-no-card" class="billing-status no-card" style="display:none">
-        ⚠️ <strong>No card on file</strong> — add one below so catering commissions can be collected automatically.
+        ⚠️ <strong>No card on file</strong> — add one below so the 15% booking fee can be charged when you confirm a catering job.
       </div>
 
       <div class="billing-info">
-        <strong>How commissions work:</strong> When you confirm a catering booking, 559eats automatically charges a <strong>15% commission</strong> based on the event budget to the card saved here. This is how we keep the platform running and free for customers.
+        <strong>How commissions work:</strong> When you confirm a catering booking, you enter the price you agreed on with the customer, and 559eats charges a <strong>15% booking fee</strong> on it to the card saved here (capped at 15% of the top of the customer's budget range). This is how we keep the platform running and free for customers.
       </div>
 
       <div class="form-group" style="margin-bottom:1rem;">
@@ -837,6 +837,8 @@
     renderCommissionHistory(allCatering);
   }
 
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
   function renderCatering(data) {
     const tbody = document.getElementById('catering-body');
     if (!data || data.length === 0) {
@@ -847,19 +849,20 @@
       const dateStr = c.event_date ? new Date(c.event_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—';
       let commissionCell = '—';
       if (c.status === 'confirmed') {
-        if (c.commission_paid) commissionCell = `<span class="badge badge-paid">✓ Paid${c.commission_amount ? ' $' + parseFloat(c.commission_amount).toFixed(2) : ''}</span>`;
-        else if (c.commission_amount) commissionCell = `<span class="badge badge-unpaid">Unpaid $${parseFloat(c.commission_amount).toFixed(2)}</span>`;
-        else commissionCell = `<span class="badge badge-unpaid">Pending charge</span>`;
+        const amt = c.commission_amount ? '$' + parseFloat(c.commission_amount).toFixed(2) : '';
+        if (c.commission_paid) commissionCell = `<span class="badge badge-paid">✓ Paid ${amt}</span>`;
+        else commissionCell = `<span class="badge badge-unpaid">Unpaid ${amt}</span>${c.commission_error ? `<div class="sub-detail">${esc(c.commission_error)}</div>` : ''}<button class="action-btn confirm" style="margin-top:4px" onclick="retryFee('${c.id}', this)">Pay fee now</button>`;
+        if (c.job_total) commissionCell += `<div class="sub-detail">Agreed price $${parseFloat(c.job_total).toFixed(2)}</div>`;
       }
       return `<tr>
-        <td><strong>${c.customer_name}</strong><div class="sub-detail">📞 ${c.customer_phone}${c.customer_email ? '<br>✉️ ' + c.customer_email : ''}</div></td>
+        <td><strong>${esc(c.customer_name)}</strong><div class="sub-detail">📞 ${esc(c.customer_phone)}${c.customer_email ? '<br>✉️ ' + esc(c.customer_email) : ''}</div></td>
         <td>${dateStr}</td>
-        <td>${c.guest_count || '—'}</td>
-        <td>${c.budget || '—'}</td>
-        <td style="max-width:130px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${c.event_location || ''}">${c.event_location || '—'}</div>${c.notes ? `<div class="sub-detail">${c.notes}</div>` : ''}</td>
+        <td>${esc(c.guest_count) || '—'}</td>
+        <td>${esc(c.budget) || '—'}</td>
+        <td style="max-width:130px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(c.event_location)}">${esc(c.event_location) || '—'}</div>${c.notes ? `<div class="sub-detail">${esc(c.notes)}</div>` : ''}</td>
         <td>${commissionCell}</td>
-        <td><span class="badge badge-${c.status}">${c.status}</span></td>
-        <td>${c.status === 'pending' ? `<button class="action-btn confirm" onclick="setCateringStatus('${c.id}','confirmed')">✓ Confirm</button><button class="action-btn decline" onclick="setCateringStatus('${c.id}','declined')">✗ Decline</button>` : '—'}</td>
+        <td><span class="badge badge-${esc(c.status)}">${esc(c.status)}</span></td>
+        <td>${c.status === 'pending' ? `<button class="action-btn confirm" onclick="openConfirm('${c.id}')">✓ Confirm</button><button class="action-btn decline" onclick="setCateringStatus('${c.id}','declined')">✗ Decline</button>` : '—'}</td>
       </tr>`;
     }).join('');
   }
@@ -888,6 +891,63 @@
     document.getElementById(`cp-${filter}`).classList.add('active');
     if (filter === 'all') renderCatering(allCatering);
     else renderCatering(allCatering.filter(c => c.status === filter));
+  }
+
+  const BUDGET_CAPS = { 'Under $500': 500, '$500 to $1,000': 1000, '$1,000 to $2,500': 2500, '$2,500 to $5,000': 5000 };
+  let confirmId = null;
+  function openConfirm(id) {
+    const c = allCatering.find(x => x.id === id);
+    if (!c) return;
+    confirmId = id;
+    document.getElementById('cf-who').textContent = `${c.customer_name || 'Customer'}, ${c.event_date || ''}${c.budget ? ' · budget ' + c.budget : ''}`;
+    document.getElementById('cf-total').value = '';
+    document.getElementById('cf-fee').textContent = '';
+    document.getElementById('cf-err').textContent = '';
+    document.getElementById('confirm-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('cf-total').focus(), 50);
+  }
+  function closeConfirm() { document.getElementById('confirm-modal').style.display = 'none'; confirmId = null; }
+  function previewFee() {
+    const c = allCatering.find(x => x.id === confirmId);
+    const t = parseFloat(String(document.getElementById('cf-total').value).replace(/[^0-9.]/g, ''));
+    const el = document.getElementById('cf-fee');
+    if (!c || !(t >= 1)) { el.textContent = ''; return; }
+    const cap = BUDGET_CAPS[c.budget];
+    const base = cap ? Math.min(t, cap) : t;
+    el.textContent = `559eats fee: $${(Math.round(base * 15) / 100).toFixed(2)}${cap && t > cap ? ' (capped at 15% of $' + cap.toLocaleString() + ')' : ''}. Charged to your saved card.`;
+  }
+  async function submitConfirm() {
+    const btn = document.getElementById('cf-go');
+    const err = document.getElementById('cf-err');
+    const total = document.getElementById('cf-total').value;
+    if (!(parseFloat(String(total).replace(/[^0-9.]/g, '')) >= 1)) { err.textContent = 'Enter the price you agreed on.'; return; }
+    btn.disabled = true; btn.textContent = 'Confirming...'; err.textContent = '';
+    try {
+      const res = await fetch('/api/catering-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ action: 'confirmed', booking_id: confirmId, job_total: total })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Could not confirm.');
+      closeConfirm();
+      showToast(data.charged ? `✅ Confirmed. $${Number(data.fee).toFixed(2)} fee charged to your card.` : `✅ Confirmed. Fee of $${Number(data.fee).toFixed(2)} not charged yet: ${data.charge_error}. Add a card in Billing, then tap "Pay fee now".`);
+      loadCatering(restaurant.id);
+    } catch (e) { err.textContent = e.message; }
+    btn.disabled = false; btn.textContent = 'Confirm booking';
+  }
+  async function retryFee(id, btn) {
+    btn.disabled = true; btn.textContent = 'Charging...';
+    try {
+      const res = await fetch('/api/catering-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ action: 'charge', booking_id: id })
+      });
+      const data = await res.json();
+      showToast(data.charged ? '✅ Fee paid. Thanks!' : `Couldn't charge: ${data.error || data.charge_error || 'try again'}`);
+      loadCatering(restaurant.id);
+    } catch (e) { showToast('Network error. Please try again.'); btn.disabled = false; btn.textContent = 'Pay fee now'; }
   }
 
   async function setCateringStatus(id, status) {
@@ -977,5 +1037,20 @@
 
   init();
 </script>
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeConfirm()">
+  <div style="background:#fff;border-radius:14px;max-width:420px;width:100%;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.2)">
+    <h3 style="margin:0 0 4px">Confirm this catering job</h3>
+    <div id="cf-who" style="font-size:.85rem;color:#7a6e6a;margin-bottom:14px"></div>
+    <label style="font-weight:600;font-size:.9rem">Price you agreed on with the customer ($)</label>
+    <input id="cf-total" type="text" inputmode="decimal" placeholder="e.g. 1200" oninput="previewFee()" onkeydown="if(event.key==='Enter')submitConfirm()" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:1rem;margin:6px 0 8px;box-sizing:border-box">
+    <div id="cf-fee" style="font-size:.85rem;color:#27500A;min-height:1.2em"></div>
+    <div id="cf-err" style="font-size:.85rem;color:#b3261e;min-height:1.2em"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="action-btn" onclick="closeConfirm()">Cancel</button>
+      <button class="action-btn confirm" id="cf-go" onclick="submitConfirm()">Confirm booking</button>
+    </div>
+    <p style="font-size:.75rem;color:#7a6e6a;margin:12px 0 0">The 15% fee is never more than 15% of the top of the customer's budget range. See <a href="/terms.html#catering" target="_blank">Terms</a>.</p>
+  </div>
+</div>
 </body>
 </html>
