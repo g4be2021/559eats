@@ -5,7 +5,7 @@
 //                          and text-message previews don't run the page's JavaScript)
 const SUPA = process.env.SUPABASE_URL || 'https://wlpugteoycouvvnhamnm.supabase.co';
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-const SITE = 'https://559eats.com';
+const SITE = 'https://www.559eats.com';
 const H = { apikey: ANON, Authorization: `Bearer ${ANON}` };
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -31,7 +31,7 @@ function hhmm(t) { return t ? String(t).slice(0, 5) : null; }
 
 async function truckPage(req, res) {
   const id = String(req.query.id || '');
-  const host = /^[a-z0-9.-]+$/i.test(req.headers.host || '') ? req.headers.host : '559eats.com';
+  const host = /^[a-z0-9.-]+$/i.test(req.headers.host || '') ? req.headers.host : 'www.559eats.com';
   const tpl = await fetch(`https://${host}/restaurant.html`, { headers: { cookie: req.headers.cookie || '' } }).then((r) => r.text());
   if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).setHeader('Content-Type', 'text/html').send(tpl);
   const [rows, photos, hours] = await Promise.all([
