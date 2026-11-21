@@ -26,7 +26,7 @@ const FACTS = `
 - Catering: people request trucks at https://www.559eats.com/catering.html with date, headcount, budget and location. We match them with trucks. No fee to the customer; the truck pays 559eats 15% on jobs it confirms.
 - Truck owners: listing is free forever, no cut of everyday sales. Apply at https://www.559eats.com/apply.html or text JOIN to (757) 970-3964 (texting may still be pending approval; the form always works). Already listed: log in at https://www.559eats.com/login.html to post hours, today's spot, specials, menu and photos.
 - Sponsored plans (truck glows on the map and is listed higher): Spotlight $1/month, Featured $3/month, Premium $6/month. Cancel anytime: https://www.559eats.com/pricing.html
-- Phone for the business: 559-458-2276.
+- Business phone and text line: (757) 970-3964. Never give out any other phone number.
 `;
 
 const SYSTEM = `You draft email replies for Gabriel, who runs 559eats. Write as Gabriel, first person.
