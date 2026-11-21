@@ -1091,16 +1091,44 @@
     tbody.innerHTML = data.map(c => {
       const eventDate = c.event_date ? new Date(c.event_date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—';
       let commCell = '—';
-      if (c.status==='confirmed') commCell = c.commission_paid ? `<span class="badge badge-paid">✓ $${parseFloat(c.commission_amount||0).toFixed(2)}</span>` : `<span class="badge badge-unpaid">Unpaid</span>`;
+      if (c.status==='confirmed') commCell = (c.commission_paid ? `<span class="badge badge-paid">✓ $${parseFloat(c.commission_amount||0).toFixed(2)}</span>` : `<span class="badge badge-unpaid">Unpaid $${parseFloat(c.commission_amount||0).toFixed(2)}</span>${c.commission_error?`<div class="sub-detail">${esc(c.commission_error)}</div>`:''}`) + (c.job_total?`<div class="sub-detail">on $${parseFloat(c.job_total).toFixed(2)}</div>`:'');
       return `<tr>
         <td><strong>${esc(c.customer_name)}</strong><div class="sub-detail">📞 ${esc(c.customer_phone)}${c.customer_email?'<br>✉️ '+esc(c.customer_email):''}</div></td>
         <td>${c.restaurant_id ? esc(restaurantMap[c.restaurant_id]||'—') : '<span class="badge badge-pending">General quote</span>'}</td><td>${eventDate}</td>
         <td>${esc(c.guest_count)||'—'}</td><td>${esc(c.budget)||'—'}</td>
         <td><div style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.event_location)||'—'}</div>${c.notes?`<div class="sub-detail">${esc(c.notes)}</div>`:''}</td>
         <td>${commCell}</td><td><span class="badge badge-${c.status}">${c.status}</span></td>
-        <td><button class="action-btn delete" onclick="deleteCatering('${c.id}')">Delete</button></td>
+        <td>${(!c.restaurant_id && c.status==='pending') ? `<select id="as-${c.id}" style="max-width:150px;margin-bottom:4px"><option value="">Send to truck...</option>${truckOptions()}</select><button class="action-btn confirm" onclick="assignCatering('${c.id}',this)">Send</button><br>` : ''}${(c.status==='confirmed' && !c.commission_paid) ? `<button class="action-btn confirm" onclick="chargeCatering('${c.id}',this)">Charge fee</button><br>` : ''}<button class="action-btn delete" onclick="deleteCatering('${c.id}')">Delete</button></td>
       </tr>`;
     }).join('');
+  }
+
+  function truckOptions() {
+    return Object.entries(restaurantMap).sort((a,b)=>String(a[1]).localeCompare(String(b[1]))).map(([id,name])=>`<option value="${id}">${esc(name)}</option>`).join('');
+  }
+  async function cateringAction(body) {
+    const r = await fetch('/api/catering-booking', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+(sessionStorage.getItem('559eats-admin-token')||'')}, body: JSON.stringify(body) });
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(d.error || 'Request failed');
+    return d;
+  }
+  async function assignCatering(id, btn) {
+    const rid = document.getElementById('as-'+id).value;
+    if (!rid) { showToast('Pick a truck first.'); return; }
+    btn.disabled = true;
+    try {
+      const d = await cateringAction({ action:'assign', booking_id:id, restaurant_id:rid });
+      showToast(d.texted ? `Sent to ${d.truck}. Owner was texted.` : d.has_owner ? `Sent to ${d.truck}. Text didn't go out, so call or email the owner.` : `Sent to ${d.truck}. No owner login yet, so call them.`);
+      loadCatering();
+    } catch(e) { showToast(e.message); btn.disabled = false; }
+  }
+  async function chargeCatering(id, btn) {
+    btn.disabled = true;
+    try {
+      const d = await cateringAction({ action:'charge', booking_id:id });
+      showToast(d.charged ? 'Fee charged.' : `Not charged: ${d.error||d.charge_error}`);
+      loadCatering();
+    } catch(e) { showToast(e.message); btn.disabled = false; }
   }
 
   async function deleteCatering(id) {
