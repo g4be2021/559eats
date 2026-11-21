@@ -133,6 +133,7 @@
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SM0VBC86SK"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-SM0VBC86SK');</script>
+<script src="/truck-utils.js"></script>
 </head>
 <body>
 
@@ -145,22 +146,73 @@
 </nav>
 
 <main id="main-content" style="display:none">
-  <h1 class="page-title">Your listing <span class="status-badge status-approved" id="status-badge">Approved</span></h1>
-  <p class="page-sub">Manage your listing, bookings, and billing all in one place.</p>
+  <h1 class="page-title">Your truck <span class="status-badge status-approved" id="status-badge">Approved</span></h1>
+  <p class="page-sub">Tell customers where you are today, update your menu and photos, and manage catering requests. <a id="view-page-link" href="#" target="_blank" style="color:var(--coral);font-weight:600">View your public page →</a></p>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('listing', this)">📋 My listing</button>
+    <button class="tab-btn active" onclick="switchTab('today', this)">📍 Today</button>
+    <button class="tab-btn" onclick="switchTab('listing', this)">📋 My listing</button>
+    <button class="tab-btn" onclick="switchTab('menu', this)">🍽 Menu &amp; photos</button>
     <button class="tab-btn" onclick="switchTab('reservations', this)" id="res-tab-btn">📅 Reservations</button>
     <button class="tab-btn" onclick="switchTab('catering', this)" id="cat-tab-btn">🍽️ Catering</button>
     <button class="tab-btn" onclick="switchTab('billing', this)">💳 Billing</button>
   </div>
 
+  <!-- TAB: TODAY -->
+  <div class="tab-panel active" id="tab-today">
+    <div class="card">
+      <div class="card-title">What customers see right now</div>
+      <div id="now-preview" style="font-size:15px;font-weight:600"></div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-top:6px">Tip: you can also text <strong>(757) 970-3964</strong> something like "here at Blackstone &amp; Shields till 8" and we'll update this for you.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📍 Where are you parked today?</div>
+      <div class="form-grid">
+        <div class="form-group full"><label>Spot description customers will see</label><input type="text" id="t-spot" maxlength="120" placeholder="e.g. Blackstone &amp; Shields, in the Walgreens lot" /></div>
+        <div class="form-group"><label>Here until</label><input type="time" id="t-until" /></div>
+        <div class="form-group"><label>Location</label><div id="t-gps-status" style="font-size:13px;color:var(--ink-muted);padding-top:10px">We'll use your phone's GPS when you tap the button.</div></div>
+      </div>
+      <button class="save-btn" onclick="hereNow()">📍 I'm here now</button>
+      <button class="save-btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border);margin-left:8px" onclick="leaveSpot()">Done for today</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Open or closed right now</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px">This overrides your regular hours until the end of today.</p>
+      <button class="save-btn" style="background:#1f9d55" onclick="setOverride('open')">🟢 We're open now</button>
+      <button class="save-btn" style="background:#6b6360;margin-left:8px" onclick="setOverride('closed')">⛔ Closed today</button>
+      <button class="save-btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border);margin-left:8px" onclick="setOverride(null)">Use my regular hours</button>
+    </div>
+    <div class="card">
+      <div class="card-title">⭐ Today's special</div>
+      <div class="form-grid"><div class="form-group full"><label>Shows on the map and your page until midnight</label><input type="text" id="t-special" maxlength="140" placeholder="e.g. Birria tacos 3 for $10 today only" /></div></div>
+      <button class="save-btn" onclick="saveSpecial()">Post special</button>
+      <button class="save-btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border);margin-left:8px" onclick="clearSpecial()">Remove</button>
+    </div>
+  </div>
+
+  <!-- TAB: MENU & PHOTOS -->
+  <div class="tab-panel" id="tab-menu">
+    <div class="card">
+      <div class="card-title">Menu</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px">Add your most popular items. Price and description are optional.</p>
+      <div id="menu-rows"></div>
+      <button class="save-btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border)" onclick="addMenuRow()">+ Add item</button>
+      <button class="save-btn" style="margin-left:8px" onclick="saveMenu()">Save menu</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Photos</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px">The first photo is your cover photo on the map and your page. Food and truck photos work best.</p>
+      <div id="photo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px"></div>
+      <label class="save-btn" style="display:inline-block;cursor:pointer">📷 Add photos<input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="uploadPhotos(this.files)" /></label>
+    </div>
+  </div>
+
   <!-- TAB: LISTING -->
-  <div class="tab-panel active" id="tab-listing">
+  <div class="tab-panel" id="tab-listing">
     <div class="card">
       <div class="card-title">Basic information</div>
       <div class="form-grid">
-        <div class="form-group"><label>Restaurant name</label><input type="text" id="f-name" placeholder="Your restaurant name" /></div>
+        <div class="form-group"><label>Truck name</label><input type="text" id="f-name" placeholder="Your truck name" /></div>
         <div class="form-group">
           <label>Cuisine type</label>
           <select id="f-cuisine">
@@ -181,9 +233,12 @@
           </select>
         </div>
         <div class="form-group"><label>Phone number</label><input type="tel" id="f-phone" placeholder="(559) 555-0100" /></div>
-        <div class="form-group full"><label>Address</label><input type="text" id="f-address" placeholder="123 Main St, Fresno CA 93721" /></div>
+        <div class="form-group full"><label>Usual spot (address or cross streets)</label><input type="text" id="f-address" placeholder="Blackstone Ave &amp; Shields Ave, Fresno" /></div>
         <div class="form-group"><label>Website (optional)</label><input type="url" id="f-website" placeholder="https://yourrestaurant.com" /></div>
-        <div class="form-group full"><label>Description</label><textarea id="f-description" placeholder="Tell people what makes your spot special..."></textarea></div>
+        <div class="form-group"><label>Instagram</label><input type="text" id="f-instagram" placeholder="@yourtruck" /></div>
+        <div class="form-group"><label>Facebook page link</label><input type="url" id="f-facebook" placeholder="https://facebook.com/yourtruck" /></div>
+        <div class="form-group full"><label>Payment accepted</label><div id="f-accepts" style="display:flex;gap:14px;flex-wrap:wrap;font-size:14px;padding-top:6px"></div></div>
+        <div class="form-group full"><label>Description</label><textarea id="f-description" placeholder="What do you serve? What are you known for?"></textarea></div>
       </div>
       <button class="save-btn" onclick="saveBasicInfo()">Save changes</button>
     </div>
@@ -195,8 +250,9 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Location coordinates</div>
-      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">Use <a href="https://maps.google.com" target="_blank" style="color:var(--coral)">Google Maps</a> to find your exact lat/lng.</p>
+      <div class="card-title">Usual spot on the map</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:1rem;">Where your pin shows when you haven't posted a spot for today. Park at your usual spot and tap "Use my current location", or enter coordinates.</p>
+      <button class="save-btn" style="background:#fff;color:var(--ink);border:1.5px solid var(--border);margin-bottom:12px" onclick="useGpsForUsual()">📍 Use my current location</button>
       <div class="form-grid">
         <div class="form-group"><label>Latitude</label><input type="number" id="f-lat" step="0.0001" placeholder="36.7783" /></div>
         <div class="form-group"><label>Longitude</label><input type="number" id="f-lng" step="0.0001" placeholder="-119.7945" /></div>
@@ -405,6 +461,14 @@
     document.getElementById('f-description').value = restaurant.description || '';
     document.getElementById('f-lat').value = restaurant.latitude || '';
     document.getElementById('f-lng').value = restaurant.longitude || '';
+    document.getElementById('f-instagram').value = restaurant.instagram || '';
+    document.getElementById('f-facebook').value = restaurant.facebook || '';
+    document.getElementById('f-accepts').innerHTML = PAY_TYPES.map(t => `<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="${t}" ${(restaurant.accepts||[]).includes(t)?'checked':''}> ${t}</label>`).join('');
+    document.getElementById('view-page-link').href = '/restaurant.html?id=' + restaurant.id;
+    menuItems = Array.isArray(restaurant.menu) ? restaurant.menu : [];
+    renderMenu();
+    loadPhotos();
+    renderToday();
 
     const badge = document.getElementById('status-badge');
     badge.textContent = restaurant.status;
@@ -457,6 +521,9 @@
       address: document.getElementById('f-address').value,
       website: document.getElementById('f-website').value,
       description: document.getElementById('f-description').value,
+      instagram: document.getElementById('f-instagram').value.trim() || null,
+      facebook: document.getElementById('f-facebook').value.trim() || null,
+      accepts: [...document.querySelectorAll('#f-accepts input:checked')].map(i => i.value),
       updated_at: new Date().toISOString()
     });
     showToast('✅ Basic info saved!');
@@ -484,6 +551,143 @@
       updated_at: new Date().toISOString()
     });
     showToast('✅ Location saved!');
+  }
+
+  // ── TODAY / LIVE STATUS ──
+  const PAY_TYPES = ['Cash', 'Card', 'Apple Pay', 'Google Pay', 'Venmo', 'Zelle', 'Cash App'];
+  let menuItems = [];
+  function endOfTodayLocal() {
+    // midnight tonight in Fresno time, as an ISO string
+    const now = new Date();
+    const local = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    const offsetMs = now.getTime() - local.getTime();
+    const mid = new Date(local); mid.setHours(23, 59, 0, 0);
+    return new Date(mid.getTime() + offsetMs).toISOString();
+  }
+  function todayAtLocal(hhmm) {
+    const now = new Date();
+    const local = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    const offsetMs = now.getTime() - local.getTime();
+    const [h, m] = hhmm.split(':').map(Number);
+    const t = new Date(local); t.setHours(h, m || 0, 0, 0);
+    if (t <= local) t.setDate(t.getDate() + 1); // past-midnight close
+    return new Date(t.getTime() + offsetMs).toISOString();
+  }
+  async function patchRestaurant(fields, msg) {
+    const res = await api(`restaurants?id=eq.${restaurant.id}`, 'PATCH', { ...fields, updated_at: new Date().toISOString() });
+    if (Array.isArray(res) && res[0]) { Object.assign(restaurant, res[0]); renderToday(); showToast(msg); return true; }
+    showToast('Could not save. Please sign in again.'); return false;
+  }
+  async function renderToday() {
+    if (!restaurant) return;
+    const hrs = await api(`hours?restaurant_id=eq.${restaurant.id}`) || [];
+    const s = Truck.status(restaurant, hrs), live = Truck.liveSpot(restaurant);
+    const color = s.state === 'open' ? '#1f9d55' : s.state === 'unknown' ? '#9a8f8a' : '#6b6360';
+    document.getElementById('now-preview').innerHTML = `<span style="color:${color}">● ${Truck.esc(s.label)}</span>` +
+      (live && live.note ? `<div style="font-weight:500;font-size:14px;margin-top:4px">📍 ${Truck.esc(live.note)}</div>` : '') +
+      (restaurant.special && Truck.future(restaurant.special_until) ? `<div style="font-weight:500;font-size:14px;margin-top:4px">⭐ ${Truck.esc(restaurant.special)}</div>` : '');
+    if (live && live.note && !document.getElementById('t-spot').value) document.getElementById('t-spot').value = live.note;
+    if (!document.getElementById('t-until').value) {
+      const today = hrs.find(h => h.day_of_week === Truck.nowLocal().day && !h.is_closed);
+      document.getElementById('t-until').value = (today && today.close_time ? today.close_time.slice(0, 5) : '20:00');
+    }
+    if (restaurant.special && Truck.future(restaurant.special_until)) document.getElementById('t-special').value = restaurant.special;
+  }
+  function getGps() {
+    return new Promise((ok, fail) => {
+      if (!navigator.geolocation) return fail(new Error('Location is not available on this device'));
+      navigator.geolocation.getCurrentPosition(p => ok(p.coords), () => fail(new Error('Please allow location access, then try again')), { enableHighAccuracy: true, timeout: 15000 });
+    });
+  }
+  async function hereNow() {
+    const st = document.getElementById('t-gps-status');
+    st.textContent = 'Getting your location...';
+    try {
+      const c = await getGps();
+      st.textContent = `Got it (accurate to about ${Math.round(c.accuracy)} m)`;
+      const until = todayAtLocal(document.getElementById('t-until').value || '20:00');
+      await patchRestaurant({ today_lat: c.latitude, today_lng: c.longitude, today_spot: document.getElementById('t-spot').value.trim() || null, today_until: until }, '📍 Your spot is live on the map!');
+    } catch (e) { st.textContent = e.message; showToast(e.message); }
+  }
+  async function leaveSpot() { await patchRestaurant({ today_until: new Date().toISOString() }, 'Spot cleared. See you next time!'); }
+  async function setOverride(mode) {
+    await patchRestaurant(mode ? { open_override: mode, open_override_until: endOfTodayLocal() } : { open_override: null, open_override_until: null },
+      mode === 'open' ? '🟢 Marked open' : mode === 'closed' ? '⛔ Marked closed for today' : 'Back to your regular hours');
+  }
+  async function saveSpecial() {
+    const v = document.getElementById('t-special').value.trim(); if (!v) return showToast('Type your special first');
+    await patchRestaurant({ special: v, special_until: endOfTodayLocal() }, '⭐ Special posted');
+  }
+  async function clearSpecial() { document.getElementById('t-special').value = ''; await patchRestaurant({ special: null, special_until: null }, 'Special removed'); }
+  async function useGpsForUsual() {
+    try { const c = await getGps(); document.getElementById('f-lat').value = c.latitude.toFixed(6); document.getElementById('f-lng').value = c.longitude.toFixed(6); showToast('Location filled in. Tap Save location.'); }
+    catch (e) { showToast(e.message); }
+  }
+
+  // ── MENU ──
+  function renderMenu() {
+    const el = document.getElementById('menu-rows');
+    if (!menuItems.length) menuItems = [{ name: '', price: '', desc: '' }];
+    el.innerHTML = menuItems.map((m, i) => `
+      <div style="display:grid;grid-template-columns:2fr 90px 3fr 36px;gap:8px;margin-bottom:8px">
+        <input type="text" placeholder="Item name" value="${Truck.esc(m.name||'')}" oninput="menuItems[${i}].name=this.value" maxlength="80" />
+        <input type="text" placeholder="$ price" value="${Truck.esc(m.price||'')}" oninput="menuItems[${i}].price=this.value" maxlength="12" />
+        <input type="text" placeholder="Short description (optional)" value="${Truck.esc(m.desc||'')}" oninput="menuItems[${i}].desc=this.value" maxlength="160" />
+        <button onclick="menuItems.splice(${i},1);renderMenu()" title="Remove" style="border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer">✕</button>
+      </div>`).join('');
+  }
+  function addMenuRow() { menuItems.push({ name: '', price: '', desc: '' }); renderMenu(); }
+  async function saveMenu() {
+    const clean = menuItems.map(m => ({ name: (m.name||'').trim(), price: (m.price||'').trim(), desc: (m.desc||'').trim() })).filter(m => m.name).slice(0, 60);
+    if (await patchRestaurant({ menu: clean }, '✅ Menu saved')) { menuItems = clean; renderMenu(); }
+  }
+
+  // ── PHOTOS ──
+  let photos = [];
+  async function loadPhotos() {
+    photos = await api(`photos?restaurant_id=eq.${restaurant.id}&order=is_primary.desc,sort_order.asc`) || [];
+    const grid = document.getElementById('photo-grid');
+    grid.innerHTML = photos.length ? photos.map((p, i) => `
+      <div style="position:relative">
+        <img src="${Truck.esc(p.url)}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;${i===0?'outline:3px solid var(--coral)':''}" alt="" />
+        <div style="display:flex;gap:4px;margin-top:4px">
+          ${i===0?'<span style="font-size:11px;font-weight:700;color:var(--coral)">Cover</span>':`<button onclick="makeCover('${p.id}')" style="font-size:11px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;padding:2px 6px">Make cover</button>`}
+          <button onclick="deletePhoto('${p.id}')" style="font-size:11px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;padding:2px 6px;margin-left:auto">Delete</button>
+        </div>
+      </div>`).join('') : '<p style="font-size:13px;color:var(--ink-muted)">No photos yet.</p>';
+  }
+  function resizeImage(file, maxW) {
+    return new Promise((ok, fail) => {
+      const r = new FileReader();
+      r.onload = () => { const img = new Image(); img.onload = () => {
+        let w = img.width, h = img.height; if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        ok(c.toDataURL('image/jpeg', 0.8)); }; img.onerror = fail; img.src = r.result; };
+      r.onerror = fail; r.readAsDataURL(file);
+    });
+  }
+  async function uploadPhotos(files) {
+    if (!files || !files.length) return;
+    if (photos.length + files.length > 12) return showToast('Up to 12 photos. Delete some first.');
+    for (const f of files) {
+      try {
+        const url = await resizeImage(f, 1200);
+        const res = await api('photos', 'POST', { restaurant_id: restaurant.id, url, sort_order: photos.length, is_primary: photos.length === 0 });
+        if (!Array.isArray(res)) throw new Error();
+        photos.push(res[0]);
+      } catch { showToast('One photo could not be uploaded'); }
+    }
+    document.getElementById('photo-input').value = '';
+    await loadPhotos(); showToast('📷 Photos added');
+  }
+  async function deletePhoto(id) {
+    if (!confirm('Delete this photo?')) return;
+    await api(`photos?id=eq.${id}`, 'DELETE'); await loadPhotos();
+  }
+  async function makeCover(id) {
+    await api(`photos?restaurant_id=eq.${restaurant.id}`, 'PATCH', { is_primary: false });
+    await api(`photos?id=eq.${id}`, 'PATCH', { is_primary: true });
+    await loadPhotos(); showToast('Cover photo updated');
   }
 
   // ── RESERVATIONS ──
