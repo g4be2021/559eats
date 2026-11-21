@@ -1,211 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>559eats — Fresno's Food Map</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--orange:#E8512A;--dark:#1a1a2e;--radius:12px}
-html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif}
-#map{position:fixed;inset:0;z-index:0}
-#nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(26,26,46,0.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-#nav .logo{font-family:'Playfair Display',serif;font-size:1.4rem;color:#fff;text-decoration:none}
-#nav .logo span{color:var(--orange)}
-#nav-links{display:flex;gap:20px;align-items:center}
-#nav-links a{color:rgba(255,255,255,0.8);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
-#nav-links a:hover{color:#fff}
-#nav-links a.active{color:var(--orange)}
-#searchWrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:900;width:min(480px,90vw)}
-#searchInput{width:100%;padding:12px 18px 12px 42px;border-radius:50px;border:none;font-size:.95rem;font-family:'Inter',sans-serif;background:rgba(255,255,255,0.97);box-shadow:0 4px 20px rgba(0,0,0,0.25);outline:none}
-#searchInput::placeholder{color:#999}
-#searchIcon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999;pointer-events:none}
-#filters{position:fixed;top:130px;left:50%;transform:translateX(-50%);z-index:900;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;max-width:95vw;padding:0 4px;scrollbar-width:none}
-#filters::-webkit-scrollbar{display:none}
-.pill{padding:7px 16px;border-radius:50px;border:none;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;background:rgba(255,255,255,0.92);color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:all .2s}
-.pill:hover{background:#fff;transform:translateY(-1px)}
-.pill.active{background:var(--orange);color:#fff}
-#legend{position:fixed;bottom:24px;left:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 14px;color:#fff;font-size:.75rem}
-#legend div{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-#legend div:last-child{margin-bottom:0}
-.leg-dot{width:12px;height:12px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;flex-shrink:0}
-#spotCount{position:fixed;bottom:24px;right:16px;z-index:900;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);border-radius:10px;padding:10px 16px;color:#fff;font-size:.8rem;font-weight:600}
-.leaflet-popup-content-wrapper{border-radius:var(--radius)!important;padding:0!important;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.2)!important;min-width:240px}
-.leaflet-popup-content{margin:0!important;width:auto!important}
-.leaflet-popup-tip-container{display:none}
-.spot-popup{padding:16px}
-.spot-popup h3{font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:4px;line-height:1.3}
-.spot-popup .sp-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.spot-popup .sp-tag{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:50px;background:#f0f0f0;color:#555}
-.spot-popup .sp-tag.truck{background:#fff3ee;color:var(--orange)}
-.spot-popup .sp-info{font-size:.78rem;color:#666;margin-bottom:10px;line-height:1.5}
-.spot-popup .sp-btns{display:flex;gap:8px}
-.sp-btn{flex:1;padding:8px 10px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;display:block}
-.sp-btn.primary{background:var(--orange);color:#fff}
-.sp-btn.secondary{background:#f5f5f5;color:var(--dark)}
-.sp-btn:hover{opacity:.85}
-#welcomeOverlay{position:fixed;inset:0;z-index:2000;background:rgba(10,10,20,0.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px}
-#welcomeModal{background:#fff;border-radius:20px;max-width:460px;width:100%;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.4);animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
-@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
-.wm-header{background:var(--dark);padding:28px 28px 20px;text-align:center}
-.wm-header h1{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;margin-bottom:4px}
-.wm-header h1 span{color:var(--orange)}
-.wm-header p{color:rgba(255,255,255,0.65);font-size:.9rem}
-.wm-body{padding:24px 28px}
-.wm-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:22px}
-.wm-step{display:flex;align-items:flex-start;gap:14px}
-.wm-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-.wm-step-text strong{display:block;font-size:.88rem;font-weight:700;color:var(--dark);margin-bottom:2px}
-.wm-step-text span{font-size:.82rem;color:#666;line-height:1.4}
-.wm-pins{display:flex;gap:16px;background:#f8f8f8;border-radius:12px;padding:12px 16px;margin-bottom:22px}
-.wm-pin{display:flex;align-items:center;gap:8px;font-size:.82rem;color:#444;font-weight:500}
-.pin-dot{width:14px;height:14px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(0,0,0,0.15);flex-shrink:0}
-#exploreBtn{width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
-#exploreBtn:hover{opacity:.9}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>559eats &middot; Fresno &amp; Central Valley Food Truck Map</title>
+  <meta name="description" content="Live map of Fresno and Central Valley food trucks. See who's open now, where they're parked today, and get directions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="/truck-utils.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #E8512A; --orange-dark: #c73e18; --orange-light: #f9ede8;
+      --cream: #faf7f4; --dark: #1a1310; --text: #2d2420; --muted: #7a6e6a;
+      --border: #e8e0da; --white: #fff; --green: #1f9d55; --green-light: #e6f6ec; --gray: #9a8f8a;
+    }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--cream); overflow: hidden; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(250,247,244,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); height: 64px; display: flex; align-items: center; padding: 0 24px; gap: 32px; }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; color: var(--orange); text-decoration: none; }
+    .nav-links { display: flex; gap: 22px; list-style: none; margin-left: auto; align-items: center; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover, .nav-links a.active { color: var(--orange); }
+    .nav-cta { background: var(--orange); color: #fff !important; padding: 8px 18px; border-radius: 999px; font-weight: 600 !important; }
+
+    .layout { display: flex; height: 100vh; padding-top: 64px; }
+    .sidebar { width: 380px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 2; }
+    .side-head { padding: 18px 18px 10px; border-bottom: 1px solid var(--border); }
+    .side-head h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin-bottom: 4px; }
+    .side-sub { font-size: .8rem; color: var(--muted); margin-bottom: 12px; }
+    .search { display: flex; gap: 8px; }
+    .search input { flex: 1; border: 1.5px solid var(--border); border-radius: 999px; padding: 10px 16px; font: inherit; font-size: .9rem; outline: none; }
+    .search input:focus { border-color: var(--orange); }
+    .btn-near { border: 1.5px solid var(--border); background: #fff; border-radius: 999px; padding: 0 14px; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--text); }
+    .btn-near.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .chips { display: flex; gap: 6px; padding: 10px 18px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { flex-shrink: 0; padding: 6px 12px; border-radius: 999px; font-size: .78rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: #fff; color: var(--muted); white-space: nowrap; }
+    .chip:hover { border-color: var(--orange); color: var(--orange); }
+    .chip.on { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .chip.green.on { background: var(--green); border-color: var(--green); }
+    .count { font-size: .78rem; color: var(--muted); padding: 8px 18px 0; }
+    .list { flex: 1; overflow-y: auto; padding: 8px 10px 20px; }
+    .card { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 12px; cursor: pointer; border: 1.5px solid transparent; margin-bottom: 4px; }
+    .card:hover { background: var(--cream); }
+    .card.active { background: var(--orange-light); border-color: var(--orange); }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--cream); border: 3px solid var(--gray); flex-shrink: 0; position: relative; }
+    .avatar.open { border-color: var(--green); background: var(--green-light); }
+    .avatar.unknown { border-style: dashed; }
+    .avatar .live-dot { position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; border-radius: 50%; background: #e11d48; border: 2px solid #fff; }
+    .card-body { flex: 1; min-width: 0; }
+    .card-name { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { font-size: .76rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-status { font-size: .76rem; font-weight: 600; margin-top: 3px; color: var(--gray); }
+    .card-status.open { color: var(--green); }
+    .card-special { font-size: .74rem; color: var(--orange-dark); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fav { background: none; border: none; font-size: 1.15rem; cursor: pointer; padding: 6px; color: #c9bfba; line-height: 1; }
+    .fav.on { color: #e11d48; }
+    .empty { padding: 40px 18px; text-align: center; color: var(--muted); font-size: .9rem; }
+
+    #map { flex: 1; z-index: 1; }
+    /* markers */
+    .pin-wrap { position: relative; }
+    .pin { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 3px 10px rgba(0,0,0,.25); transition: transform .15s; }
+    .pin.open { border-color: var(--green); }
+    .pin.unknown { border-style: dashed; border-color: #b9aea9; }
+    .pin.live { border-color: #e11d48; }
+    .pin.live::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid #e11d48; opacity: .6; animation: pulse 1.8s ease-out infinite; }
+    @keyframes pulse { from { transform: scale(.8); opacity: .7; } to { transform: scale(1.5); opacity: 0; } }
+    .pin-wrap:hover .pin, .pin-wrap.sel .pin { transform: scale(1.15); }
+    .pin-label { position: absolute; left: 50%; top: 44px; transform: translateX(-50%); background: var(--dark); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+    .pin-wrap:hover .pin-label, .pin-wrap.sel .pin-label, .show-labels .pin-label { opacity: 1; }
+    .cluster { width: 44px; height: 44px; border-radius: 50%; background: var(--orange); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 4px solid rgba(255,255,255,.85); box-shadow: 0 3px 12px rgba(0,0,0,.25); font-size: .95rem; }
+    .cluster small { font-size: .62rem; font-weight: 700; display: block; line-height: 1; }
+    .me-dot { width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(37,99,235,.25); }
+    /* popup */
+    .leaflet-popup-content-wrapper { border-radius: 14px !important; padding: 0 !important; overflow: hidden; box-shadow: 0 10px 34px rgba(0,0,0,.18) !important; }
+    .leaflet-popup-content { margin: 0 !important; width: 280px !important; }
+    .pop-photo { height: 110px; background: var(--orange-light) center/cover no-repeat; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
+    .pop-body { padding: 12px 14px 14px; }
+    .pop-name { font-family: 'Playfair Display', serif; font-weight: 800; font-size: 1.08rem; line-height: 1.2; }
+    .pop-meta { font-size: .76rem; color: var(--muted); margin: 3px 0 8px; }
+    .pill { display: inline-block; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #f1ece9; color: var(--muted); }
+    .pill.open { background: var(--green-light); color: var(--green); }
+    .pill.live { background: #ffe4ea; color: #be123c; }
+    .pop-line { font-size: .8rem; margin-top: 6px; }
+    .pop-special { margin-top: 8px; background: var(--orange-light); color: var(--orange-dark); font-size: .78rem; font-weight: 600; padding: 7px 9px; border-radius: 8px; }
+    .pop-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+    .pop-actions a, .pop-actions button { text-align: center; text-decoration: none; font: inherit; font-size: .78rem; font-weight: 700; padding: 8px 6px; border-radius: 999px; border: 1.5px solid var(--border); background: #fff; color: var(--text); cursor: pointer; }
+    .pop-actions .primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .legend { position: absolute; left: 12px; bottom: 22px; z-index: 500; background: rgba(255,255,255,.95); border-radius: 10px; padding: 8px 10px; font-size: .72rem; color: var(--muted); box-shadow: 0 2px 10px rgba(0,0,0,.12); display: flex; gap: 10px; }
+    .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2.5px solid; margin-right: 4px; vertical-align: -1px; }
+    .map-area { position: relative; flex: 1; display: flex; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: .85rem; z-index: 2000; display: none; }
+    .view-toggle { display: none; }
+
+    @media (max-width: 760px) {
+      nav { padding: 0 14px; } .nav-links li:not(:last-child) { display: none; }
+      .layout { flex-direction: column; }
+      .sidebar { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; width: 100%; border-right: none; transform: translateY(100%); transition: transform .25s; z-index: 600; }
+      body.list-view .sidebar { transform: translateY(0); }
+      .view-toggle { display: block; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 900; background: var(--dark); color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+      .legend { bottom: 80px; }
+    }
+  .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
 </style>
 </head>
 <body>
-<div id="map"></div>
-<div id="welcomeOverlay">
-  <div id="welcomeModal">
-    <div class="wm-header">
-      <h1><span>559</span>eats</h1>
-      <p>Fresno &amp; The Central Valley's Food Map</p>
-    </div>
-    <div class="wm-body">
-      <div class="wm-steps">
-        <div class="wm-step">
-          <div class="wm-icon" style="background:#fff3ee">📍</div>
-          <div class="wm-step-text">
-            <strong>Tap any pin on the map</strong>
-            <span>See the name, cuisine, address, phone, and get directions</span>
-          </div>
-        </div>
-        <div class="wm-step">
-          <div class="wm-icon" style="background:#f0f4ff">🔍</div>
-          <div class="wm-step-text">
-            <strong>Search or filter</strong>
-            <span>Find spots by name, neighborhood, or cuisine type</span>
-          </div>
-        </div>
-        <div class="wm-step">
-          <div class="wm-icon" style="background:#f0fff4">🗺️</div>
-          <div class="wm-step-text">
-            <strong>Browse the full list</strong>
-            <span>Hit Browse in the nav for photos, details, and more</span>
-          </div>
+  <nav>
+    <a href="/" class="nav-logo">559eats</a>
+    <ul class="nav-links">
+      <li><a href="/browse.html">Browse</a></li>
+      <li><a href="/" class="active">Map</a></li>
+      <li><a href="/catering.html">Catering</a></li>
+      <li><a href="/apply.html" class="nav-cta">List your truck</a></li>
+    </ul>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-head">
+        <h1>Food truck map</h1>
+        <div class="side-sub">Fresno, Clovis &amp; the Central Valley</div>
+        <div class="search">
+          <input type="search" id="q" placeholder="Search trucks, food, area..." autocomplete="off" />
+          <button class="btn-near" id="nearBtn" title="Sort by distance from you">📍 Near me</button>
         </div>
       </div>
-      <div class="wm-pins">
-        <div class="wm-pin"><div class="pin-dot" style="background:#E8512A"></div> Food Truck</div>
-        <div class="wm-pin"><div class="pin-dot" style="background:#1a1310"></div> Restaurant</div>
-      </div>
-      <button id="exploreBtn">Explore the Map &#8594;</button>
+      <div class="chips" id="chips"></div>
+      <div class="count" id="count"></div>
+      <div class="list" id="list"><div class="empty">Loading trucks...</div></div>
+    </aside>
+    <div class="map-area">
+      <div id="map"></div>
+      <div class="legend"><span><i style="border-color:var(--green)"></i>Open</span><span><i style="border-color:#e11d48"></i>Here now</span><span><i style="border-color:var(--gray)"></i>Closed</span><span><i style="border-color:#b9aea9;border-style:dashed"></i>No hours</span></div>
     </div>
   </div>
-</div>
-<nav id="nav">
-  <a class="logo" href="/"><span>559</span>eats</a>
-  <div id="nav-links">
-    <a href="/" class="active">Map</a>
-    <a href="/browse">Browse</a>
-    <a href="/catering.html">Catering</a>
-    <a href="/about.html">About</a>
-    <a href="/apply.html" style="background:var(--orange);color:#fff;padding:7px 16px;border-radius:50px;font-size:.82rem">List Your Spot</a>
-  </div>
-</nav>
-<div id="searchWrap">
-  <span id="searchIcon">🔍</span>
-  <input id="searchInput" type="text" placeholder="Search restaurants, cuisine, neighborhood…">
-</div>
-<div id="filters">
-  <button class="pill active" data-filter="all">All</button>
-  <button class="pill" data-filter="food_truck">Food Trucks</button>
-  <button class="pill" data-filter="mexican">Mexican</button>
-  <button class="pill" data-filter="american">American</button>
-  <button class="pill" data-filter="asian">Asian</button>
-  <button class="pill" data-filter="bbq">BBQ</button>
-  <button class="pill" data-filter="seafood">Seafood</button>
-  <button class="pill" data-filter="italian">Italian</button>
-  <button class="pill" data-filter="dessert">Dessert</button>
-</div>
-<div id="legend">
-  <div><span class="leg-dot" style="background:#E8512A"></span>Food Truck</div>
-  <div><span class="leg-dot" style="background:#1a1310"></span>Restaurant</div>
-</div>
-<div id="spotCount">Loading…</div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-document.getElementById('exploreBtn').addEventListener('click',function(){
-  var o=document.getElementById('welcomeOverlay');
-  o.style.transition='opacity .3s';
-  o.style.opacity='0';
-  setTimeout(function(){o.remove();},300);
-});
-var map=L.map('map',{zoomControl:false}).setView([36.7378,-119.7871],13);
-L.control.zoom({position:'bottomright'}).addTo(map);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  maxZoom:19
-}).addTo(map);
-var allSpots=[],activeFilter='all',searchQuery='',markers=[];
-function makeIcon(truck){
-  var color=truck?'#E8512A':'#1a1310';
-  return L.divIcon({className:'',html:'<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:'+color+';border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',iconSize:[22,22],iconAnchor:[11,22],popupAnchor:[0,-24]});
-}
-function makePopup(r){
-  var tags=[];
-  if(r.is_food_truck) tags.push('<span class="sp-tag truck">Food Truck</span>');
-  if(r.cuisine_type) tags.push('<span class="sp-tag">'+r.cuisine_type+'</span>');
-  if(r.neighborhood) tags.push('<span class="sp-tag">'+r.neighborhood+'</span>');
-  var info='';
-  if(r.address) info+='📍 '+r.address+'<br>';
-  if(r.phone) info+='📞 <a href="tel:'+r.phone+'" style="color:#E8512A;text-decoration:none">'+r.phone+'</a>';
-  var mapsUrl=r.address?'https://maps.google.com/?q='+encodeURIComponent(r.address):'#';
-  return '<div class="spot-popup"><h3>'+r.name+'</h3>'+(tags.length?'<div class="sp-tags">'+tags.join('')+'</div>':'')+(info?'<div class="sp-info">'+info+'</div>':'')+'<div class="sp-btns"><a class="sp-btn primary" href="/restaurant?id='+r.id+'" target="_blank">View Details</a>'+(r.address?'<a class="sp-btn secondary" href="'+mapsUrl+'" target="_blank">Directions</a>':'')+'</div></div>';
-}
-function matches(r){
-  if(activeFilter==='food_truck'&&!r.is_food_truck) return false;
-  if(activeFilter!=='all'&&activeFilter!=='food_truck'){var c=(r.cuisine_type||'').toLowerCase();if(!c.includes(activeFilter)) return false;}
-  if(searchQuery){var q=searchQuery.toLowerCase();var hay=(r.name+' '+(r.cuisine_type||'')+' '+(r.neighborhood||'')).toLowerCase();if(!hay.includes(q)) return false;}
-  return true;
-}
-function renderMarkers(){
-  markers.forEach(function(m){map.removeLayer(m);});
-  markers=[];
-  var visible=allSpots.filter(matches);
-  visible.forEach(function(r){
-    if(!r.latitude||!r.longitude) return;
-    var m=L.marker([r.latitude,r.longitude],{icon:makeIcon(r.is_food_truck)}).bindPopup(makePopup(r),{maxWidth:280}).addTo(map);
-    markers.push(m);
-  });
-  document.getElementById('spotCount').textContent=visible.length+' spot'+(visible.length!==1?'s':'');
-}
-function loadSpots(){
-  fetch(SUPA+'/rest/v1/restaurants?select=id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,is_food_truck,is_active&is_active=eq.true&order=name.asc&limit=500',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}})
-  .then(function(r){return r.json();})
-  .then(function(data){allSpots=data;renderMarkers();})
-  .catch(function(){document.getElementById('spotCount').textContent='Could not load spots';});
-}
-document.querySelectorAll('.pill').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.pill').forEach(function(b){b.classList.remove('active');});
-    btn.classList.add('active');
-    activeFilter=btn.dataset.filter;
-    renderMarkers();
-  });
-});
-var searchTimer;
-document.getElementById('searchInput').addEventListener('input',function(e){
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(function(){searchQuery=e.target.value.trim();renderMarkers();},200);
-});
-loadSpots();
-</script>
+  <button class="view-toggle" id="viewToggle">☰ List</button>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SUPA = 'https://wlpugteoycouvvnhamnm.supabase.co';
+    const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+    const H = { apikey: KEY, Authorization: 'Bearer ' + KEY };
+    const { esc } = Truck;
+
+    const map = L.map('map', { zoomControl: false }).setView([36.7468, -119.7726], 11);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map);
+    const cluster = L.markerClusterGroup({
+      showCoverageOnHover: false, maxClusterRadius: 45, spiderfyOnMaxZoom: true,
+      iconCreateFunction: (c) => {
+        const kids = c.getAllChildMarkers(); const open = kids.filter((m) => m._open).length;
+        return L.divIcon({ className: '', html: `<div class="cluster"><div>${kids.length}${open ? `<small>${open} open</small>` : ''}</div></div>`, iconSize: [44, 44] });
+      },
+    });
+    map.addLayer(cluster);
+    // Show truck names on every pin once zoomed in
+    const labelZoom = () => document.getElementById('map').classList.toggle('show-labels', map.getZoom() >= 14);
+    map.on('zoomend', labelZoom);
+
+    let trucks = [], hours = [], markers = {}, me = null, meMarker = null, selected = null;
+    const filters = { chip: 'all', q: '' };
+
+    function enrich(r) {
+      r._status = Truck.status(r, hours);
+      r._live = Truck.liveSpot(r);
+      r._pos = Truck.position(r);
+      r._icon = Truck.cuisineIcon(r.cuisine_type);
+      r._dist = me && r._pos ? Truck.distanceMiles(me, r._pos) : null;
+      return r;
+    }
+
+    function buildChips() {
+      const cuisines = {};
+      trucks.forEach((t) => { const c = (t.cuisine_type || '').trim(); if (c && c !== 'Other') cuisines[c] = (cuisines[c] || 0) + 1; });
+      const base = [['all', 'All'], ['open', '🟢 Open now', 'green'], ['live', '📍 Here today'], ['fav', '❤ Saved']];
+      const cz = Object.entries(cuisines).sort((a, b) => b[1] - a[1]).map(([c]) => ['c:' + c, Truck.cuisineIcon(c) + ' ' + c]);
+      document.getElementById('chips').innerHTML = [...base, ...cz].map(([k, l, cls]) =>
+        `<button class="chip ${cls || ''} ${filters.chip === k ? 'on' : ''}" data-k="${esc(k)}">${esc(l)}</button>`).join('');
+    }
+    document.getElementById('chips').addEventListener('click', (e) => {
+      const b = e.target.closest('.chip'); if (!b) return;
+      filters.chip = filters.chip === b.dataset.k && b.dataset.k !== 'all' ? 'all' : b.dataset.k;
+      buildChips(); render();
+    });
+
+    function visible() {
+      const q = filters.q.toLowerCase(), favs = Truck.favs();
+      let list = trucks.filter((t) => {
+        if (q && ![t.name, t.cuisine_type, t.neighborhood, t.address, t.today_spot, t.special].some((v) => (v || '').toLowerCase().includes(q))) return false;
+        const c = filters.chip;
+        if (c === 'open') return t._status.state === 'open';
+        if (c === 'live') return !!t._live;
+        if (c === 'fav') return favs.has(t.id);
+        if (c.startsWith('c:')) return (t.cuisine_type || '') === c.slice(2);
+        return true;
+      });
+      const rank = (t) => (t._live ? 0 : t._status.state === 'open' ? 1 : t._status.state === 'unknown' ? 2 : 3);
+      list.sort((a, b) => me ? (a._dist ?? 1e9) - (b._dist ?? 1e9) : rank(a) - rank(b) || (a.name || '').localeCompare(b.name || ''));
+      return list;
+    }
+
+    function pinHtml(t) {
+      const cls = t._live ? 'live' : t._status.state;
+      return `<div class="pin-wrap" data-id="${t.id}"><div class="pin ${cls}">${t._icon}</div><div class="pin-label">${esc(t.name)}</div></div>`;
+    }
+
+    function popupHtml(t) {
+      const s = t._status, pos = t._pos;
+      const d = pos ? Truck.directionsLinks(pos[0], pos[1], t.name) : null;
+      const fav = Truck.favs().has(t.id);
+      const pillCls = t._live ? 'live' : s.state === 'open' ? 'open' : '';
+      return `<div class="pop-photo" id="pp-${t.id}">${t._icon}</div>
+        <div class="pop-body">
+          <div class="pop-name">${esc(t.name)}</div>
+          <div class="pop-meta">${esc([t.cuisine_type, t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
+          <span class="pill ${pillCls}">${esc(s.label)}</span>
+          ${t._live && t._live.note ? `<div class="pop-line">📍 <strong>Today:</strong> ${esc(t._live.note)}</div>` : ''}
+          ${s.todayText && !t._live ? `<div class="pop-line">🕒 Today: ${esc(s.todayText)}</div>` : ''}
+          ${t.special && Truck.future(t.special_until) ? `<div class="pop-special">⭐ ${esc(t.special)}</div>` : ''}
+          <div class="pop-actions">
+            ${d ? `<a class="primary" href="${d.google}" target="_blank" rel="noopener">Directions</a>` : ''}
+            <a href="/restaurant.html?id=${t.id}">Menu &amp; info</a>
+            ${t.phone ? `<a href="tel:${esc(t.phone)}">Call</a>` : ''}
+            <button onclick="shareTruck('${t.id}')">Share</button>
+            <button onclick="favTruck('${t.id}', this)">${fav ? '❤ Saved' : '♡ Save'}</button>
+            ${d ? `<a href="${d.apple}" target="_blank" rel="noopener">Apple Maps</a>` : ''}
+          </div>
+        </div>`;
+    }
+
+    async function loadPhoto(t) {
+      if (t._photo !== undefined) { if (t._photo) setPhoto(t); return; }
+      try {
+        const r = await fetch(`${SUPA}/rest/v1/photos?restaurant_id=eq.${t.id}&select=url&order=is_primary.desc,sort_order.asc&limit=1`, { headers: H });
+        const j = await r.json(); t._photo = (j[0] && j[0].url) || null;
+      } catch { t._photo = null; }
+      if (t._photo) setPhoto(t);
+    }
+    function setPhoto(t) { const el = document.getElementById('pp-' + t.id); if (el) { el.style.backgroundImage = `url("${t._photo.replace(/"/g, '%22')}")`; el.textContent = ''; } }
+
+    function renderMarkers(list) {
+      cluster.clearLayers(); markers = {};
+      list.forEach((t) => {
+        if (!t._pos) return;
+        const m = L.marker(t._pos, { icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
+        m._open = t._status.state === 'open';
+        m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
+        m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
+        m.on('popupclose', () => { if (selected === t.id) select(null, false); history.replaceState(null, '', location.pathname); });
+        cluster.addLayer(m); markers[t.id] = m;
+      });
+    }
+
+    function renderList(list) {
+      const favs = Truck.favs();
+      const open = list.filter((t) => t._status.state === 'open').length;
+      document.getElementById('count').textContent = `${list.length} truck${list.length === 1 ? '' : 's'}${open ? ` · ${open} open now` : ''}${me ? ' · sorted by distance' : ''}`;
+      const el = document.getElementById('list');
+      if (!list.length) {
+        el.innerHTML = `<div class="empty">${filters.chip === 'fav' ? 'Tap ♡ on any truck to save it here.' : filters.chip === 'live' ? 'No trucks have posted today\'s spot yet.' : 'No trucks match that.'}</div>`;
+        return;
+      }
+      el.innerHTML = list.map((t) => `
+        <div class="card ${selected === t.id ? 'active' : ''}" data-id="${t.id}">
+          <div class="avatar ${t._status.state}">${t._icon}${t._live ? '<span class="live-dot" title="Here now"></span>' : ''}</div>
+          <div class="card-body">
+            <div class="card-name">${esc(t.name)}</div>
+            <div class="card-meta">${esc([t.cuisine_type, t._live ? t._live.note : t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
+            <div class="card-status ${t._status.state === 'open' ? 'open' : ''}">${esc(t._status.label)}</div>
+            ${t.special && Truck.future(t.special_until) ? `<div class="card-special">⭐ ${esc(t.special)}</div>` : ''}
+          </div>
+          <button class="fav ${favs.has(t.id) ? 'on' : ''}" data-fav="${t.id}" title="Save">${favs.has(t.id) ? '❤' : '♡'}</button>
+        </div>`).join('');
+    }
+
+    document.getElementById('list').addEventListener('click', (e) => {
+      const f = e.target.closest('[data-fav]');
+      if (f) { e.stopPropagation(); Truck.toggleFav(f.dataset.fav); render(); return; }
+      const c = e.target.closest('.card'); if (c) openTruck(c.dataset.id);
+    });
+    // Hovering a card highlights its pin
+    document.getElementById('list').addEventListener('mouseover', (e) => {
+      const c = e.target.closest('.card');
+      document.querySelectorAll('.pin-wrap.sel').forEach((p) => p.classList.remove('sel'));
+      if (c) { const p = document.querySelector(`.pin-wrap[data-id="${c.dataset.id}"]`); if (p) p.classList.add('sel'); }
+    });
+
+    function select(id, scroll) {
+      selected = id;
+      document.querySelectorAll('.card').forEach((c) => c.classList.toggle('active', c.dataset.id === id));
+      if (id && scroll) { const c = document.querySelector(`.card[data-id="${id}"]`); if (c) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    }
+
+    function openTruck(id) {
+      const t = trucks.find((x) => x.id === id); const m = markers[id];
+      if (!t) return;
+      document.body.classList.remove('list-view'); document.getElementById('viewToggle').textContent = '☰ List';
+      if (!m) { location.href = '/restaurant.html?id=' + id; return; }
+      cluster.zoomToShowLayer(m, () => { map.panTo(m.getLatLng()); m.openPopup(); });
+      select(id, true);
+    }
+
+    window.favTruck = (id, btn) => { const on = Truck.toggleFav(id); btn.textContent = on ? '❤ Saved' : '♡ Save'; renderList(visible()); };
+    window.shareTruck = async (id) => {
+      const t = trucks.find((x) => x.id === id);
+      const res = await Truck.share(t.name + ' on 559eats', location.origin + '/restaurant.html?id=' + id);
+      if (res === 'copied') toast('Link copied');
+    };
+    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => (t.style.display = 'none'), 2200); }
+
+    function render() {
+      trucks.forEach(enrich);
+      const list = visible();
+      renderMarkers(list); renderList(list);
+    }
+
+    let qTimer;
+    document.getElementById('q').addEventListener('input', (e) => { clearTimeout(qTimer); qTimer = setTimeout(() => { filters.q = e.target.value.trim(); render(); }, 150); });
+
+    document.getElementById('nearBtn').addEventListener('click', () => {
+      const btn = document.getElementById('nearBtn');
+      if (me) { me = null; btn.classList.remove('on'); if (meMarker) map.removeLayer(meMarker); render(); return; }
+      if (!navigator.geolocation) return toast('Location is not available on this device');
+      btn.textContent = '📍 Finding...';
+      navigator.geolocation.getCurrentPosition((p) => {
+        me = [p.coords.latitude, p.coords.longitude]; btn.textContent = '📍 Near me'; btn.classList.add('on');
+        if (meMarker) map.removeLayer(meMarker);
+        meMarker = L.marker(me, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [18, 18] }), interactive: false }).addTo(map);
+        map.setView(me, 13); render();
+      }, () => { btn.textContent = '📍 Near me'; toast('Allow location access to sort by distance'); }, { enableHighAccuracy: true, timeout: 10000 });
+    });
+
+    document.getElementById('viewToggle').addEventListener('click', () => {
+      const on = document.body.classList.toggle('list-view');
+      document.getElementById('viewToggle').textContent = on ? '🗺 Map' : '☰ List';
+      if (!on) setTimeout(() => map.invalidateSize(), 260);
+    });
+
+    async function init() {
+      try {
+        const cols = 'id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until';
+        const [r1, r2] = await Promise.all([
+          fetch(`${SUPA}/rest/v1/restaurants?select=${cols}&is_active=eq.true&order=name.asc&limit=1000`, { headers: H }),
+          fetch(`${SUPA}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`, { headers: H }),
+        ]);
+        trucks = await r1.json(); hours = r2.ok ? await r2.json() : [];
+        if (!Array.isArray(trucks)) throw new Error('bad data');
+        buildChips(); render(); labelZoom();
+        const pts = trucks.map((t) => t._pos).filter(Boolean);
+        const want = new URLSearchParams(location.search).get('truck');
+        if (want && markers[want]) openTruck(want);
+        else {
+          // Start on Fresno/Clovis where most trucks are; zoom out to see the rest of the valley
+          const local = pts.filter((p) => Truck.distanceMiles([36.78, -119.75], p) < 20);
+          if (local.length) map.fitBounds(local, { padding: [40, 40], maxZoom: 13 });
+          else if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 13 });
+        }
+        // Refresh open/closed status every minute without reloading
+        setInterval(() => { if (!selected) render(); }, 60000);
+      } catch (e) {
+        document.getElementById('list').innerHTML = '<div class="empty">Could not load trucks. Please refresh.</div>';
+      }
+    }
+    init();
+  </script>
 </body>
 </html>
