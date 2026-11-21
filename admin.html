@@ -454,6 +454,19 @@
         <textarea class="form-input" id="edit-description" rows="3" placeholder="Brief description shown on the listing page..." style="resize:vertical;line-height:1.5"></textarea>
       </div>
 
+      <div class="form-section">Weekly hours <span style="font-weight:400;font-size:11px;color:var(--ink-muted)">(leave a day blank if you don't know it; check Closed for days off)</span></div>
+      <div id="edit-hours" style="display:grid;grid-template-columns:90px 1fr 1fr 70px;gap:6px 8px;align-items:center;font-size:13px"></div>
+
+      <div class="form-section">Owner login</div>
+      <div id="edit-owner-current" style="font-size:13px;margin-bottom:8px;color:var(--ink-muted)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+        <input class="form-input" id="edit-owner-name" placeholder="Owner name">
+        <input class="form-input" id="edit-owner-email" type="email" placeholder="owner@email.com">
+        <input class="form-input" id="edit-owner-phone" placeholder="Owner cell">
+        <button class="action-btn approve" type="button" onclick="addOwner()" style="padding:9px 12px">+ Add</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">After you add them, they go to <strong>559eats.com/login</strong>, enter that email, and tap the link we email them. That opens their dashboard.</p>
+
       <div class="form-section">Photos</div>
       <div>
         <div class="photos-grid" id="photos-grid">
@@ -806,6 +819,8 @@
 
     document.getElementById('edit-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('edit-hours').innerHTML = '<span style="grid-column:1/-1;color:var(--ink-muted)">Loading...</span>';
+    loadEditExtras(r.id);
     setTimeout(() => document.getElementById('edit-name').focus(), 120);
 
     // Load notes and photos for this restaurant
@@ -909,6 +924,39 @@
     btn.disabled = false;
   }
 
+  const HDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  async function loadEditExtras(id) {
+    const [hrs, owners] = await Promise.all([api(`hours?restaurant_id=eq.${id}`), api(`owners?restaurant_id=eq.${id}&select=id,name,email,phone`)]);
+    const by = Object.fromEntries((hrs || []).map(h => [String(h.day_of_week).toLowerCase(), h]));
+    document.getElementById('edit-hours').innerHTML = HDAYS.map(d => {
+      const h = by[d.toLowerCase()] || {};
+      return `<span>${d.slice(0,3)}</span><input class="form-input" type="time" id="eh-o-${d}" value="${(h.open_time||'').slice(0,5)}"><input class="form-input" type="time" id="eh-c-${d}" value="${(h.close_time||'').slice(0,5)}"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="eh-x-${d}" ${h.is_closed?'checked':''}> Closed</label>`;
+    }).join('');
+    const o = owners || [];
+    document.getElementById('edit-owner-current').innerHTML = o.length ? 'Current: ' + o.map(x => `${esc(x.name||'')} &lt;${esc(x.email||'')}&gt;`).join(', ') : 'No owner login yet.';
+  }
+  async function saveEditHours(id) {
+    const rows = HDAYS.map(d => ({ d, o: document.getElementById('eh-o-'+d).value, c: document.getElementById('eh-c-'+d).value, x: document.getElementById('eh-x-'+d).checked }))
+      .filter(r => r.x || (r.o && r.c))
+      .map(r => ({ restaurant_id: id, day_of_week: r.d, open_time: r.x ? null : r.o, close_time: r.x ? null : r.c, is_closed: r.x }));
+    await api(`hours?restaurant_id=eq.${id}`, 'DELETE');
+    if (rows.length) await api('hours', 'POST', rows);
+  }
+  async function addOwner() {
+    const id = document.getElementById('edit-id').value;
+    const name = document.getElementById('edit-owner-name').value.trim();
+    const email = document.getElementById('edit-owner-email').value.trim().toLowerCase();
+    const phone = document.getElementById('edit-owner-phone').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showToast('Enter a valid email');
+    const exist = await api(`owners?email=eq.${encodeURIComponent(email)}&select=id`);
+    if (exist && exist.length) return showToast('That email already has a login');
+    const out = await api('owners', 'POST', [{ restaurant_id: id, name: name || null, email, phone: phone || null, auth_method: 'portal' }]);
+    if (!out) return showToast('Could not add owner');
+    ['edit-owner-name','edit-owner-email','edit-owner-phone'].forEach(i => document.getElementById(i).value = '');
+    showToast('✅ Owner added. Tell them to log in at 559eats.com/login');
+    loadEditExtras(id);
+  }
+
   async function saveEdit() {
     const id = document.getElementById('edit-id').value;
     const name = document.getElementById('edit-name').value.trim();
@@ -935,7 +983,9 @@
         latitude: lat,
         longitude: lng,
         description: document.getElementById('edit-description').value.trim() || null,
+        updated_at: new Date().toISOString(),
       });
+      await saveEditHours(id);
       showToast(`✅ ${name} saved`);
       closeEdit();
       loadListings();

@@ -10,3 +10,4 @@ Disallow: /dashboard.html
 Disallow: /login.html
 Disallow: /fliplog/
 Sitemap: https://559eats.com/sitemap.xml
+Disallow: /flyer.html
