@@ -1,202 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Browse Food Trucks &middot; 559eats</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Browse Food Trucks in Fresno &amp; Clovis &middot; 559eats</title>
+<meta name="description" content="Browse every food truck in Fresno, Clovis and the Central Valley. See who is open now, where they are parked today, photos, menus and hours.">
 <link rel="canonical" href="https://www.559eats.com/browse.html">
-<meta property="og:type" content="website"><meta property="og:site_name" content="559eats"><meta property="og:title" content="Browse Food Trucks &middot; 559eats"><meta property="og:description" content="Browse all food trucks in Fresno and the Central Valley. Filter by cuisine, neighborhood, and more."><meta property="og:url" content="https://www.559eats.com/browse.html"><meta property="og:image" content="https://www.559eats.com/og-default.png"><meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="Browse all food trucks in Fresno and the Central Valley. Filter by cuisine, neighborhood, and more.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --orange: #E8512A;
-    --orange-light: #f0683f;
-    --cream: #faf7f4;
-    --dark: #1a1310;
-    --text: #2d2420;
-    --muted: #7a6e69;
-    --border: #e8e0d8;
-    --card-bg: #ffffff;
-    --nav-h: 68px;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); }
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(250,247,244,.92); backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border); height: var(--nav-h);
-    display: flex; align-items: center;
-  }
-  .nav-inner { max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 32px; }
-  .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--orange); text-decoration: none; white-space: nowrap; }
-  .nav-links { display: flex; gap: 24px; list-style: none; margin-left: auto; }
-  .nav-links a { text-decoration: none; color: var(--text); font-size: .9rem; font-weight: 500; transition: color .2s; }
-  .nav-links a:hover, .nav-links a.active { color: var(--orange); }
-  .nav-cta { background: var(--orange); color: #fff; padding: 8px 20px; border-radius: 50px; font-size: .85rem; font-weight: 600; text-decoration: none; transition: background .2s; white-space: nowrap; }
-  .nav-cta:hover { background: var(--orange-light); }
-  .page-header { background: var(--dark); padding: 56px 24px 48px; text-align: center; }
-  .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem,4vw,3rem); color: #fff; margin-bottom: 10px; }
-  .page-header p { color: rgba(255,255,255,.65); font-size: 1.05rem; }
-  .filter-bar { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: var(--nav-h); z-index: 90; }
-  .filter-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
-  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-  #searchInput { width: 100%; padding: 10px 14px 10px 38px; border: 1.5px solid var(--border); border-radius: 50px; font-size: .9rem; font-family: inherit; background: var(--cream); outline: none; transition: border-color .2s; }
-  #searchInput:focus { border-color: var(--orange); }
-  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pill { padding: 7px 16px; border-radius: 50px; border: 1.5px solid var(--border); background: #fff; font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap; color: var(--text); }
-  .pill:hover { border-color: var(--orange); color: var(--orange); }
-  .pill.active { background: var(--orange); border-color: var(--orange); color: #fff; }
-  .sort-wrap { margin-left: auto; }
-  #sortSelect { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 50px; font-size: .82rem; font-family: inherit; background: #fff; cursor: pointer; color: var(--text); outline: none; }
-  #sortSelect:focus { border-color: var(--orange); }
-  .results-meta { max-width: 1200px; margin: 24px auto 0; padding: 0 24px; }
-  .results-meta span { font-size: .88rem; color: var(--muted); }
-  #resultCount { font-weight: 600; color: var(--text); }
-  .grid-wrap { max-width: 1200px; margin: 20px auto 60px; padding: 0 24px; }
-  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-  .card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: transform .2s, box-shadow .2s; text-decoration: none; color: inherit; display: block; }
-  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
-  .card-img { width: 100%; aspect-ratio: 3/2; object-fit: cover; background: #e8e0d8; }
-  .card-body { padding: 16px; }
-  .card-badges { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .badge { padding: 3px 10px; border-radius: 50px; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
-  .badge-truck { background: #fff3ee; color: var(--orange); border: 1px solid #fad0c0; }
-  .badge-featured { background: #fef9e7; color: #b8860b; border: 1px solid #f0d882; }
-  .badge-sponsored { background: #f0f7ff; color: #2563eb; border: 1px solid #bcd4f8; }
-  .card-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
-  .card-cuisine { font-size: .82rem; color: var(--orange); font-weight: 500; margin-bottom: 6px; }
-  .card-meta { font-size: .8rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
-  .empty { text-align: center; padding: 80px 24px; }
-  .empty-icon { font-size: 3rem; margin-bottom: 16px; }
-  .empty h3 { font-size: 1.3rem; margin-bottom: 8px; }
-  .empty p { color: var(--muted); font-size: .95rem; }
-  .skeleton { animation: shimmer 1.4s infinite; background: linear-gradient(90deg,#f0ebe6 25%,#e8e0d8 50%,#f0ebe6 75%); background-size: 200% 100%; border-radius: 8px; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .skel-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
-  .skel-img { height: 180px; }
-  .skel-body { padding: 16px; }
-  .skel-line { height: 14px; margin-bottom: 10px; }
-  .skel-line.short { width: 60%; }
-  .skel-line.med { width: 80%; }
-  footer { background: var(--dark); color: rgba(255,255,255,.5); text-align: center; padding: 32px 24px; font-size: .82rem; }
-  footer a { color: rgba(255,255,255,.7); text-decoration: none; }
-  @media (max-width: 600px) { .nav-links { display: none; } .sort-wrap { margin-left: 0; width: 100%; } #sortSelect { width: 100%; } }
-</style>
-<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+<meta property="og:type" content="website"><meta property="og:site_name" content="559eats"><meta property="og:title" content="Browse Food Trucks &middot; 559eats"><meta property="og:image" content="https://www.559eats.com/og-default.png"><meta name="twitter:card" content="summary_large_image"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--orange:#E8512A;--orange-dark:#c73e18;--orange-light:#f9ede8;--cream:#faf7f4;--dark:#1a1310;--text:#2d2420;--muted:#7a6e6a;--border:#e8e0da;--white:#fff;--shadow:0 2px 12px rgba(0,0,0,.08)}html{scroll-behavior:smooth}body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);line-height:1.5}nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:rgba(250,247,244,.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid rgba(232,224,218,.6);transition:background .3s,box-shadow .3s}nav.scrolled{background:rgba(250,247,244,.97);box-shadow:0 2px 20px rgba(0,0,0,.08)}.nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:var(--orange);text-decoration:none}.nav-links{display:flex;align-items:center;gap:8px}.nav-links a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:999px;transition:color .2s,background .2s}.nav-links a:hover{color:var(--text);background:var(--border)}.nav-cta{background:var(--orange)!important;color:var(--white)!important;padding:8px 20px!important;border-radius:999px!important;font-weight:600!important}.nav-cta:hover{background:var(--orange-dark)!important}.page-hero{padding:120px 24px 60px;text-align:center;background:linear-gradient(160deg,#2d1a14 0%,#4a2218 60%,#E8512A 100%)}.page-hero .eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:12px;display:block}.page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.1}.page-hero p{font-size:1.05rem;color:rgba(255,255,255,.8);max-width:520px;margin:0 auto}.container{max-width:1100px;margin:0 auto;padding:60px 24px}footer{background:var(--dark);color:rgba(255,255,255,.55);text-align:center;padding:36px 24px;font-size:.875rem}footer a{color:rgba(255,255,255,.75);text-decoration:none}footer a:hover{color:var(--orange)}.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}@media(max-width:768px){nav{padding:0 16px}.nav-links a:not(.nav-cta){display:none}}
+  .bar{position:sticky;top:64px;z-index:50;background:rgba(250,247,244,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+  .bar-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .bar input{flex:1;min-width:200px;border:1.5px solid var(--border);border-radius:999px;padding:10px 16px;font:inherit;font-size:.92rem;outline:none;background:#fff}
+  .bar input:focus{border-color:var(--orange)}
+  .bar select,.bar .near{border:1.5px solid var(--border);border-radius:999px;padding:9px 14px;font:inherit;font-size:.85rem;background:#fff;cursor:pointer;color:var(--text)}
+  .near.on{background:#2563eb;border-color:#2563eb;color:#fff}
+  .chips{max-width:1180px;margin:0 auto;padding:0 24px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  .chip{flex-shrink:0;padding:6px 12px;border-radius:999px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);white-space:nowrap}
+  .chip.on{background:var(--orange);border-color:var(--orange);color:#fff}
+  .meta{max-width:1180px;margin:18px auto 0;padding:0 24px;font-size:.85rem;color:var(--muted)}
+  .grid{max-width:1180px;margin:0 auto;padding:14px 24px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+  .c{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s;position:relative}
+  .c:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.12)}
+  .c.t1{box-shadow:0 0 0 2px rgba(232,81,42,.5),0 0 18px rgba(232,81,42,.25)}
+  .c.t2{box-shadow:0 0 0 2px #f5b301,0 0 22px rgba(245,179,1,.35)}
+  .c.t3{box-shadow:0 0 0 3px #ffcf33,0 0 30px rgba(255,191,0,.55)}
+  .ph{height:160px;background:var(--orange-light) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:3.4rem;position:relative}
+  .st{position:absolute;left:10px;top:10px;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.95);color:var(--muted)}
+  .st.open{color:#1f9d55}.st.live{color:#be123c}
+  .tb{position:absolute;right:10px;top:10px;font-size:.7rem;font-weight:800;padding:4px 9px;border-radius:999px;background:#fff4cc;color:#8a6200}
+  .tb.t1{background:var(--orange-light);color:#c73e18}.tb.t3{background:linear-gradient(90deg,#f5b301,#ffd95a);color:#1a1310}
+  .bd{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
+  .nm{font-weight:700;font-size:1.02rem;line-height:1.25}
+  .sub{font-size:.8rem;color:var(--muted);margin-top:3px}
+  .sp{font-size:.78rem;color:#c73e18;margin-top:6px;font-weight:600}
+  .ft{margin-top:auto;padding-top:10px;display:flex;gap:8px;font-size:.78rem;font-weight:600}
+  .ft span{color:var(--muted);font-weight:500}
+  .fav{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.95);border:none;border-radius:50%;width:34px;height:34px;font-size:1rem;cursor:pointer;color:#c9bfba}
+  .fav.on{color:#e11d48}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px}
+  .page-hero{padding:110px 24px 40px}
+  @media(max-width:600px){.bar{top:64px}.bar-in{padding:10px 14px}.chips,.grid,.meta{padding-left:14px;padding-right:14px}}
+</style><script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
-<body>
-<nav>
-  <div class="nav-inner">
-    <a href="/" class="logo">559<span style="color:var(--text)">eats</span></a>
-    <ul class="nav-links">
-      <li><a href="/">Home</a></li>
-      <li><a href="/browse.html" class="active">Browse</a></li>
-      <li><a href="/">Map</a></li>
-      <li><a href="/catering.html">Catering</a></li>
-      <li><a href="/about.html">About</a></li>
-    </ul>
-    <a href="/apply.html" class="nav-cta">List Your Spot</a>
-  </div>
-</nav>
-<div class="page-header">
-  <h1>Browse Fresno's Food Scene</h1>
-  <p>Food trucks, carts, and pop-ups &mdash; all in one place</p>
+<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/">Map</a><a href="/browse.html" style="color:var(--text)">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
+<div class="page-hero">
+  <span class="eyebrow">Fresno &middot; Clovis &middot; Central Valley</span>
+  <h1>Browse food trucks</h1>
+  <p>Every truck on 559eats, with who&rsquo;s open now and where they&rsquo;re parked today.</p>
 </div>
-<div class="filter-bar">
-  <div class="filter-inner">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="searchInput" type="search" placeholder="Search name, cuisine, neighborhood..." autocomplete="off">
-    </div>
-    <div class="pills" id="pills">
-      <button class="pill active" data-filter="all">All</button>
-      <button class="pill" data-filter="truck">Food Trucks</button>
-      <button class="pill" data-filter="Mexican">Mexican</button>
-      <button class="pill" data-filter="American">American</button>
-      <button class="pill" data-filter="Asian">Asian</button>
-      <button class="pill" data-filter="BBQ">BBQ</button>
-      <button class="pill" data-filter="Seafood">Seafood</button>
-      <button class="pill" data-filter="Italian">Italian</button>
-      <button class="pill" data-filter="Dessert">Dessert</button>
-    </div>
-    <div class="sort-wrap">
-      <select id="sortSelect">
-        <option value="name">Sort: A-Z</option>
-        <option value="name_desc">Sort: Z-A</option>
-        <option value="featured">Featured First</option>
-        <option value="truck">Trucks First</option>
-      </select>
-    </div>
-  </div>
-</div>
-<div class="results-meta">
-  <span>Showing <span id="resultCount">...</span> spots</span>
-</div>
-<div class="grid-wrap">
-  <div class="cards-grid" id="grid">
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skel-body"><div class="skeleton skel-line med"></div><div class="skeleton skel-line short"></div><div class="skeleton skel-line med"></div></div></div>
-  </div>
-</div>
-<footer>
-  <p>&copy; 2026 559eats &middot; <a href="/about.html">About</a> &middot; <a href="/contact.html">Contact</a> &middot; <a href="/apply.html">List Your Spot</a> &middot; <a href="/pricing.html">Pricing</a> &middot; <a href="/terms.html">Terms &amp; Privacy</a></p>
-  <p style="margin-top:6px"><a href="/food-trucks/fresno">Food trucks in Fresno</a> &middot; <a href="/food-trucks/clovis">Food trucks in Clovis</a> &middot; <a href="/food-trucks/taco-trucks-fresno">Taco trucks Fresno</a> &middot; <a href="/food-trucks/birria-fresno">Birria Fresno</a></p>
-</footer>
+<div class="bar"><div class="bar-in">
+  <input type="search" id="q" placeholder="Search trucks, food, area..." autocomplete="off">
+  <button class="near" id="near">📍 Near me</button>
+  <select id="sort"><option value="best">Sort: Best match</option><option value="az">Sort: A to Z</option><option value="open">Sort: Open now first</option></select>
+</div><div class="chips" id="chips"></div></div>
+<div class="meta" id="meta">Loading trucks...</div>
+<div class="grid" id="grid"></div>
+<script src="/truck-utils.js"></script>
 <script>
-const SUPA = 'https://wlpugteoycouvvnhamnm.supabase.co';
-const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
-const FOOD_PHOTOS = {
-  Mexican:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
-  American:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
-  Asian:'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600&q=80',
-  BBQ:'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&q=80',
-  Seafood:'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=600&q=80',
-  Italian:'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80',
-  Dessert:'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80',
-  default:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80'
-};
-let allData=[],activeFilter='all',searchQuery='',sortMode='name';
-async function loadData(){
-  try{
-    const r=await fetch(SUPA+'/rest/v1/restaurants?select=*&is_active=eq.true&order=name.asc&limit=500',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
-    if(!r.ok)throw new Error('fetch failed');
-    allData=await r.json();
-  }catch(e){allData=[];}
-  render();
+const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const H={apikey:KEY,Authorization:'Bearer '+KEY};
+const {esc}=Truck;
+let trucks=[],hours=[],photos={},me=null;
+const f={q:'',chip:'all',sort:'best'};
+const rank=t=>t._live?0:t._s.state==='open'?1:t._s.state==='unknown'?2:3;
+function enrich(){trucks.forEach(t=>{t._s=Truck.status(t,hours);t._live=Truck.liveSpot(t);t._tier=Truck.tier(t);t._icon=Truck.cuisineIcon(t.cuisine_type);const p=Truck.position(t);t._dist=me&&p?Truck.distanceMiles(me,p):null;});}
+function chips(){
+  const c={};trucks.forEach(t=>{const k=(t.neighborhood||'').trim();if(k)c[k]=(c[k]||0)+1;});
+  const base=[['all','All'],['open','🟢 Open now'],['live','📍 Here today'],['photo','📷 Has photos'],['fav','❤ Saved']];
+  const areas=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k])=>['a:'+k,k]);
+  document.getElementById('chips').innerHTML=[...base,...areas].map(([k,l])=>`<button class="chip ${f.chip===k?'on':''}" data-k="${esc(k)}">${esc(l)}</button>`).join('');
 }
-function getPhoto(r){
-  if(r.photo_url)return r.photo_url;
-  const c=r.cuisine_type||'';
-  for(const[k,v]of Object.entries(FOOD_PHOTOS)){if(c.toLowerCase().includes(k.toLowerCase()))return v;}
-  return FOOD_PHOTOS.default;
+function list(){
+  const q=f.q.toLowerCase(),favs=Truck.favs();
+  let l=trucks.filter(t=>{
+    if(q&&![t.name,t.cuisine_type,t.neighborhood,t.address,t.description,t.special].some(v=>(v||'').toLowerCase().includes(q)))return false;
+    if(f.chip==='open')return t._s.state==='open';
+    if(f.chip==='live')return !!t._live;
+    if(f.chip==='photo')return !!photos[t.id];
+    if(f.chip==='fav')return favs.has(t.id);
+    if(f.chip.startsWith('a:'))return (t.neighborhood||'')===f.chip.slice(2);
+    return true;});
+  const az=(a,b)=>a.name.localeCompare(b.name);
+  if(me) l.sort((a,b)=>(b._tier-a._tier)||((a._dist??1e9)-(b._dist??1e9)));
+  else if(f.sort==='az') l.sort(az);
+  else if(f.sort==='open') l.sort((a,b)=>rank(a)-rank(b)||az(a,b));
+  else l.sort((a,b)=>(b._tier-a._tier)||rank(a)-rank(b)||(photos[b.id]?1:0)-(photos[a.id]?1:0)||az(a,b));
+  return l;
 }
-function getSlug(r){return r.slug||r.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
-function matchesFilter(r){if(activeFilter==='all')return true;if(activeFilter==='truck')return r.is_food_truck;return(r.cuisine_type||'').toLowerCase().includes(activeFilter.toLowerCase());}
-function matchesSearch(r){if(!searchQuery)return true;const q=searchQuery.toLowerCase();return(r.name||'').toLowerCase().includes(q)||(r.cuisine_type||'').toLowerCase().includes(q)||(r.neighborhood||'').toLowerCase().includes(q)||(r.address||'').toLowerCase().includes(q);}
-function sortData(arr){const c=[...arr];if(sortMode==='name')c.sort((a,b)=>a.name.localeCompare(b.name));if(sortMode==='name_desc')c.sort((a,b)=>b.name.localeCompare(a.name));if(sortMode==='featured')c.sort((a,b)=>(b.is_featured?1:0)-(a.is_featured?1:0));if(sortMode==='truck')c.sort((a,b)=>(b.is_food_truck?1:0)-(a.is_food_truck?1:0));return c;}
 function render(){
-  const filtered=sortData(allData.filter(r=>matchesFilter(r)&&matchesSearch(r)));
-  document.getElementById('resultCount').textContent=filtered.length;
-  const grid=document.getElementById('grid');
-  if(filtered.length===0){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">Ã°ÂÂÂ½Ã¯Â¸Â</div><h3>'+(allData.length===0?'No listings yet':'No results found')+'</h3><p>'+(allData.length===0?'Be the first to <a href="/apply.html" style="color:var(--orange)">add your spot</a>!':'Try a different search or filter.')+'</p></div>';return;}
-  grid.innerHTML=filtered.map(r=>{
-    const slug=getSlug(r),photo=getPhoto(r);
-    const badges=[r.is_food_truck?'<span class="badge badge-truck">Food Truck</span>':'',r.is_featured?'<span class="badge badge-featured">Featured</span>':'',r.is_sponsored?'<span class="badge badge-sponsored">Sponsored</span>':''].filter(Boolean).join('');
-    return '<a class="card" href="/truck/'+r.id+'"><img class="card-img" src="'+photo+'" alt="'+r.name+'" loading="lazy" onerror="this.hidden=true"><div class="card-body">'+(badges?'<div class="card-badges">'+badges+'</div>':'')+'<div class="card-name">'+r.name+'</div>'+(r.cuisine_type?'<div class="card-cuisine">'+r.cuisine_type+'</div>':'')+'<div class="card-meta">'+(r.neighborhood?'<span>Ã°ÂÂÂ '+r.neighborhood+'</span>':'')+(r.phone?'<span>Ã°ÂÂÂ '+r.phone+'</span>':'')+'</div></div></a>';
-  }).join('');
+  enrich();const l=list(),favs=Truck.favs();
+  const open=l.filter(t=>t._s.state==='open').length;
+  document.getElementById('meta').textContent=`${l.length} truck${l.length===1?'':'s'}${open?` · ${open} open now`:''}${me?' · sorted by distance':''}`;
+  document.getElementById('grid').innerHTML=l.length?l.map(t=>{
+    const ph=photos[t.id];
+    const sc=t._live?'live':t._s.state==='open'?'open':'';
+    return `<a class="c ${t._tier?'t'+t._tier:''}" href="/truck/${t.id}">
+      <div class="ph" ${ph?`style="background-image:url('${ph.replace(/'/g,'%27')}')"`:''}>${ph?'':t._icon}
+        <span class="st ${sc}">${esc(t._s.label)}</span>
+        ${t._tier?`<span class="tb t${t._tier}">★ ${Truck.TIERS[t._tier]}</span>`:''}
+        <button class="fav ${favs.has(t.id)?'on':''}" data-fav="${t.id}" title="Save">${favs.has(t.id)?'❤':'♡'}</button>
+      </div>
+      <div class="bd"><div class="nm">${esc(t.name)}</div>
+        <div class="sub">${esc([t.cuisine_type,t._live?t._live.note:t.neighborhood].filter(Boolean).join(' · '))}${t._dist!=null?' · '+t._dist.toFixed(1)+' mi':''}</div>
+        ${t.special&&Truck.future(t.special_until)?`<div class="sp">⭐ ${esc(t.special)}</div>`:''}
+        <div class="ft">${t._s.todayText?`<span>Today ${esc(t._s.todayText)}</span>`:''}</div>
+      </div></a>`;}).join(''):`<div class="empty">${f.chip==='fav'?'Tap ♡ on any truck to save it here.':f.chip==='live'?'No trucks have posted today\'s spot yet.':'No trucks match that.'}</div>`;
 }
-document.getElementById('pills').addEventListener('click',e=>{const p=e.target.closest('.pill');if(!p)return;document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');activeFilter=p.dataset.filter;render();});
-let t;document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>{searchQuery=e.target.value.trim();render();},220);});
-document.getElementById('sortSelect').addEventListener('change',e=>{sortMode=e.target.value;render();});
-loadData();
+document.getElementById('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;f.chip=f.chip===b.dataset.k&&b.dataset.k!=='all'?'all':b.dataset.k;chips();render();});
+document.getElementById('grid').addEventListener('click',e=>{const b=e.target.closest('[data-fav]');if(!b)return;e.preventDefault();Truck.toggleFav(b.dataset.fav);render();});
+let tm;document.getElementById('q').addEventListener('input',e=>{clearTimeout(tm);tm=setTimeout(()=>{f.q=e.target.value.trim();render();},150);});
+document.getElementById('sort').addEventListener('change',e=>{f.sort=e.target.value;render();});
+document.getElementById('near').addEventListener('click',()=>{const b=document.getElementById('near');
+  if(me){me=null;b.classList.remove('on');render();return;}
+  if(!navigator.geolocation)return;b.textContent='📍 Finding...';
+  navigator.geolocation.getCurrentPosition(p=>{me=[p.coords.latitude,p.coords.longitude];b.textContent='📍 Near me';b.classList.add('on');render();},()=>{b.textContent='📍 Near me';},{timeout:10000});});
+(async()=>{
+  try{
+    const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,description,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until,sponsor_tier';
+    const [a,b,c]=await Promise.all([
+      fetch(`${SUPA}/rest/v1/restaurants?select=${cols}&is_active=eq.true&status=eq.approved&order=name.asc&limit=1000`,{headers:H}).then(r=>r.json()),
+      fetch(`${SUPA}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`,{headers:H}).then(r=>r.ok?r.json():[]),
+      fetch(`${SUPA}/rest/v1/photos?select=restaurant_id,url,is_primary,sort_order&order=is_primary.desc,sort_order.asc&limit=2000`,{headers:H}).then(r=>r.ok?r.json():[]),
+    ]);
+    trucks=Array.isArray(a)?a:[];hours=b;(c||[]).forEach(p=>{if(!photos[p.restaurant_id])photos[p.restaurant_id]=p.url;});
+    chips();render();
+  }catch(e){document.getElementById('meta').textContent='Could not load trucks. Please refresh.';}
+})();
 </script>
+<footer><div class="footer-links"><a href="/food-trucks/fresno">Food trucks in Fresno</a><a href="/food-trucks/clovis">Food trucks in Clovis</a><a href="/food-trucks/taco-trucks-fresno">Taco trucks Fresno</a><a href="/apply.html">List your food truck</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/terms.html">Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 <script src="/chat-widget.js" defer></script>
-</body>
-</html>
+</body></html>
