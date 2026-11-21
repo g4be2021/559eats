@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Claim your truck · 559eats</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --coral: #D85A30; --coral-dark: #4A1B0C; --coral-light: #FAECE7;
+      --cream: #FBF7F2; --ink: #1A1208; --ink-muted: #6B5C4E;
+      --ink-faint: #C2B5A8; --white: #FFFFFF; --card-border: rgba(26,18,8,0.08);
+      --radius: 14px; --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--ink);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 900; color: var(--coral);
+      text-decoration: none; margin-bottom: 2rem; display: block; text-align: center;
+    }
+    .card {
+      background: var(--white); border: 1px solid var(--card-border);
+      border-radius: var(--radius); padding: 2.5rem;
+      width: 100%; max-width: 420px;
+    }
+    h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: var(--ink-muted); margin-bottom: 2rem; line-height: 1.5; }
+    label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+    input[type="email"] {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      color: var(--ink); background: var(--cream); outline: none;
+      transition: border-color 0.2s; margin-bottom: 1rem;
+    }
+    input[type="email"]:focus { border-color: var(--coral); background: var(--white); }
+    .submit-btn {
+      width: 100%; padding: 12px;
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .submit-btn:hover { background: var(--coral-dark); }
+    .submit-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
+    .success-box {
+      background: #EAF3DE; border: 1px solid #97C459;
+      border-radius: var(--radius-sm); padding: 16px;
+      font-size: 14px; color: #27500A; display: none; margin-top: 1rem;
+      line-height: 1.5;
+    }
+    .error-box {
+      background: #FCEBEB; border: 1px solid #F09595;
+      border-radius: var(--radius-sm); padding: 12px;
+      font-size: 13px; color: #791F1F; display: none; margin-top: 1rem;
+    }
+    .divider { border: none; border-top: 1px solid var(--card-border); margin: 1.5rem 0; }
+    .footer-note { font-size: 12px; color: var(--ink-muted); text-align: center; line-height: 1.6; }
+    .footer-note a { color: var(--coral); text-decoration: none; }
+    .back-link { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--ink-muted); }
+    .back-link a { color: var(--coral); text-decoration: none; }
+
+    .google-btn { width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:11px; background:#fff; color:#1f1f1f; border:1px solid #dadce0; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500; cursor:pointer; text-decoration:none; }
+    .google-btn:hover { background:#f8f9fa; }
+    .or { display:flex; align-items:center; gap:10px; color:var(--ink-faint); font-size:12px; margin:1.25rem 0; }
+    .or::before, .or::after { content:''; flex:1; border-top:1px solid var(--card-border); }
+  </style>
+</head>
+<body>
+<a href="/" class="logo">559eats</a>
+<div class="card">
+  <div id="loading" class="subtitle">Loading your claim link...</div>
+
+  <div id="claim-box" style="display:none">
+    <h1 id="title">Claim your truck</h1>
+    <p class="subtitle" id="sub">Your listing on the 559eats map is free. Claim it to post your hours, where you're parked today, your menu and photos.</p>
+    <a class="google-btn" id="google-btn" href="#"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg> Continue with Google</a>
+    <div class="or">or</div>
+    <label for="email">Your email</label>
+    <input type="email" id="email" placeholder="you@email.com" />
+    <button class="submit-btn" id="email-btn" onclick="sendLink()">Email me a sign-in link</button>
+    <div class="success-box" id="sent">Check your email and tap the link. It brings you right back here to finish.</div>
+  </div>
+
+  <div id="working" class="subtitle" style="display:none">Linking your account...</div>
+  <div class="success-box" id="done"></div>
+  <div class="error-box" id="err"></div>
+  <hr class="divider" />
+  <p class="footer-note">Questions? Email <a href="mailto:gabe@559eats.com">gabe@559eats.com</a>. By claiming you agree to our <a href="/terms.html">Terms</a>.</p>
+</div>
+<script>
+const SUPABASE_URL = 'https://wlpugteoycouvvnhamnm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const $ = (id) => document.getElementById(id);
+const t = new URLSearchParams(location.search).get('t') || '';
+const back = location.origin + '/claim?t=' + encodeURIComponent(t);
+
+function err(m) { $('err').textContent = m; $('err').style.display = 'block'; }
+
+async function finish(access_token, refresh_token) {
+  $('claim-box').style.display = 'none'; $('loading').style.display = 'none'; $('working').style.display = 'block';
+  try {
+    const r = await fetch('/api/claim-link', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + access_token }, body: JSON.stringify({ a: 'use', t }) });
+    const d = await r.json().catch(() => ({}));
+    $('working').style.display = 'none';
+    if (!r.ok || !d.success) return err(d.error || 'Could not claim. Please try again.');
+    localStorage.setItem('559eats_session', JSON.stringify({ access_token, refresh_token }));
+    $('done').innerHTML = '✅ <strong>' + d.name.replace(/[<>&]/g, '') + '</strong> is yours. Taking you to your dashboard...';
+    $('done').style.display = 'block';
+    setTimeout(() => location.href = '/dashboard.html', 1500);
+  } catch (e) { $('working').style.display = 'none'; err('Network error. Please try again.'); }
+}
+
+async function sendLink() {
+  const email = $('email').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err('Enter a valid email.');
+  $('email-btn').disabled = true; $('email-btn').textContent = 'Sending...'; $('err').style.display = 'none';
+  const r = await fetch(SUPABASE_URL + '/auth/v1/otp', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY }, body: JSON.stringify({ email, create_user: true, options: { emailRedirectTo: back } }) }).catch(() => null);
+  if (r && r.ok) { $('sent').style.display = 'block'; $('email-btn').textContent = 'Sent'; }
+  else { const d = r ? await r.json().catch(() => ({})) : {}; err(d.msg || d.error_description || 'Could not send. Try Continue with Google instead.'); $('email-btn').disabled = false; $('email-btn').textContent = 'Email me a sign-in link'; }
+}
+$('email').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendLink(); });
+
+(async () => {
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('error_description')) { $('loading').style.display = 'none'; err(h.get('error_description').replace(/\+/g, ' ')); }
+  if (!t) { $('loading').style.display = 'none'; return err('This link is missing its code. Ask us for a new one at gabe@559eats.com.'); }
+  if (h.get('access_token')) { history.replaceState(null, '', location.pathname + location.search); return finish(h.get('access_token'), h.get('refresh_token')); }
+  const r = await fetch('/api/claim-link?t=' + encodeURIComponent(t));
+  const d = await r.json().catch(() => ({}));
+  $('loading').style.display = 'none';
+  if (!r.ok) return err(d.error || 'This claim link did not work.');
+  $('title').textContent = 'Claim ' + d.name;
+  if (d.claimed) $('sub').textContent = d.name + ' already has an owner login. If that is you, sign in below to open your dashboard.';
+  $('google-btn').href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(back);
+  $('claim-box').style.display = 'block';
+})();
+</script>
+</body>
+</html>

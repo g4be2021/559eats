@@ -471,7 +471,23 @@
         <input class="form-input" id="edit-owner-phone" placeholder="Owner cell">
         <button class="action-btn approve" type="button" onclick="addOwner()" style="padding:9px 12px">+ Add</button>
       </div>
-      <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">After you add them, they go to <strong>559eats.com/login</strong>, enter that email, and tap the link we email them. That opens their dashboard.</p>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">After you add them, they go to <strong>559eats.com/login</strong> and tap Continue with Google, or enter that email for a sign-in link.</p>
+      <div style="margin-top:12px;padding:12px;border:1px dashed var(--coral);border-radius:10px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px">One-click claim link</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+          <input class="form-input" id="claim-email" type="email" placeholder="Owner email (only needed for Email it)">
+          <button class="action-btn approve" type="button" onclick="makeClaimLink()" style="padding:9px 12px">Make link</button>
+        </div>
+        <div id="claim-out" style="display:none;margin-top:8px">
+          <input class="form-input" id="claim-url" readonly onclick="this.select()" style="font-size:12px">
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <button class="action-btn" type="button" onclick="copyClaim('url')">Copy link</button>
+            <button class="action-btn" type="button" onclick="copyClaim('text')">Copy text/DM message</button>
+            <button class="action-btn approve" type="button" onclick="emailClaim()">Email it from Gmail</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">Works for 30 days. The owner taps it, then Continue with Google (or gets an email link), and the truck is theirs. You get a text when it's claimed.</p>
+      </div>
 
       <div class="form-section">Photos</div>
       <div>
@@ -936,6 +952,7 @@
 
   const HDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   async function loadEditExtras(id) {
+    claimInfo = null; const co = document.getElementById('claim-out'); if (co) co.style.display = 'none'; const ce = document.getElementById('claim-email'); if (ce) ce.value = '';
     const [hrs, owners] = await Promise.all([api(`hours?restaurant_id=eq.${id}`), api(`owners?restaurant_id=eq.${id}&select=id,name,email,phone`)]);
     const by = Object.fromEntries((hrs || []).map(h => [String(h.day_of_week).toLowerCase(), h]));
     document.getElementById('edit-hours').innerHTML = HDAYS.map(d => {
@@ -952,6 +969,35 @@
     await api(`hours?restaurant_id=eq.${id}`, 'DELETE');
     if (rows.length) await api('hours', 'POST', rows);
   }
+  let claimInfo = null;
+  async function makeClaimLink() {
+    const id = document.getElementById('edit-id').value;
+    try {
+      const r = await fetch('/api/claim-link', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+(sessionStorage.getItem('559eats-admin-token')||'')}, body: JSON.stringify({ a:'make', restaurant_id:id }) });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok) throw new Error(d.error || 'Could not make link');
+      claimInfo = d;
+      document.getElementById('claim-url').value = d.url;
+      document.getElementById('claim-out').style.display = 'block';
+    } catch(e) { showToast(e.message); }
+  }
+  function claimMessage() {
+    return `Hi, this is Gabe with 559eats, the food truck map for Fresno and Clovis. ${claimInfo.name} is already on the map for free. Tap this link to claim it so you can post your hours, where you're parked today, your menu and photos. It takes about 30 seconds: ${claimInfo.url}`;
+  }
+  async function copyClaim(kind) {
+    if (!claimInfo) return;
+    try { await navigator.clipboard.writeText(kind === 'url' ? claimInfo.url : claimMessage()); showToast('Copied'); }
+    catch(e) { document.getElementById('claim-url').select(); showToast('Press Ctrl+C to copy'); }
+  }
+  function emailClaim() {
+    if (!claimInfo) return;
+    const to = document.getElementById('claim-email').value.trim();
+    const subject = `Claim ${claimInfo.name} on 559eats (free)`;
+    const body = `Hi,\n\nThis is Gabe with 559eats, the food truck map for Fresno, Clovis and the Central Valley. ${claimInfo.name} is already listed on the map for free.\n\nClaim your listing here (about 30 seconds, sign in with Google or your email):\n${claimInfo.url}\n\nOnce it's yours you can post your hours, tap "I'm here now" to show where you're parked, add your menu and photos, and get catering requests from local events. Listing stays free.\n\nThanks,\nGabe\n559eats.com\n(757) 970-3964`;
+    const url = 'https://mail.google.com/mail/?authuser=gabe@559eats.com&view=cm&fs=1' + (to ? '&to=' + encodeURIComponent(to) : '') + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    window.open(url, '_blank');
+  }
+
   async function addOwner() {
     const id = document.getElementById('edit-id').value;
     const name = document.getElementById('edit-owner-name').value.trim();
