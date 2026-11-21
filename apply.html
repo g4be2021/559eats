@@ -113,6 +113,7 @@
         <div class="form-group"><label>Address or regular location</label><input type="text" id="address" placeholder="Street address or &ldquo;Rotating &mdash; check Instagram&rdquo;"></div>
         <div class="form-group"><label>Instagram handle</label><input type="text" id="instagram" placeholder="@yourtruck"><div class="form-hint">Optional but highly recommended &mdash; it drives follows and engagement.</div></div>
         <div class="form-group"><label>Anything else you&rsquo;d like us to know?</label><textarea id="notes" placeholder="Hours, specialties, upcoming events, catering availability&hellip;"></textarea></div>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:.82rem;color:var(--muted);margin:6px 0 10px;line-height:1.45"><input type="checkbox" id="smsConsent" style="margin-top:3px;flex-shrink:0"> <span>Text me about my listing (setup, hours and location updates, catering requests). Message frequency varies. Msg &amp; data rates may apply. Reply HELP for help, STOP to opt out. Consent is not required to be listed. See our <a href="/sms-terms.html" style="color:var(--orange)">SMS terms &amp; privacy</a>.</span></label>
         <button class="btn-submit" onclick="submitApply()">Submit for free listing &#8594;</button>
         <p style="font-size:.78rem;color:var(--muted);margin-top:10px;text-align:center">By submitting you agree to our <a href="/terms.html" style="color:var(--orange)">Terms &amp; Privacy</a> and <a href="/sms-terms.html" style="color:var(--orange)">SMS terms</a>.</p>
       </div>
@@ -146,7 +147,7 @@ async function submitApply(){
   try{
     const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       name,phone,type:v('bizType'),owner_name:v('ownerName'),email:v('email'),cuisine:v('cuisine'),
-      neighborhood:v('neighborhood'),address:v('address'),instagram:v('instagram'),notes:v('notes'),website_url:v('website_url')})});
+      neighborhood:v('neighborhood'),address:v('address'),instagram:v('instagram'),notes:v('notes'),website_url:v('website_url'),sms_consent:!!(document.getElementById('smsConsent')||{}).checked})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(d.error||'Something went wrong. Please try again.');
     document.getElementById('applyForm').style.display='none';
