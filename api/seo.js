@@ -31,7 +31,8 @@ function hhmm(t) { return t ? String(t).slice(0, 5) : null; }
 
 async function truckPage(req, res) {
   const id = String(req.query.id || '');
-  const tpl = await fetch(`${SITE}/restaurant.html`).then((r) => r.text());
+  const host = /^[a-z0-9.-]+$/i.test(req.headers.host || '') ? req.headers.host : '559eats.com';
+  const tpl = await fetch(`https://${host}/restaurant.html`, { headers: { cookie: req.headers.cookie || '' } }).then((r) => r.text());
   if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(404).setHeader('Content-Type', 'text/html').send(tpl);
   const [rows, photos, hours] = await Promise.all([
     get(`restaurants?id=eq.${id}&is_active=eq.true&select=id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,description,website,instagram,facebook,menu&limit=1`),
