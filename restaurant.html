@@ -124,6 +124,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
     dir?`<a class="act primary" href="${dir.google}" target="_blank" rel="noopener">🧭 Directions</a>`:'',
     d.phone?`<a class="act" href="tel:${esc(d.phone)}">📞 Call</a>`:'',
     `<a class="act" href="/?truck=${d.id}">🗺 See on map</a>`,
+    `<a class="act" href="/catering.html?truck=${d.id}#quoteSection">🎉 Book for an event</a>`,
     `<button class="act" id="shareBtn">🔗 Share</button>`,
     `<button class="act ${favOn()?'fav-on':''}" id="favBtn">${favOn()?'❤ Saved':'♡ Save'}</button>`,
   ].join('');
@@ -168,7 +169,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
     fb?`<div class="info-row"><span>👍</span><div><strong>Facebook</strong><a href="${esc(fb)}" target="_blank" rel="noopener">Facebook page</a></div></div>`:'',
     web?`<div class="info-row"><span>🌐</span><div><strong>Website</strong><a href="${esc(web)}" target="_blank" rel="noopener">${esc(web.replace(/^https?:\/\//,''))}</a></div></div>`:'',
     Array.isArray(d.accepts)&&d.accepts.length?`<div class="info-row"><span>💳</span><div><strong>Payment</strong><div class="pay">${d.accepts.map(a=>`<span>${esc(a)}</span>`).join('')}</div></div></div>`:'',
-    `<div class="info-row"><span>🍽️</span><div><strong>Catering</strong><a href="/catering.html">Request a catering quote</a></div></div>`,
+    `<div class="info-row"><span>🍽️</span><div><strong>Catering</strong><a href="/catering.html?truck=${d.id}#quoteSection">Book this truck for an event</a></div></div>`,
   ].join('');
   document.getElementById('infoSec').innerHTML='<h2>Info</h2>'+info;
 
