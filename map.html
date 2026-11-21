@@ -107,7 +107,8 @@
       .view-toggle { display: block; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 900; background: var(--dark); color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
       .legend { bottom: 80px; }
     }
-  </style>
+  .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
+</style>
 </head>
 <body>
   <nav>
@@ -151,9 +152,9 @@
 
     const map = L.map('map', { zoomControl: false }).setView([36.7468, -119.7726], 11);
     L.control.zoom({ position: 'topright' }).addTo(map);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd', maxZoom: 20,
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
     }).addTo(map);
     const cluster = L.markerClusterGroup({
       showCoverageOnHover: false, maxClusterRadius: 45, spiderfyOnMaxZoom: true,
