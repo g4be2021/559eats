@@ -67,7 +67,7 @@
 <div class="layout">
   <main>
     <div id="special"></div>
-    <div class="sec live-box" id="todaySec" style="display:none"><h2>📍 Where we are today</h2><div id="todayText"></div><div id="miniMap"></div></div>
+    <div class="sec" id="todaySec" style="display:none"><h2>📍 Where we are today</h2><div id="todayText"></div><div id="miniMap"></div></div>
     <div class="sec" id="aboutSec"><h2>About</h2><div class="muted" id="rDesc">Loading&hellip;</div></div>
     <div class="sec" id="menuSec" style="display:none"><h2>Menu</h2><div id="menu"></div></div>
     <div class="sec" id="photoSec" style="display:none"><h2>Photos</h2><div class="gallery" id="gallery"></div></div>
@@ -135,7 +135,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   }
   if(live){
     const until=new Date(live.until).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'});
-    document.getElementById('todaySec').style.display='block';
+    document.getElementById('todaySec').style.display='block';document.getElementById('todaySec').classList.add('live-box');
     document.getElementById('todayText').innerHTML=`<strong>${esc(live.note||'Parked now')}</strong><div class="muted" style="font-size:.88rem;margin-top:2px">Here until ${esc(until)}</div>`;
   }
   if(pos){

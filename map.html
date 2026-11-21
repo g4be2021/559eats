@@ -360,7 +360,12 @@
         const pts = trucks.map((t) => t._pos).filter(Boolean);
         const want = new URLSearchParams(location.search).get('truck');
         if (want && markers[want]) openTruck(want);
-        else if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 13 });
+        else {
+          // Start on Fresno/Clovis where most trucks are; zoom out to see the rest of the valley
+          const local = pts.filter((p) => Truck.distanceMiles([36.78, -119.75], p) < 20);
+          if (local.length) map.fitBounds(local, { padding: [40, 40], maxZoom: 13 });
+          else if (pts.length) map.fitBounds(pts, { padding: [40, 40], maxZoom: 13 });
+        }
         // Refresh open/closed status every minute without reloading
         setInterval(() => { if (!selected) render(); }, 60000);
       } catch (e) {
