@@ -74,11 +74,12 @@
     .pin.live { border-color: #e11d48; }
     .pin .star { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #f5b301; color: #fff; font-size: 11px; line-height: 18px; text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
     /* Sponsor glows: Premium (3) > Featured (2) > Spotlight (1) */
-    .pin.t1 { box-shadow: 0 0 0 3px rgba(232,81,42,.55), 0 0 14px 4px rgba(232,81,42,.35), 0 3px 10px rgba(0,0,0,.25); }
-    .pin.t2 { box-shadow: 0 0 0 3px #f5b301, 0 0 20px 7px rgba(245,179,1,.55), 0 3px 10px rgba(0,0,0,.25); }
-    .pin.t3 { width: 48px; height: 48px; font-size: 1.5rem; box-shadow: 0 0 0 4px #ffcf33, 0 0 26px 10px rgba(255,191,0,.75), 0 0 52px 18px rgba(255,140,0,.35); animation: glow3 2.2s ease-in-out infinite; }
+    .pin.t1, .pin.t2, .pin.t3 { border-style: solid; }
+    .pin.t1 { border-color: #E8512A; box-shadow: 0 0 0 3px rgba(232,81,42,.45), 0 0 16px 6px rgba(232,81,42,.45), 0 3px 10px rgba(0,0,0,.25); }
+    .pin.t2 { width: 44px; height: 44px; border-color: #f5b301; box-shadow: 0 0 0 4px rgba(245,179,1,.8), 0 0 24px 10px rgba(245,179,1,.6), 0 3px 10px rgba(0,0,0,.25); }
+    .pin.t3 { width: 52px; height: 52px; font-size: 1.6rem; border-color: #ffcf33; box-shadow: 0 0 0 4px #ffcf33, 0 0 26px 10px rgba(255,191,0,.75), 0 0 52px 18px rgba(255,140,0,.35); animation: glow3 2.2s ease-in-out infinite; }
     @keyframes glow3 { 0%,100% { box-shadow: 0 0 0 4px #ffcf33, 0 0 22px 8px rgba(255,191,0,.65), 0 0 44px 14px rgba(255,140,0,.28); } 50% { box-shadow: 0 0 0 4px #ffe27a, 0 0 34px 14px rgba(255,191,0,.9), 0 0 70px 26px rgba(255,140,0,.45); } }
-    .pin-wrap.t3 .pin-label { opacity: 1; top: 52px; background: linear-gradient(90deg,#b8860b,#f5b301); color: #1a1310; }
+    .pin-wrap.t3 .pin-label { opacity: 1; top: 58px; background: linear-gradient(90deg,#b8860b,#f5b301); color: #1a1310; }
     .pin.t1 .star { background: #E8512A; }
     .pin.t3 .star { width: 22px; height: 22px; line-height: 22px; font-size: 13px; top: -7px; right: -7px; }
     .feat-tag { display: inline-block; font-size: .66rem; font-weight: 800; color: #8a6200; background: #fff4cc; border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
@@ -276,7 +277,7 @@
       cluster.clearLayers(); premiumLayer.clearLayers(); markers = {};
       list.forEach((t) => {
         if (!t._pos) return;
-        const m = L.marker(t._pos, { zIndexOffset: t._tier * 300, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [48, 48] : [40, 40], iconAnchor: t._tier === 3 ? [24, 24] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
+        const m = L.marker(t._pos, { zIndexOffset: t._tier * 300, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [52, 52] : t._tier === 2 ? [44, 44] : [40, 40], iconAnchor: t._tier === 3 ? [26, 26] : t._tier === 2 ? [22, 22] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
         m._open = t._status.state === 'open';
         m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
         m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
