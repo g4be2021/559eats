@@ -471,7 +471,7 @@
     document.getElementById('f-instagram').value = restaurant.instagram || '';
     document.getElementById('f-facebook').value = restaurant.facebook || '';
     document.getElementById('f-accepts').innerHTML = PAY_TYPES.map(t => `<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="${t}" ${(restaurant.accepts||[]).includes(t)?'checked':''}> ${t}</label>`).join('');
-    document.getElementById('view-page-link').href = '/restaurant.html?id=' + restaurant.id;
+    document.getElementById('view-page-link').href = '/truck/' + restaurant.id;
     menuItems = Array.isArray(restaurant.menu) ? restaurant.menu : [];
     renderMenu();
     loadPhotos();

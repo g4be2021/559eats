@@ -974,7 +974,7 @@
     const tbody = document.getElementById('claims-body');
     if (!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No claim requests yet</td></tr>'; return; }
     tbody.innerHTML = data.map(c => `<tr>
-      <td><strong>${restaurantMap[c.restaurant_id]||'—'}</strong><div class="sub-detail"><a href="restaurant.html?id=${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div></td>
+      <td><strong>${restaurantMap[c.restaurant_id]||'—'}</strong><div class="sub-detail"><a href="/truck/${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div></td>
       <td><strong>${esc(c.owner_name)}</strong></td>
       <td><div class="sub-detail">📞 ${esc(c.owner_phone)}</div><div class="sub-detail">✉️ ${esc(c.owner_email)}</div></td>
       <td>${esc(c.years_operating)||'—'}</td>

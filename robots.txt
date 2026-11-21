@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /analytics.html
+Disallow: /add-restaurants.html
+Disallow: /discover-local.html
+Disallow: /photo-route.html
+Disallow: /dashboard.html
+Disallow: /login.html
+Disallow: /fliplog/
+Sitemap: https://559eats.com/sitemap.xml

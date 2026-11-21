@@ -55,7 +55,8 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;display:none;z-index:3000}
   @media(max-width:860px){.layout{grid-template-columns:1fr}.hero{height:260px}.hero-info{padding:18px}}
 .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
-</style></head>
+</style><script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+</head>
 <body>
 <nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/">Map</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
 
@@ -93,7 +94,7 @@ const get=(p)=>fetch(SUPA+'/rest/v1/'+p,{headers:H}).then(r=>r.ok?r.json():[]).c
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
 
 (async()=>{
-  const id=new URLSearchParams(location.search).get('id');
+  const id=new URLSearchParams(location.search).get('id')||window.TRUCK_ID||(location.pathname.match(/\/truck\/([0-9a-f-]{36})/)||[])[1];
   if(!id||!/^[0-9a-f-]{36}$/i.test(id)) return notFound();
   const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,website,description,is_food_truck,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,menu,instagram,facebook,accepts,is_featured,sponsored_until';
   const [rows,hours,photos]=await Promise.all([
@@ -174,7 +175,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   // nearby trucks, closest first
   const others=await get(`restaurants?select=id,name,cuisine_type,neighborhood,latitude,longitude&is_active=eq.true&id=neq.${id}&limit=500`);
   const near=others.filter(o=>o.latitude&&o.longitude&&pos).map(o=>({...o,dist:Truck.distanceMiles(pos,[o.latitude,o.longitude])})).sort((a,b)=>a.dist-b.dist).slice(0,5);
-  document.getElementById('nearby').innerHTML=near.length?near.map(o=>`<a class="nb" href="/restaurant.html?id=${o.id}"><div class="nb-ico">${Truck.cuisineIcon(o.cuisine_type)}</div><div><div class="nb-name">${esc(o.name)}</div><div class="nb-meta">${esc([o.cuisine_type,o.dist.toFixed(1)+' mi'].filter(Boolean).join(' · '))}</div></div></a>`).join(''):'';
+  document.getElementById('nearby').innerHTML=near.length?near.map(o=>`<a class="nb" href="/truck/${o.id}"><div class="nb-ico">${Truck.cuisineIcon(o.cuisine_type)}</div><div><div class="nb-name">${esc(o.name)}</div><div class="nb-meta">${esc([o.cuisine_type,o.dist.toFixed(1)+' mi'].filter(Boolean).join(' · '))}</div></div></a>`).join(''):'';
   if(!near.length) document.getElementById('nearbySec').style.display='none';
 })();
 

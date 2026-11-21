@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>559eats &middot; Fresno &amp; Central Valley Food Truck Map</title>
+<link rel="canonical" href="https://559eats.com/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="559eats"><meta property="og:title" content="559eats &middot; Fresno &amp; Central Valley Food Truck Map"><meta property="og:description" content="Live map of Fresno and Central Valley food trucks. See who's open now, where they're parked today, and get directions."><meta property="og:url" content="https://559eats.com/"><meta property="og:image" content="https://559eats.com/og-default.png"><meta name="twitter:card" content="summary_large_image">
   <meta name="description" content="Live map of Fresno and Central Valley food trucks. See who's open now, where they're parked today, and get directions." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -112,6 +114,7 @@
     }
   .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
 </style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
   <nav>
@@ -235,7 +238,7 @@
           ${t.special && Truck.future(t.special_until) ? `<div class="pop-special">⭐ ${esc(t.special)}</div>` : ''}
           <div class="pop-actions">
             ${d ? `<a class="primary" href="${d.google}" target="_blank" rel="noopener">Directions</a>` : ''}
-            <a href="/restaurant.html?id=${t.id}">Menu &amp; info</a>
+            <a href="/truck/${t.id}">Menu &amp; info</a>
             ${t.phone ? `<a href="tel:${esc(t.phone)}">Call</a>` : ''}
             <button onclick="shareTruck('${t.id}')">Share</button>
             <button onclick="favTruck('${t.id}', this)">${fav ? '❤ Saved' : '♡ Save'}</button>
@@ -311,7 +314,7 @@
       const t = trucks.find((x) => x.id === id); const m = markers[id];
       if (!t) return;
       document.body.classList.remove('list-view'); document.getElementById('viewToggle').textContent = '☰ List';
-      if (!m) { location.href = '/restaurant.html?id=' + id; return; }
+      if (!m) { location.href = '/truck/' + id; return; }
       cluster.zoomToShowLayer(m, () => { map.panTo(m.getLatLng()); m.openPopup(); });
       select(id, true);
     }
@@ -319,7 +322,7 @@
     window.favTruck = (id, btn) => { const on = Truck.toggleFav(id); btn.textContent = on ? '❤ Saved' : '♡ Save'; renderList(visible()); };
     window.shareTruck = async (id) => {
       const t = trucks.find((x) => x.id === id);
-      const res = await Truck.share(t.name + ' on 559eats', location.origin + '/restaurant.html?id=' + id);
+      const res = await Truck.share(t.name + ' on 559eats', location.origin + '/truck/' + id);
       if (res === 'copied') toast('Link copied');
     };
     function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => (t.style.display = 'none'), 2200); }
