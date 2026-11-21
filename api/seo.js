@@ -12,9 +12,63 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const get = async (path) => { const r = await fetch(`${SUPA}/rest/v1/${path}`, { headers: H }); return r.ok ? r.json() : []; };
 
+
+// Search landing pages: "food trucks in Fresno", "taco trucks Fresno", etc.
+const LANDINGS = {
+  'fresno': { h1: 'Food trucks in Fresno', title: 'Food Trucks in Fresno, CA: Hours, Locations & Menus', intro: 'Every food truck we know of in Fresno, with where they park, hours when posted, phone numbers and directions. Updated daily.', match: (r) => /fresno/i.test(r.address || '') },
+  'clovis': { h1: 'Food trucks in Clovis', title: 'Food Trucks in Clovis, CA: Hours, Locations & Menus', intro: 'Food trucks parking in Clovis, with locations, hours when posted, phone numbers and directions.', match: (r) => /clovis/i.test(r.address || '') || /clovis/i.test(r.neighborhood || '') },
+  'taco-trucks-fresno': { h1: 'Taco trucks in Fresno', title: 'Taco Trucks in Fresno, CA: Best Spots, Hours & Locations', intro: 'Taco trucks across Fresno and Clovis: where they park, hours when posted, and how to reach them.', match: (r) => /taco|taquer/i.test(r.name || '') },
+  'birria-fresno': { h1: 'Birria trucks in Fresno & the Central Valley', title: 'Birria in Fresno: Food Trucks Serving Birria & Quesabirria', intro: 'Food trucks serving birria in Fresno and around the Central Valley.', match: (r) => /birri/i.test(r.name || '') || /birri/i.test(r.description || '') },
+  'mariscos-fresno': { h1: 'Mariscos & seafood trucks in Fresno', title: 'Mariscos Trucks in Fresno: Seafood Food Trucks', intro: 'Seafood and mariscos trucks in Fresno.', match: (r) => /marisco|seafood|ceviche/i.test((r.name || '') + ' ' + (r.cuisine_type || '') + ' ' + (r.description || '')) },
+};
+
+async function landingPage(req, res) {
+  const key = String(req.query.page || '');
+  const L = LANDINGS[key];
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  if (!L) return res.status(404).send('Not found');
+  const all = await get('restaurants?select=id,name,cuisine_type,neighborhood,address,phone,description,is_featured,sponsored_until,sponsor_tier&is_active=eq.true&status=eq.approved&order=name.asc&limit=1000');
+  const hrs = await get('hours?select=restaurant_id&limit=10000');
+  const withHours = new Set(hrs.map((h) => h.restaurant_id));
+  const tierOf = (r) => (r.is_featured && (!r.sponsored_until || new Date(r.sponsored_until) > new Date())) ? (r.sponsor_tier || 2) : 0;
+  const list = all.filter(L.match).sort((a, b) => tierOf(b) - tierOf(a) || a.name.localeCompare(b.name));
+  const url = `${SITE}/food-trucks/${key}`;
+  const items = list.map((r) => `<li class="t">
+      <a class="tn" href="/truck/${r.id}">${esc(r.name)}</a>${tierOf(r) ? ' <span class="b">★</span>' : ''}
+      <div class="tm">${esc([r.cuisine_type, r.neighborhood].filter(Boolean).join(' · '))}</div>
+      ${r.address ? `<div class="ta">📍 ${esc(r.address)}</div>` : ''}
+      <div class="tl">${withHours.has(r.id) ? '<a href="/truck/' + r.id + '">Hours &amp; menu</a>' : '<span>Hours not posted yet</span>'}${r.phone ? ` · <a href="tel:${esc(r.phone)}">${esc(r.phone)}</a>` : ''} · <a href="/?truck=${r.id}">See on map</a></div>
+    </li>`).join('');
+  const others = Object.entries(LANDINGS).filter(([k]) => k !== key).map(([k, v]) => `<a href="/food-trucks/${k}">${esc(v.h1)}</a>`).join(' · ');
+  const ld = { '@context': 'https://schema.org', '@type': 'ItemList', name: L.h1, itemListElement: list.slice(0, 50).map((r, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/truck/${r.id}`, name: r.name })) };
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(L.title)} · 559eats</title><meta name="description" content="${esc(L.intro)}"><link rel="canonical" href="${url}">
+<meta property="og:title" content="${esc(L.h1)} · 559eats"><meta property="og:description" content="${esc(L.intro)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${SITE}/og-default.png"><meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@800&display=swap" rel="stylesheet">
+<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,sans-serif;background:#faf7f4;color:#2d2420;line-height:1.5}
+nav{display:flex;justify-content:space-between;align-items:center;padding:0 24px;height:64px;background:#fff;border-bottom:1px solid #e8e0da}nav a{color:#7a6e6a;text-decoration:none;margin-left:16px;font-size:.9rem}.logo{font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;color:#E8512A!important;margin:0!important}
+.hero{background:linear-gradient(160deg,#2d1a14,#4a2218 60%,#E8512A);color:#fff;padding:48px 24px;text-align:center}.hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4vw,2.8rem)}.hero p{opacity:.85;max-width:620px;margin:10px auto 0}
+.wrap{max-width:820px;margin:0 auto;padding:28px 20px 60px}.count{color:#7a6e6a;font-size:.9rem;margin-bottom:12px}.cta{display:inline-block;background:#E8512A;color:#fff;font-weight:700;padding:11px 22px;border-radius:999px;text-decoration:none;margin:4px 0 20px}
+ul{list-style:none}.t{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.tn{font-weight:700;font-size:1.05rem;color:#2d2420;text-decoration:none}.b{color:#f5b301}.tm{color:#7a6e6a;font-size:.85rem}.ta{font-size:.88rem;margin-top:4px}.tl{font-size:.85rem;margin-top:6px;color:#7a6e6a}.tl a{color:#c73e18;font-weight:600;text-decoration:none}
+.own{background:#f9ede8;border-radius:14px;padding:18px;margin-top:24px;font-size:.92rem}.own a{color:#c73e18;font-weight:700}.more{margin-top:28px;font-size:.88rem;color:#7a6e6a}.more a{color:#c73e18;text-decoration:none}
+footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:28px;font-size:.85rem}footer a{color:rgba(255,255,255,.8);margin:0 8px;text-decoration:none}</style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script></head><body>
+<nav><a class="logo" href="/">559eats</a><div><a href="/">Map</a><a href="/browse.html">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a></div></nav>
+<div class="hero"><h1>${esc(L.h1)}</h1><p>${esc(L.intro)}</p></div>
+<div class="wrap"><a class="cta" href="/">Open the live map</a>
+<div class="count">${list.length} truck${list.length === 1 ? '' : 's'} listed</div><ul>${items || '<li class="t">No trucks listed here yet.</li>'}</ul>
+<div class="own">Own a food truck${key.includes('clovis') ? ' in Clovis' : ' in Fresno'}? <a href="/apply.html">List it free</a> and post your hours, menu and today's spot.</div>
+<div class="more">More: ${others}</div></div>
+<footer><a href="/apply.html">List your truck</a><a href="/catering.html">Book a truck</a><a href="/contact.html">Contact</a><a href="/terms.html">Terms &amp; Privacy</a></footer>
+<script src="/chat-widget.js" defer></script></body></html>`;
+  res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
+  return res.status(200).send(html);
+}
+
 async function sitemap(req, res) {
   const trucks = await get('restaurants?select=id,updated_at,created_at&is_active=eq.true&status=eq.approved&limit=5000');
-  const pages = ['/', '/browse.html', '/events.html', '/catering.html', '/apply.html', '/pricing.html', '/about.html', '/contact.html'];
+  const pages = ['/', '/browse.html', '/events.html', '/catering.html', '/apply.html', '/pricing.html', '/about.html', '/contact.html', ...Object.keys(LANDINGS).map((k) => `/food-trucks/${k}`)];
   const urls = [
     ...pages.map((p) => `<url><loc>${SITE}${p}</loc><changefreq>daily</changefreq><priority>${p === '/' ? '1.0' : '0.6'}</priority></url>`),
     ...trucks.map((t) => {
@@ -85,6 +139,7 @@ module.exports = async (req, res) => {
   try {
     if (req.query.type === 'sitemap') return await sitemap(req, res);
     if (req.query.type === 'truck') return await truckPage(req, res);
+    if (req.query.type === 'landing') return await landingPage(req, res);
     return res.status(404).end();
   } catch (e) {
     console.error('seo', e);
