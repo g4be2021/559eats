@@ -55,9 +55,10 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;display:none;z-index:3000}
   @media(max-width:860px){.layout{grid-template-columns:1fr}.hero{height:260px}.hero-info{padding:18px}}
 .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
-</style></head>
+</style><script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+</head>
 <body>
-<nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/map.html">Map</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
+<nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/">Map</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
 
 <div class="hero" id="hero"><div class="hero-emoji" id="heroEmoji">🚚</div>
   <div class="hero-info"><h1 id="rName">Loading&hellip;</h1><div class="tags" id="tags"></div></div>
@@ -81,7 +82,7 @@
 </div>
 <div class="lightbox" id="lightbox" onclick="this.style.display='none'"><img id="lbImg" alt=""></div>
 <div class="toast" id="toast"></div>
-<footer><div class="footer-links"><a href="/apply.html">List your food truck</a><a href="/map.html">Truck map</a><a href="/contact.html">Contact</a><a href="/sms-terms.html">SMS Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
+<footer><div class="footer-links"><a href="/apply.html">List your food truck</a><a href="/">Truck map</a><a href="/contact.html">Contact</a><a href="/pricing.html">For trucks</a><a href="/terms.html">Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 
 <script>
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
@@ -93,9 +94,9 @@ const get=(p)=>fetch(SUPA+'/rest/v1/'+p,{headers:H}).then(r=>r.ok?r.json():[]).c
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
 
 (async()=>{
-  const id=new URLSearchParams(location.search).get('id');
+  const id=new URLSearchParams(location.search).get('id')||window.TRUCK_ID||(location.pathname.match(/\/truck\/([0-9a-f-]{36})/)||[])[1];
   if(!id||!/^[0-9a-f-]{36}$/i.test(id)) return notFound();
-  const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,website,description,is_food_truck,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,menu,instagram,facebook,accepts';
+  const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,website,description,is_food_truck,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,menu,instagram,facebook,accepts,is_featured,sponsored_until';
   const [rows,hours,photos]=await Promise.all([
     get(`restaurants?id=eq.${id}&select=${cols}&limit=1`),
     get(`hours?restaurant_id=eq.${id}&select=restaurant_id,day_of_week,open_time,close_time,is_closed`),
@@ -113,6 +114,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
     `<span class="tag ${live?'live':st.state==='open'?'open':''}">${esc(st.label)}</span>`,
     d.cuisine_type?`<span class="tag">${icon} ${esc(d.cuisine_type)}</span>`:'',
     d.neighborhood?`<span class="tag">${esc(d.neighborhood)}</span>`:'',
+    Truck.featured(d)?`<span class="tag" style="background:#fff4cc;color:#8a6200">★ Featured</span>`:'',
   ].join('');
 
   // action buttons
@@ -121,7 +123,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   const renderActions=()=>{document.getElementById('actions').innerHTML=[
     dir?`<a class="act primary" href="${dir.google}" target="_blank" rel="noopener">🧭 Directions</a>`:'',
     d.phone?`<a class="act" href="tel:${esc(d.phone)}">📞 Call</a>`:'',
-    `<a class="act" href="/map.html?truck=${d.id}">🗺 See on map</a>`,
+    `<a class="act" href="/?truck=${d.id}">🗺 See on map</a>`,
     `<button class="act" id="shareBtn">🔗 Share</button>`,
     `<button class="act ${favOn()?'fav-on':''}" id="favBtn">${favOn()?'❤ Saved':'♡ Save'}</button>`,
   ].join('');
@@ -173,7 +175,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   // nearby trucks, closest first
   const others=await get(`restaurants?select=id,name,cuisine_type,neighborhood,latitude,longitude&is_active=eq.true&id=neq.${id}&limit=500`);
   const near=others.filter(o=>o.latitude&&o.longitude&&pos).map(o=>({...o,dist:Truck.distanceMiles(pos,[o.latitude,o.longitude])})).sort((a,b)=>a.dist-b.dist).slice(0,5);
-  document.getElementById('nearby').innerHTML=near.length?near.map(o=>`<a class="nb" href="/restaurant.html?id=${o.id}"><div class="nb-ico">${Truck.cuisineIcon(o.cuisine_type)}</div><div><div class="nb-name">${esc(o.name)}</div><div class="nb-meta">${esc([o.cuisine_type,o.dist.toFixed(1)+' mi'].filter(Boolean).join(' · '))}</div></div></a>`).join(''):'';
+  document.getElementById('nearby').innerHTML=near.length?near.map(o=>`<a class="nb" href="/truck/${o.id}"><div class="nb-ico">${Truck.cuisineIcon(o.cuisine_type)}</div><div><div class="nb-name">${esc(o.name)}</div><div class="nb-meta">${esc([o.cuisine_type,o.dist.toFixed(1)+' mi'].filter(Boolean).join(' · '))}</div></div></a>`).join(''):'';
   if(!near.length) document.getElementById('nearbySec').style.display='none';
 })();
 
@@ -182,7 +184,7 @@ function notFound(){
   document.getElementById('rName').textContent='Truck not found';
   document.getElementById('rDesc').textContent='This listing may have moved or been removed. Try the map to find trucks near you.';
   document.getElementById('hours').innerHTML='';
-  document.getElementById('actions').innerHTML='<a class="act primary" href="/map.html">🗺 Open the truck map</a>';
+  document.getElementById('actions').innerHTML='<a class="act primary" href="/">🗺 Open the truck map</a>';
 }
 </script>
 </body></html>

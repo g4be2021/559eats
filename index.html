@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>559eats &middot; Fresno &amp; Central Valley Food Truck Map</title>
+<link rel="canonical" href="https://559eats.com/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="559eats"><meta property="og:title" content="559eats &middot; Fresno &amp; Central Valley Food Truck Map"><meta property="og:description" content="Live map of Fresno and Central Valley food trucks. See who's open now, where they're parked today, and get directions."><meta property="og:url" content="https://559eats.com/"><meta property="og:image" content="https://559eats.com/og-default.png"><meta name="twitter:card" content="summary_large_image">
   <meta name="description" content="Live map of Fresno and Central Valley food trucks. See who's open now, where they're parked today, and get directions." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -70,6 +72,9 @@
     .pin.open { border-color: var(--green); }
     .pin.unknown { border-style: dashed; border-color: #b9aea9; }
     .pin.live { border-color: #e11d48; }
+    .pin .star { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #f5b301; color: #fff; font-size: 11px; line-height: 18px; text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .pin.feat { box-shadow: 0 0 0 3px #f5b301, 0 3px 10px rgba(0,0,0,.25); }
+    .feat-tag { display: inline-block; font-size: .66rem; font-weight: 800; color: #8a6200; background: #fff4cc; border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
     .pin.live::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid #e11d48; opacity: .6; animation: pulse 1.8s ease-out infinite; }
     @keyframes pulse { from { transform: scale(.8); opacity: .7; } to { transform: scale(1.5); opacity: 0; } }
     .pin-wrap:hover .pin, .pin-wrap.sel .pin { transform: scale(1.15); }
@@ -109,6 +114,7 @@
     }
   .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
 </style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
   <nav>
@@ -116,6 +122,7 @@
     <ul class="nav-links">
       <li><a href="/browse.html">Browse</a></li>
       <li><a href="/" class="active">Map</a></li>
+      <li><a href="/events.html">Events</a></li>
       <li><a href="/catering.html">Catering</a></li>
       <li><a href="/apply.html" class="nav-cta">List your truck</a></li>
     </ul>
@@ -176,6 +183,7 @@
       r._pos = Truck.position(r);
       r._icon = Truck.cuisineIcon(r.cuisine_type);
       r._dist = me && r._pos ? Truck.distanceMiles(me, r._pos) : null;
+      r._feat = Truck.featured(r);
       return r;
     }
 
@@ -205,13 +213,14 @@
         return true;
       });
       const rank = (t) => (t._live ? 0 : t._status.state === 'open' ? 1 : t._status.state === 'unknown' ? 2 : 3);
-      list.sort((a, b) => me ? (a._dist ?? 1e9) - (b._dist ?? 1e9) : rank(a) - rank(b) || (a.name || '').localeCompare(b.name || ''));
+      // Featured (paid) trucks go first, then live / open / no hours / closed
+      list.sort((a, b) => (b._feat - a._feat) || (me ? (a._dist ?? 1e9) - (b._dist ?? 1e9) : rank(a) - rank(b) || (a.name || '').localeCompare(b.name || '')));
       return list;
     }
 
     function pinHtml(t) {
       const cls = t._live ? 'live' : t._status.state;
-      return `<div class="pin-wrap" data-id="${t.id}"><div class="pin ${cls}">${t._icon}</div><div class="pin-label">${esc(t.name)}</div></div>`;
+      return `<div class="pin-wrap" data-id="${t.id}"><div class="pin ${cls} ${t._feat ? 'feat' : ''}">${t._icon}${t._feat ? '<span class="star">★</span>' : ''}</div><div class="pin-label">${esc(t.name)}</div></div>`;
     }
 
     function popupHtml(t) {
@@ -221,7 +230,7 @@
       const pillCls = t._live ? 'live' : s.state === 'open' ? 'open' : '';
       return `<div class="pop-photo" id="pp-${t.id}">${t._icon}</div>
         <div class="pop-body">
-          <div class="pop-name">${esc(t.name)}</div>
+          <div class="pop-name">${esc(t.name)}${t._feat ? '<span class="feat-tag">★ Featured</span>' : ''}</div>
           <div class="pop-meta">${esc([t.cuisine_type, t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
           <span class="pill ${pillCls}">${esc(s.label)}</span>
           ${t._live && t._live.note ? `<div class="pop-line">📍 <strong>Today:</strong> ${esc(t._live.note)}</div>` : ''}
@@ -229,7 +238,7 @@
           ${t.special && Truck.future(t.special_until) ? `<div class="pop-special">⭐ ${esc(t.special)}</div>` : ''}
           <div class="pop-actions">
             ${d ? `<a class="primary" href="${d.google}" target="_blank" rel="noopener">Directions</a>` : ''}
-            <a href="/restaurant.html?id=${t.id}">Menu &amp; info</a>
+            <a href="/truck/${t.id}">Menu &amp; info</a>
             ${t.phone ? `<a href="tel:${esc(t.phone)}">Call</a>` : ''}
             <button onclick="shareTruck('${t.id}')">Share</button>
             <button onclick="favTruck('${t.id}', this)">${fav ? '❤ Saved' : '♡ Save'}</button>
@@ -252,7 +261,7 @@
       cluster.clearLayers(); markers = {};
       list.forEach((t) => {
         if (!t._pos) return;
-        const m = L.marker(t._pos, { icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
+        const m = L.marker(t._pos, { zIndexOffset: t._feat ? 500 : 0, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
         m._open = t._status.state === 'open';
         m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
         m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
@@ -274,7 +283,7 @@
         <div class="card ${selected === t.id ? 'active' : ''}" data-id="${t.id}">
           <div class="avatar ${t._status.state}">${t._icon}${t._live ? '<span class="live-dot" title="Here now"></span>' : ''}</div>
           <div class="card-body">
-            <div class="card-name">${esc(t.name)}</div>
+            <div class="card-name">${esc(t.name)}${t._feat ? '<span class="feat-tag">★ Featured</span>' : ''}</div>
             <div class="card-meta">${esc([t.cuisine_type, t._live ? t._live.note : t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
             <div class="card-status ${t._status.state === 'open' ? 'open' : ''}">${esc(t._status.label)}</div>
             ${t.special && Truck.future(t.special_until) ? `<div class="card-special">⭐ ${esc(t.special)}</div>` : ''}
@@ -305,7 +314,7 @@
       const t = trucks.find((x) => x.id === id); const m = markers[id];
       if (!t) return;
       document.body.classList.remove('list-view'); document.getElementById('viewToggle').textContent = '☰ List';
-      if (!m) { location.href = '/restaurant.html?id=' + id; return; }
+      if (!m) { location.href = '/truck/' + id; return; }
       cluster.zoomToShowLayer(m, () => { map.panTo(m.getLatLng()); m.openPopup(); });
       select(id, true);
     }
@@ -313,7 +322,7 @@
     window.favTruck = (id, btn) => { const on = Truck.toggleFav(id); btn.textContent = on ? '❤ Saved' : '♡ Save'; renderList(visible()); };
     window.shareTruck = async (id) => {
       const t = trucks.find((x) => x.id === id);
-      const res = await Truck.share(t.name + ' on 559eats', location.origin + '/restaurant.html?id=' + id);
+      const res = await Truck.share(t.name + ' on 559eats', location.origin + '/truck/' + id);
       if (res === 'copied') toast('Link copied');
     };
     function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => (t.style.display = 'none'), 2200); }
@@ -348,7 +357,7 @@
 
     async function init() {
       try {
-        const cols = 'id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until';
+        const cols = 'id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until';
         const [r1, r2] = await Promise.all([
           fetch(`${SUPA}/rest/v1/restaurants?select=${cols}&is_active=eq.true&order=name.asc&limit=1000`, { headers: H }),
           fetch(`${SUPA}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`, { headers: H }),

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Browse Food Trucks &middot; 559eats</title>
+<link rel="canonical" href="https://559eats.com/browse.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="559eats"><meta property="og:title" content="Browse Food Trucks &middot; 559eats"><meta property="og:description" content="Browse all food trucks in Fresno and the Central Valley. Filter by cuisine, neighborhood, and more."><meta property="og:url" content="https://559eats.com/browse.html"><meta property="og:image" content="https://559eats.com/og-default.png"><meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Browse all food trucks in Fresno and the Central Valley. Filter by cuisine, neighborhood, and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -83,6 +85,7 @@
   footer a { color: rgba(255,255,255,.7); text-decoration: none; }
   @media (max-width: 600px) { .nav-links { display: none; } .sort-wrap { margin-left: 0; width: 100%; } #sortSelect { width: 100%; } }
 </style>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <nav>
@@ -91,7 +94,7 @@
     <ul class="nav-links">
       <li><a href="/">Home</a></li>
       <li><a href="/browse.html" class="active">Browse</a></li>
-      <li><a href="/map.html">Map</a></li>
+      <li><a href="/">Map</a></li>
       <li><a href="/catering.html">Catering</a></li>
       <li><a href="/about.html">About</a></li>
     </ul>
@@ -143,7 +146,7 @@
   </div>
 </div>
 <footer>
-  <p>&copy; 2025 559eats &middot; <a href="/about.html">About</a> &middot; <a href="/contact.html">Contact</a> &middot; <a href="/apply.html">List Your Spot</a></p>
+  <p>&copy; 2026 559eats &middot; <a href="/about.html">About</a> &middot; <a href="/contact.html">Contact</a> &middot; <a href="/apply.html">List Your Spot</a> &middot; <a href="/pricing.html">Pricing</a> &middot; <a href="/terms.html">Terms &amp; Privacy</a></p>
 </footer>
 <script>
 const SUPA = 'https://wlpugteoycouvvnhamnm.supabase.co';
@@ -185,7 +188,7 @@ function render(){
   grid.innerHTML=filtered.map(r=>{
     const slug=getSlug(r),photo=getPhoto(r);
     const badges=[r.is_food_truck?'<span class="badge badge-truck">Food Truck</span>':'',r.is_featured?'<span class="badge badge-featured">Featured</span>':'',r.is_sponsored?'<span class="badge badge-sponsored">Sponsored</span>':''].filter(Boolean).join('');
-    return '<a class="card" href="/restaurant.html?id='+r.id+'"><img class="card-img" src="'+photo+'" alt="'+r.name+'" loading="lazy" onerror="this.hidden=true"><div class="card-body">'+(badges?'<div class="card-badges">'+badges+'</div>':'')+'<div class="card-name">'+r.name+'</div>'+(r.cuisine_type?'<div class="card-cuisine">'+r.cuisine_type+'</div>':'')+'<div class="card-meta">'+(r.neighborhood?'<span>Ã°ÂÂÂ '+r.neighborhood+'</span>':'')+(r.phone?'<span>Ã°ÂÂÂ '+r.phone+'</span>':'')+'</div></div></a>';
+    return '<a class="card" href="/truck/'+r.id+'"><img class="card-img" src="'+photo+'" alt="'+r.name+'" loading="lazy" onerror="this.hidden=true"><div class="card-body">'+(badges?'<div class="card-badges">'+badges+'</div>':'')+'<div class="card-name">'+r.name+'</div>'+(r.cuisine_type?'<div class="card-cuisine">'+r.cuisine_type+'</div>':'')+'<div class="card-meta">'+(r.neighborhood?'<span>Ã°ÂÂÂ '+r.neighborhood+'</span>':'')+(r.phone?'<span>Ã°ÂÂÂ '+r.phone+'</span>':'')+'</div></div></a>';
   }).join('');
 }
 document.getElementById('pills').addEventListener('click',e=>{const p=e.target.closest('.pill');if(!p)return;document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');activeFilter=p.dataset.filter;render();});

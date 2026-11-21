@@ -216,16 +216,52 @@
   <div id="sms-result" style="display:none;background:#EAF3DE;border:1px solid #97C459;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#27500A;margin-bottom:1.5rem;"></div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('listings',this)">🏪 Listings</button>
+    <button class="tab-btn active" onclick="switchTab('business',this)">📊 Business</button>
+    <button class="tab-btn" onclick="switchTab('listings',this)">🏪 Listings</button>
     <button class="tab-btn" onclick="switchTab('claims',this)" id="claims-tab-btn">🏷️ Claim requests</button>
     <button class="tab-btn" onclick="switchTab('catering',this)" id="catering-tab-btn">🍽️ Catering requests</button>
     <button class="tab-btn" onclick="switchTab('bookings',this)">📅 Reservations</button>
     <button class="tab-btn" onclick="switchTab('inbox',this)" id="inbox-tab-btn">📥 Inbox</button>
+    <button class="tab-btn" onclick="switchTab('events',this)">🎪 Events</button>
     <a class="tab-btn" href="/admin/outreach.html" style="text-decoration:none">💬 Vendor SMS</a>
   </div>
 
+  <!-- TAB: BUSINESS -->
+  <div class="tab-panel active" id="tab-business">
+    <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px">The numbers that matter each week. If "updated in 7 days" stays low, the map goes stale and nothing else works.</p>
+    <div class="stats-row" id="biz-cards"></div>
+    <div class="card" style="margin-top:1rem"><div class="card-title">Listing completeness</div><div id="biz-bars"></div></div>
+    <div class="card" style="margin-top:1rem"><div class="card-title">Money</div><div id="biz-money" style="font-size:14px;line-height:1.9"></div></div>
+    <div class="card" style="margin-top:1rem"><div class="card-title">Trucks missing info <span style="font-weight:400;color:var(--ink-muted);font-size:12px">(click to edit)</span></div><div id="biz-incomplete" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+  </div>
+
+  <!-- TAB: EVENTS -->
+  <div class="tab-panel" id="tab-events">
+    <div class="card">
+      <div class="card-title" id="ev-form-title">Add a truck event</div>
+      <input type="hidden" id="ev-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label style="grid-column:1/-1;font-size:12px">Event name<input id="ev-title" class="ev-in" placeholder="Clovis Truck Night"></label>
+        <label style="font-size:12px">Starts<input id="ev-start" type="datetime-local" class="ev-in"></label>
+        <label style="font-size:12px">Ends<input id="ev-end" type="datetime-local" class="ev-in"></label>
+        <label style="font-size:12px">Venue<input id="ev-venue" class="ev-in" placeholder="Old Town Clovis"></label>
+        <label style="font-size:12px">Address<input id="ev-address" class="ev-in" placeholder="Pollasky Ave & 4th St, Clovis"></label>
+        <label style="grid-column:1/-1;font-size:12px">Description<textarea id="ev-desc" class="ev-in" rows="3" placeholder="Live music, 8 trucks, family friendly"></textarea></label>
+        <label style="grid-column:1/-1;font-size:12px">Link (tickets, Instagram post, optional)<input id="ev-link" class="ev-in" placeholder="https://"></label>
+        <div style="grid-column:1/-1;font-size:12px">Trucks at this event<div id="ev-trucks" style="max-height:180px;overflow:auto;border:1px solid #e5ddd5;border-radius:8px;padding:8px;margin-top:4px;columns:2;font-size:13px"></div></div>
+        <label style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="ev-pub" checked> Show on the site</label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="action-btn approve" style="padding:9px 18px" onclick="saveEvent()">Save event</button>
+        <button class="action-btn" style="padding:9px 18px" onclick="resetEvent()">Clear</button>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:1rem"><table><thead><tr><th>Event</th><th>When</th><th>Where</th><th>Trucks</th><th>Status</th><th></th></tr></thead><tbody id="ev-body"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--ink-muted)">Loading...</td></tr></tbody></table></div>
+  </div>
+  <style>.card{background:#fff;border:1px solid #eee4dc;border-radius:12px;padding:18px}.card-title{font-weight:700;font-size:14px;margin-bottom:10px}.ev-in{display:block;width:100%;margin-top:4px;padding:9px 10px;border:1px solid #e5ddd5;border-radius:8px;font:inherit;font-size:13px}.bar{height:10px;background:#f1ece9;border-radius:99px;overflow:hidden;margin:4px 0 12px}.bar i{display:block;height:100%;background:var(--coral)}.chip-x{font-size:12px;padding:5px 10px;border-radius:99px;background:#f7f2ee;border:1px solid #eadfd7;cursor:pointer}</style>
+
   <!-- TAB: LISTINGS -->
-  <div class="tab-panel active" id="tab-listings">
+  <div class="tab-panel" id="tab-listings">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total listings</div></div>
       <div class="stat-card"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
@@ -418,6 +454,19 @@
         <textarea class="form-input" id="edit-description" rows="3" placeholder="Brief description shown on the listing page..." style="resize:vertical;line-height:1.5"></textarea>
       </div>
 
+      <div class="form-section">Weekly hours <span style="font-weight:400;font-size:11px;color:var(--ink-muted)">(leave a day blank if you don't know it; check Closed for days off)</span></div>
+      <div id="edit-hours" style="display:grid;grid-template-columns:90px 1fr 1fr 70px;gap:6px 8px;align-items:center;font-size:13px"></div>
+
+      <div class="form-section">Owner login</div>
+      <div id="edit-owner-current" style="font-size:13px;margin-bottom:8px;color:var(--ink-muted)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+        <input class="form-input" id="edit-owner-name" placeholder="Owner name">
+        <input class="form-input" id="edit-owner-email" type="email" placeholder="owner@email.com">
+        <input class="form-input" id="edit-owner-phone" placeholder="Owner cell">
+        <button class="action-btn approve" type="button" onclick="addOwner()" style="padding:9px 12px">+ Add</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">After you add them, they go to <strong>559eats.com/login</strong>, enter that email, and tap the link we email them. That opens their dashboard.</p>
+
       <div class="form-section">Photos</div>
       <div>
         <div class="photos-grid" id="photos-grid">
@@ -577,11 +626,98 @@
   }
 
   async function loadAll() {
+    loadBusiness();
     await loadListings();
+    loadEvents();
     await loadClaims();
     await loadCatering();
     await loadBookings();
     await loadInbox();
+  }
+
+
+  // ── BUSINESS ──
+  async function loadBusiness() {
+    const s = await Admin.stats();
+    if (!s) { document.getElementById('biz-cards').innerHTML = '<div style="color:var(--ink-muted)">Could not load numbers.</div>'; return; }
+    const card = (n, l) => `<div class="stat-card"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`;
+    document.getElementById('biz-cards').innerHTML = [
+      card(s.trucks, 'Trucks live on map'), card(s.updated_7d, 'Updated in last 7 days'), card(s.live_now, 'Posted spot today'),
+      card(s.featured, 'Featured (paying)'), card(s.catering_30d, 'Catering requests, 30 days'), card(s.new_applications_7d, 'New applications, 7 days'),
+      card(s.sms_in_7d, 'Texts from trucks, 7 days'), card(s.with_owner, 'Trucks with owner login'),
+    ].join('');
+    const bar = (n, l) => { const p = s.trucks ? Math.round(n / s.trucks * 100) : 0; return `<div style="font-size:13px;display:flex;justify-content:space-between"><span>${l}</span><span>${n} of ${s.trucks} (${p}%)</span></div><div class="bar"><i style="width:${p}%"></i></div>`; };
+    document.getElementById('biz-bars').innerHTML = bar(s.with_hours, 'Hours posted') + bar(s.with_photo, 'Has a photo') + bar(s.with_address, 'Has an address') + bar(s.with_menu, 'Has a menu') + bar(s.with_owner, 'Owner has claimed it');
+    const mrr = s.featured * 29;
+    document.getElementById('biz-money').innerHTML =
+      `Featured income: <strong>$${mrr}/month</strong> (${s.featured} × $29)<br>` +
+      `Catering fees collected: <strong>$${Number(s.fees_paid).toFixed(2)}</strong> · owed but unpaid: <strong>$${Number(s.fees_owed).toFixed(2)}</strong><br>` +
+      `Catering: ${s.catering_open} open request(s), ${s.catering_confirmed} confirmed all time<br>` +
+      `Vendor SMS prospects: ${Object.entries(s.prospects || {}).map(([k, v]) => `${esc(k)} ${v}`).join(' · ') || 'none'}`;
+    document.getElementById('biz-incomplete').innerHTML = (s.incomplete || []).map(t =>
+      `<span class="chip-x" onclick="editById('${t.id}')" title="Missing: ${[!t.hours&&'hours',!t.photo&&'photo',!t.address&&'address'].filter(Boolean).join(', ')}">${esc(t.name)} <span style="color:#b33">${[!t.hours&&'⏰',!t.photo&&'📷',!t.address&&'📍'].filter(Boolean).join('')}</span></span>`).join('') || 'Every truck is complete 🎉';
+  }
+  function editById(id) {
+    const r = (window.allRows || []).find(x => x.id === id);
+    if (r) openEdit(r); else alert('Open the Listings tab first, then try again.');
+  }
+
+  // ── EVENTS ──
+  let allEvents = [];
+  const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+  async function loadEvents() {
+    const trucks = (window.allRows || []).filter(r => r.status === 'approved').sort((a, b) => (a.name||'').localeCompare(b.name||''));
+    document.getElementById('ev-trucks').innerHTML = trucks.map(t => `<label style="display:block;break-inside:avoid"><input type="checkbox" value="${t.id}"> ${esc(t.name)}</label>`).join('') || 'No trucks yet';
+    allEvents = (await api('events?order=starts_at.desc&limit=200')) || [];
+    const fmt = (iso) => iso ? new Date(iso).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+    document.getElementById('ev-body').innerHTML = allEvents.length ? allEvents.map(e => `<tr>
+      <td><strong>${esc(e.title)}</strong></td><td>${fmt(e.starts_at)}</td><td>${esc(e.venue || '')}<div class="sub-detail">${esc(e.address || '')}</div></td>
+      <td>${(e.truck_ids || []).length}</td><td>${e.is_published ? (new Date(e.ends_at || e.starts_at) < new Date() ? 'Past' : 'Live') : 'Hidden'}</td>
+      <td><button class="action-btn" onclick="editEvent('${e.id}')">Edit</button> <button class="action-btn reject" onclick="deleteEvent('${e.id}')">Delete</button></td></tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--ink-muted)">No events yet. Add your first truck night above.</td></tr>';
+  }
+  function resetEvent() {
+    ['ev-id','ev-title','ev-start','ev-end','ev-venue','ev-address','ev-desc','ev-link'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('ev-pub').checked = true;
+    document.querySelectorAll('#ev-trucks input').forEach(c => c.checked = false);
+    document.getElementById('ev-form-title').textContent = 'Add a truck event';
+  }
+  function editEvent(id) {
+    const e = allEvents.find(x => x.id === id); if (!e) return;
+    document.getElementById('ev-id').value = e.id; document.getElementById('ev-title').value = e.title || '';
+    document.getElementById('ev-start').value = toLocalInput(e.starts_at); document.getElementById('ev-end').value = toLocalInput(e.ends_at);
+    document.getElementById('ev-venue').value = e.venue || ''; document.getElementById('ev-address').value = e.address || '';
+    document.getElementById('ev-desc').value = e.description || ''; document.getElementById('ev-link').value = e.link || '';
+    document.getElementById('ev-pub').checked = !!e.is_published;
+    document.querySelectorAll('#ev-trucks input').forEach(c => c.checked = (e.truck_ids || []).includes(c.value));
+    document.getElementById('ev-form-title').textContent = 'Edit event';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  async function saveEvent() {
+    const v = i => document.getElementById(i).value.trim();
+    if (!v('ev-title') || !v('ev-start')) return alert('Add at least an event name and start time.');
+    const row = {
+      title: v('ev-title'), starts_at: new Date(v('ev-start')).toISOString(), ends_at: v('ev-end') ? new Date(v('ev-end')).toISOString() : null,
+      venue: v('ev-venue') || null, address: v('ev-address') || null, description: v('ev-desc') || null,
+      link: /^https?:\/\//.test(v('ev-link')) ? v('ev-link') : null, is_published: document.getElementById('ev-pub').checked,
+      truck_ids: [...document.querySelectorAll('#ev-trucks input:checked')].map(c => c.value),
+    };
+    const old = allEvents.find(x => x.id === v('ev-id'));
+    if (row.address && (!old || old.address !== row.address || old.latitude == null)) {
+      try {
+        const r = await fetch(`/api/geocode?address=${encodeURIComponent(row.address + ', CA')}`, { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
+        const g = await r.json(); const loc = g.results && g.results[0] && g.results[0].geometry.location;
+        if (loc) { row.latitude = loc.lat; row.longitude = loc.lng; }
+      } catch {}
+    }
+    const id = v('ev-id');
+    const out = id ? await api(`events?id=eq.${id}`, 'PATCH', row) : await api('events', 'POST', row);
+    if (!out) return alert('Could not save the event.');
+    resetEvent(); loadEvents(); showToast ? showToast('Event saved') : null;
+  }
+  async function deleteEvent(id) {
+    if (!confirm('Delete this event?')) return;
+    await api(`events?id=eq.${id}`, 'DELETE'); loadEvents();
   }
 
   // ── INBOX ──
@@ -615,6 +751,7 @@
   async function loadListings() {
     const all = await api('restaurants?order=created_at.desc');
     if (!all) return;
+    window.allRows = all;
     all.forEach(r => restaurantMap[r.id] = r.name);
 
     document.getElementById('s-total').textContent = all.length;
@@ -682,6 +819,8 @@
 
     document.getElementById('edit-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('edit-hours').innerHTML = '<span style="grid-column:1/-1;color:var(--ink-muted)">Loading...</span>';
+    loadEditExtras(r.id);
     setTimeout(() => document.getElementById('edit-name').focus(), 120);
 
     // Load notes and photos for this restaurant
@@ -785,6 +924,39 @@
     btn.disabled = false;
   }
 
+  const HDAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  async function loadEditExtras(id) {
+    const [hrs, owners] = await Promise.all([api(`hours?restaurant_id=eq.${id}`), api(`owners?restaurant_id=eq.${id}&select=id,name,email,phone`)]);
+    const by = Object.fromEntries((hrs || []).map(h => [String(h.day_of_week).toLowerCase(), h]));
+    document.getElementById('edit-hours').innerHTML = HDAYS.map(d => {
+      const h = by[d.toLowerCase()] || {};
+      return `<span>${d.slice(0,3)}</span><input class="form-input" type="time" id="eh-o-${d}" value="${(h.open_time||'').slice(0,5)}"><input class="form-input" type="time" id="eh-c-${d}" value="${(h.close_time||'').slice(0,5)}"><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="eh-x-${d}" ${h.is_closed?'checked':''}> Closed</label>`;
+    }).join('');
+    const o = owners || [];
+    document.getElementById('edit-owner-current').innerHTML = o.length ? 'Current: ' + o.map(x => `${esc(x.name||'')} &lt;${esc(x.email||'')}&gt;`).join(', ') : 'No owner login yet.';
+  }
+  async function saveEditHours(id) {
+    const rows = HDAYS.map(d => ({ d, o: document.getElementById('eh-o-'+d).value, c: document.getElementById('eh-c-'+d).value, x: document.getElementById('eh-x-'+d).checked }))
+      .filter(r => r.x || (r.o && r.c))
+      .map(r => ({ restaurant_id: id, day_of_week: r.d, open_time: r.x ? null : r.o, close_time: r.x ? null : r.c, is_closed: r.x }));
+    await api(`hours?restaurant_id=eq.${id}`, 'DELETE');
+    if (rows.length) await api('hours', 'POST', rows);
+  }
+  async function addOwner() {
+    const id = document.getElementById('edit-id').value;
+    const name = document.getElementById('edit-owner-name').value.trim();
+    const email = document.getElementById('edit-owner-email').value.trim().toLowerCase();
+    const phone = document.getElementById('edit-owner-phone').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showToast('Enter a valid email');
+    const exist = await api(`owners?email=eq.${encodeURIComponent(email)}&select=id`);
+    if (exist && exist.length) return showToast('That email already has a login');
+    const out = await api('owners', 'POST', [{ restaurant_id: id, name: name || null, email, phone: phone || null, auth_method: 'portal' }]);
+    if (!out) return showToast('Could not add owner');
+    ['edit-owner-name','edit-owner-email','edit-owner-phone'].forEach(i => document.getElementById(i).value = '');
+    showToast('✅ Owner added. Tell them to log in at 559eats.com/login');
+    loadEditExtras(id);
+  }
+
   async function saveEdit() {
     const id = document.getElementById('edit-id').value;
     const name = document.getElementById('edit-name').value.trim();
@@ -811,7 +983,9 @@
         latitude: lat,
         longitude: lng,
         description: document.getElementById('edit-description').value.trim() || null,
+        updated_at: new Date().toISOString(),
       });
+      await saveEditHours(id);
       showToast(`✅ ${name} saved`);
       closeEdit();
       loadListings();
@@ -850,7 +1024,7 @@
     const tbody = document.getElementById('claims-body');
     if (!data.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:2rem">No claim requests yet</td></tr>'; return; }
     tbody.innerHTML = data.map(c => `<tr>
-      <td><strong>${restaurantMap[c.restaurant_id]||'—'}</strong><div class="sub-detail"><a href="restaurant.html?id=${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div></td>
+      <td><strong>${restaurantMap[c.restaurant_id]||'—'}</strong><div class="sub-detail"><a href="/truck/${c.restaurant_id}" target="_blank" style="color:var(--coral);font-size:11px;">View listing →</a></div></td>
       <td><strong>${esc(c.owner_name)}</strong></td>
       <td><div class="sub-detail">📞 ${esc(c.owner_phone)}</div><div class="sub-detail">✉️ ${esc(c.owner_email)}</div></td>
       <td>${esc(c.years_operating)||'—'}</td>

@@ -121,5 +121,6 @@
     return 'https://instagram.com/' + s.replace(/^@/, '').replace(/[^\w.]/g, '');
   }
 
-  window.Truck = { DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future };
+  const featured = (r) => !!(r && r.is_featured && (!r.sponsored_until || future(r.sponsored_until)));
+  window.Truck = { featured, DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future };
 })();

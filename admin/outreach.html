@@ -186,7 +186,7 @@ function renderDetail() {
     <div>
       ${canText ? `<button class="act" onclick="sendIntro('${p.id}')">Send intro text</button>` : ''}
       ${canReview ? `<button class="act secondary" onclick="rerunReview('${p.id}')">Run AI approval now</button>` : ''}
-      ${p.restaurant_id ? `<a class="act" style="text-decoration:none;color:#fff;background:#065f46;border-radius:8px" href="/restaurant.html?id=${esc(p.restaurant_id)}" target="_blank">View live listing</a>` : ''}
+      ${p.restaurant_id ? `<a class="act" style="text-decoration:none;color:#fff;background:#065f46;border-radius:8px" href="/truck/${esc(p.restaurant_id)}" target="_blank">View live listing</a>` : ''}
     </div>
     <div class="box"><h3>Conversation</h3><div class="thread">${msgs || '<p style="color:#aaa;font-size:14px">No messages yet</p>'}</div></div>`;
 }
