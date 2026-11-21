@@ -121,6 +121,9 @@
     return 'https://instagram.com/' + s.replace(/^@/, '').replace(/[^\w.]/g, '');
   }
 
-  const featured = (r) => !!(r && r.is_featured && (!r.sponsored_until || future(r.sponsored_until)));
-  window.Truck = { featured, DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future };
+  // Paid sponsor tier: 0 none, 1 Spotlight, 2 Featured, 3 Premium (only while the paid period is active)
+  const TIERS = ['', 'Spotlight', 'Featured', 'Premium'];
+  const tier = (r) => (r && r.is_featured && (!r.sponsored_until || future(r.sponsored_until))) ? (Number(r.sponsor_tier) || 2) : 0;
+  const featured = (r) => tier(r) > 0;
+  window.Truck = { tier, TIERS, featured, DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future };
 })();

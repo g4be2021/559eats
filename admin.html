@@ -457,6 +457,12 @@
       <div class="form-section">Weekly hours <span style="font-weight:400;font-size:11px;color:var(--ink-muted)">(leave a day blank if you don't know it; check Closed for days off)</span></div>
       <div id="edit-hours" style="display:grid;grid-template-columns:90px 1fr 1fr 70px;gap:6px 8px;align-items:center;font-size:13px"></div>
 
+      <div class="form-section">Sponsor glow <span style="font-weight:400;font-size:11px;color:var(--ink-muted)">(paid plans set this automatically; use this to give a free trial)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end">
+        <label style="font-size:12px">Tier<select class="form-select" id="edit-tier"><option value="0">None</option><option value="1">Spotlight ($1)</option><option value="2">Featured ($3)</option><option value="3">Premium ($6)</option></select></label>
+        <label style="font-size:12px">Until<input class="form-input" id="edit-tier-until" type="date"></label>
+      </div>
+
       <div class="form-section">Owner login</div>
       <div id="edit-owner-current" style="font-size:13px;margin-bottom:8px;color:var(--ink-muted)"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
@@ -643,14 +649,15 @@
     const card = (n, l) => `<div class="stat-card"><div class="stat-num">${n}</div><div class="stat-label">${l}</div></div>`;
     document.getElementById('biz-cards').innerHTML = [
       card(s.trucks, 'Trucks live on map'), card(s.updated_7d, 'Updated in last 7 days'), card(s.live_now, 'Posted spot today'),
-      card(s.featured, 'Featured (paying)'), card(s.catering_30d, 'Catering requests, 30 days'), card(s.new_applications_7d, 'New applications, 7 days'),
+      card(s.featured, 'Sponsored (glowing)'), card(s.catering_30d, 'Catering requests, 30 days'), card(s.new_applications_7d, 'New applications, 7 days'),
       card(s.sms_in_7d, 'Texts from trucks, 7 days'), card(s.with_owner, 'Trucks with owner login'),
     ].join('');
     const bar = (n, l) => { const p = s.trucks ? Math.round(n / s.trucks * 100) : 0; return `<div style="font-size:13px;display:flex;justify-content:space-between"><span>${l}</span><span>${n} of ${s.trucks} (${p}%)</span></div><div class="bar"><i style="width:${p}%"></i></div>`; };
     document.getElementById('biz-bars').innerHTML = bar(s.with_hours, 'Hours posted') + bar(s.with_photo, 'Has a photo') + bar(s.with_address, 'Has an address') + bar(s.with_menu, 'Has a menu') + bar(s.with_owner, 'Owner has claimed it');
-    const mrr = s.featured * 29;
+    const T = s.tiers || {};
     document.getElementById('biz-money').innerHTML =
-      `Featured income: <strong>$${mrr}/month</strong> (${s.featured} × $29)<br>` +
+      `Sponsor income: <strong>$${s.mrr || 0}/month</strong> from ${T.paying || 0} paying truck(s)` + (T.comped ? ` · ${T.comped} on a free trial` : '') + `<br>` +
+      `Glowing on the map: ${T.premium || 0} Premium · ${T.featured || 0} Featured · ${T.spotlight || 0} Spotlight<br>` +
       `Catering fees collected: <strong>$${Number(s.fees_paid).toFixed(2)}</strong> · owed but unpaid: <strong>$${Number(s.fees_owed).toFixed(2)}</strong><br>` +
       `Catering: ${s.catering_open} open request(s), ${s.catering_confirmed} confirmed all time<br>` +
       `Vendor SMS prospects: ${Object.entries(s.prospects || {}).map(([k, v]) => `${esc(k)} ${v}`).join(' · ') || 'none'}`;
@@ -806,6 +813,9 @@
     document.getElementById('edit-lat').value = r.latitude || '';
     document.getElementById('edit-lng').value = r.longitude || '';
     document.getElementById('edit-description').value = r.description || '';
+    const activeTier = r.is_featured && (!r.sponsored_until || new Date(r.sponsored_until) > new Date()) ? (r.sponsor_tier || 2) : 0;
+    document.getElementById('edit-tier').value = String(activeTier);
+    document.getElementById('edit-tier-until').value = activeTier && r.sponsored_until ? r.sponsored_until.slice(0, 10) : '';
 
     editIsTruck = !!r.is_food_truck;
     document.getElementById('edit-truck-toggle').classList.toggle('on', editIsTruck);
@@ -984,6 +994,12 @@
         longitude: lng,
         description: document.getElementById('edit-description').value.trim() || null,
         updated_at: new Date().toISOString(),
+        ...(() => {
+          const t = Number(document.getElementById('edit-tier').value), u = document.getElementById('edit-tier-until').value;
+          if (!t) return { is_featured: false, sponsor_tier: 0 };
+          const until = u ? new Date(u + 'T23:59:00-08:00').toISOString() : new Date(Date.now() + 30 * 864e5).toISOString();
+          return { is_featured: true, sponsor_tier: t, sponsored_until: until };
+        })(),
       });
       await saveEditHours(id);
       showToast(`✅ ${name} saved`);

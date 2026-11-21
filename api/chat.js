@@ -24,7 +24,7 @@ let cache = { at: 0, text: '' };
 async function truckFacts() {
   if (Date.now() - cache.at < 60 * 1000 && cache.text) return cache.text;
   const H = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
-  const cols = 'id,name,cuisine_type,neighborhood,address,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until';
+  const cols = 'id,name,cuisine_type,neighborhood,address,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until,sponsor_tier';
   const [t, h, e] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/restaurants?select=${cols}&is_active=eq.true&status=eq.approved&order=name.asc&limit=500`, { headers: H }).then((r) => r.json()),
     fetch(`${SUPABASE_URL}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`, { headers: H }).then((r) => r.json()),
@@ -42,7 +42,7 @@ async function truckFacts() {
       `status now: ${s.label}${s.todayText ? ` (today ${s.todayText})` : ''}`,
       r.phone ? `phone ${r.phone}` : '',
       r.special && Truck.future(r.special_until) ? `special today: ${r.special}` : '',
-      Truck.featured(r) ? 'featured' : '',
+      Truck.tier(r) ? 'sponsored: ' + Truck.TIERS[Truck.tier(r)] : '',
       `page ${SITE}/truck/${r.id}`,
     ].filter(Boolean);
     return '- ' + parts.join(' | ');
@@ -60,7 +60,7 @@ const SYSTEM = (facts, page) => `You are the 559eats assistant, a chat helper on
 
 CUSTOMERS: find trucks by food, area, or who's open now; give hours, today's spot, phone, and the truck's page link. Only use the TRUCK DATA below. If a truck says "Hours not posted", say so honestly and suggest calling the truck. Never invent hours, locations, menus or prices. For booking a truck for an event, send them to ${SITE}/catering.html. For upcoming truck nights, ${SITE}/events.html.
 
-TRUCK OWNERS: listing is free forever; no cut of everyday sales. Ways to get listed: the form at ${SITE}/apply.html, or text JOIN to (757) 970-3964 (texting may still be being set up; if so, use the form). Already listed? Claim it from the truck's page, or log in at ${SITE}/login.html to post hours, today's spot, specials, menu and photos. Featured plan is $29/month: gold star pin, top of the list and search, badge on the page, cancel anytime (${SITE}/pricing.html). Catering bookings that come through 559eats carry a 15% fee to the truck, only on jobs they confirm.
+TRUCK OWNERS: listing is free forever; no cut of everyday sales. Ways to get listed: the form at ${SITE}/apply.html, or text JOIN to (757) 970-3964 (texting may still be being set up; if so, use the form). Already listed? Claim it from the truck's page, or log in at ${SITE}/login.html to post hours, today's spot, specials, menu and photos. Sponsored plans make the truck glow on the map and list it higher: Spotlight $1/month (orange glow), Featured $3/month (gold glow and star), Premium $6/month (biggest pulsing glow, name always showing, top of the list). Cancel anytime (${SITE}/pricing.html). Catering bookings that come through 559eats carry a 15% fee to the truck, only on jobs they confirm.
 
 RULES:
 - Short replies: 1 to 4 sentences, plain words, friendly, no em dashes. Use the visitor's language (reply in Spanish if they write in Spanish).
