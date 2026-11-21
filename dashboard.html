@@ -310,6 +310,13 @@
 
   <!-- TAB: BILLING -->
   <div class="tab-panel" id="tab-billing">
+    <div class="card" id="featured-card">
+      <div class="card-title">⭐ Featured truck · $29/month</div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:12px">Featured trucks get a gold star on the map, show at the top of the list and search, and get a "Featured" badge on their page. Cancel anytime; you keep it until the end of the month you paid for.</p>
+      <div id="featured-status" style="font-size:13px;margin-bottom:12px">Checking your plan...</div>
+      <button class="save-btn" id="featured-btn" onclick="startFeatured()" style="display:none">Get featured: $29/mo</button>
+      <button class="save-btn" id="featured-cancel" onclick="cancelFeatured()" style="display:none;background:#fff;color:var(--ink);border:1.5px solid var(--border, #ddd)">Cancel at end of month</button>
+    </div>
     <div class="card">
       <div class="card-title">💳 Payment method</div>
 
@@ -484,6 +491,58 @@
     buildHoursGrid(restaurant.id);
     loadReservations(restaurant.id);
     loadCatering(restaurant.id);
+    loadFeatured();
+    if (new URLSearchParams(location.search).get('featured')) switchTab('billing', document.querySelectorAll('.tab-btn')[5]);
+  }
+
+
+  // ── FEATURED PLAN ──
+  async function subApi(a, body) {
+    const r = await fetch('/api/subscribe?a=' + a, {
+      method: body === undefined && a === 'status' ? 'GET' : 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
+      body: a === 'status' ? undefined : JSON.stringify(body || {}),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'Something went wrong');
+    return j;
+  }
+  async function loadFeatured() {
+    const st = document.getElementById('featured-status');
+    const buy = document.getElementById('featured-btn'), cancel = document.getElementById('featured-cancel');
+    try {
+      const p = new URLSearchParams(location.search);
+      if (p.get('featured') === 'done' && p.get('session_id')) {
+        st.textContent = 'Finishing your upgrade...';
+        await subApi('confirm', { session_id: p.get('session_id') });
+        history.replaceState(null, '', location.pathname);
+        showToast('You are featured! ⭐');
+      }
+      const s = await subApi('status');
+      const end = s.until ? new Date(s.until).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      if (s.featured) {
+        st.innerHTML = s.cancels ? `✅ <strong>Featured</strong> until ${end}. It won't renew.` : `✅ <strong>Featured.</strong> Renews around ${end}.`;
+        buy.style.display = s.cancels ? 'inline-block' : 'none';
+        buy.textContent = 'Keep my featured spot';
+        cancel.style.display = s.cancels ? 'none' : 'inline-block';
+      } else {
+        st.textContent = 'You are on the free listing.';
+        buy.style.display = 'inline-block'; cancel.style.display = 'none';
+      }
+    } catch (e) { st.textContent = e.message; buy.style.display = 'inline-block'; }
+  }
+  async function startFeatured() {
+    const b = document.getElementById('featured-btn'); b.disabled = true; b.textContent = 'Opening checkout...';
+    try {
+      const j = await subApi('checkout');
+      if (j.url) { location.href = j.url; return; }
+      showToast('Your featured spot is back on.'); loadFeatured();
+    } catch (e) { showToast(e.message); }
+    b.disabled = false;
+  }
+  async function cancelFeatured() {
+    try { const j = await subApi('cancel'); showToast('Canceled. You stay featured until ' + new Date(j.until).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })); loadFeatured(); }
+    catch (e) { showToast(e.message); }
   }
 
   // ── LISTING ──

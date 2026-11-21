@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Food Truck Events in Fresno &amp; Clovis &middot; 559eats</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}:root{--orange:#E8512A;--orange-dark:#c73e18;--orange-light:#f9ede8;--cream:#faf7f4;--dark:#1a1310;--text:#2d2420;--muted:#7a6e6a;--border:#e8e0da;--white:#fff;--shadow:0 2px 12px rgba(0,0,0,.08)}html{scroll-behavior:smooth}body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);line-height:1.5}nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px;background:rgba(250,247,244,.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid rgba(232,224,218,.6);transition:background .3s,box-shadow .3s}nav.scrolled{background:rgba(250,247,244,.97);box-shadow:0 2px 20px rgba(0,0,0,.08)}.nav-logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;color:var(--orange);text-decoration:none}.nav-links{display:flex;align-items:center;gap:8px}.nav-links a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:999px;transition:color .2s,background .2s}.nav-links a:hover{color:var(--text);background:var(--border)}.nav-cta{background:var(--orange)!important;color:var(--white)!important;padding:8px 20px!important;border-radius:999px!important;font-weight:600!important}.nav-cta:hover{background:var(--orange-dark)!important}.page-hero{padding:120px 24px 60px;text-align:center;background:linear-gradient(160deg,#2d1a14 0%,#4a2218 60%,#E8512A 100%)}.page-hero .eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:12px;display:block}.page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.1}.page-hero p{font-size:1.05rem;color:rgba(255,255,255,.8);max-width:520px;margin:0 auto}.container{max-width:1100px;margin:0 auto;padding:60px 24px}footer{background:var(--dark);color:rgba(255,255,255,.55);text-align:center;padding:36px 24px;font-size:.875rem}footer a{color:rgba(255,255,255,.75);text-decoration:none}footer a:hover{color:var(--orange)}.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}@media(max-width:768px){nav{padding:0 16px}.nav-links a:not(.nav-cta){display:none}}
+  .ev-list{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+  .ev{background:#fff;border-radius:18px;box-shadow:var(--shadow);display:flex;overflow:hidden}
+  .ev-date{background:var(--orange);color:#fff;min-width:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 10px;text-align:center}
+  .ev-date .m{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.85}.ev-date .d{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:800;line-height:1}.ev-date .w{font-size:.75rem;opacity:.85}
+  .ev-body{padding:18px 22px;flex:1;min-width:0}
+  .ev-body h3{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px}
+  .ev-meta{font-size:.85rem;color:var(--muted);margin-bottom:8px}.ev-desc{font-size:.92rem;margin-bottom:10px}
+  .ev-trucks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.ev-trucks a{font-size:.8rem;font-weight:600;background:var(--cream);border:1px solid var(--border);border-radius:999px;padding:4px 10px;color:var(--text);text-decoration:none}
+  .ev-actions a{display:inline-block;font-size:.82rem;font-weight:700;padding:8px 16px;border-radius:999px;text-decoration:none;margin-right:6px;border:1.5px solid var(--border);color:var(--text)}.ev-actions a.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+  .empty{text-align:center;color:var(--muted);background:#fff;border-radius:18px;padding:40px;box-shadow:var(--shadow)}
+  @media(max-width:600px){.ev{flex-direction:column}.ev-date{flex-direction:row;gap:8px;min-width:0;padding:10px}}
+</style></head>
+<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/browse.html">Browse</a><a href="/">Map</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
+<div class="page-hero">
+  <span class="eyebrow">Truck nights &amp; pop-ups</span>
+  <h1>Food truck events</h1>
+  <p>Where the trucks are gathering around Fresno, Clovis and the Central Valley.</p>
+</div>
+<div class="container">
+  <div class="ev-list" id="list"><div class="empty">Loading events...</div></div>
+  <div class="empty" style="max-width:820px;margin:28px auto 0">
+    <strong>Hosting an event and need trucks?</strong><br>
+    <span style="font-size:.9rem">Breweries, churches, schools and businesses: we can bring the trucks. <a href="/catering.html" style="color:var(--orange);font-weight:600">Request trucks for your event</a></span>
+  </div>
+</div>
+<script src="/truck-utils.js"></script>
+<script>
+const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+const H={apikey:KEY,Authorization:'Bearer '+KEY};
+const {esc}=Truck;
+(async()=>{
+  const el=document.getElementById('list');
+  try{
+    const since=new Date(Date.now()-6*3600e3).toISOString();
+    const evs=await (await fetch(`${SUPA}/rest/v1/events?select=*&is_published=is.true&or=(ends_at.gte.${since},and(ends_at.is.null,starts_at.gte.${since}))&order=starts_at.asc&limit=50`,{headers:H})).json();
+    if(!Array.isArray(evs)||!evs.length){el.innerHTML='<div class="empty">No events posted right now. Check back soon, or follow 559eats for truck night announcements.</div>';return;}
+    const ids=[...new Set(evs.flatMap(e=>e.truck_ids||[]))];
+    const trucks=ids.length?await (await fetch(`${SUPA}/rest/v1/restaurants?select=id,name,cuisine_type&id=in.(${ids.join(',')})&is_active=eq.true`,{headers:H})).json():[];
+    const byId=Object.fromEntries((trucks||[]).map(t=>[t.id,t]));
+    const tz={timeZone:'America/Los_Angeles'};
+    el.innerHTML=evs.map(e=>{
+      const s=new Date(e.starts_at), en=e.ends_at?new Date(e.ends_at):null;
+      const time=s.toLocaleTimeString('en-US',{...tz,hour:'numeric',minute:'2-digit'})+(en?' to '+en.toLocaleTimeString('en-US',{...tz,hour:'numeric',minute:'2-digit'}):'');
+      const dir=e.latitude?Truck.directionsLinks(e.latitude,e.longitude,e.venue||e.title):(e.address?{google:'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.address)}:null);
+      const ts=(e.truck_ids||[]).map(id=>byId[id]).filter(Boolean);
+      const link=Truck.safeUrl?Truck.safeUrl(e.link):(/^https?:/.test(e.link||'')?e.link:'');
+      return `<div class="ev">
+        <div class="ev-date"><span class="m">${s.toLocaleDateString('en-US',{...tz,month:'short'})}</span><span class="d">${s.toLocaleDateString('en-US',{...tz,day:'numeric'})}</span><span class="w">${s.toLocaleDateString('en-US',{...tz,weekday:'short'})}</span></div>
+        <div class="ev-body">
+          <h3>${esc(e.title)}</h3>
+          <div class="ev-meta">🕒 ${esc(time)}${e.venue?' · 📍 '+esc(e.venue):''}${e.address?' · '+esc(e.address):''}</div>
+          ${e.description?`<div class="ev-desc">${esc(e.description)}</div>`:''}
+          ${ts.length?`<div class="ev-trucks">${ts.map(t=>`<a href="/restaurant.html?id=${t.id}">${Truck.cuisineIcon(t.cuisine_type)} ${esc(t.name)}</a>`).join('')}</div>`:''}
+          <div class="ev-actions">${dir?`<a class="primary" href="${dir.google}" target="_blank" rel="noopener">Directions</a>`:''}${link?`<a href="${esc(link)}" target="_blank" rel="noopener">Details</a>`:''}<a href="#" onclick="Truck.share(${esc(JSON.stringify(e.title))},location.href);return false">Share</a></div>
+        </div></div>`;
+    }).join('');
+  }catch(err){el.innerHTML='<div class="empty">Could not load events. Please refresh.</div>';}
+})();
+</script>
+<footer><div class="footer-links"><a href="/apply.html">List your food truck</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/terms.html">Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
+</body></html>

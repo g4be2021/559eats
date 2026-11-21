@@ -13,7 +13,7 @@ const TOKEN_HOURS = 12;
 // Tables the admin pages are allowed to touch through this proxy
 const TABLES = new Set([
   'restaurants', 'hours', 'photos', 'owners', 'claim_requests', 'catering_bookings',
-  'bookings', 'sms_log', 'prospects', 'reviews', 'contact_messages',
+  'bookings', 'sms_log', 'prospects', 'reviews', 'contact_messages', 'events',
 ]);
 
 // Best-effort brute-force guard (per warm instance)
@@ -102,6 +102,13 @@ async function handler(req, res) {
   if (!admin) return res.status(401).json({ error: 'Not signed in' });
 
   if (action === 'whoami') return res.status(200).json({ admin });
+
+  if (action === 'stats') {
+    const r = await sb('rpc/business_stats', { method: 'POST', body: '{}' });
+    const text = await r.text();
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(r.ok ? 200 : 500).send(text || '{}');
+  }
 
   if (action === 'db') {
     const { path, method = 'GET', data } = body;

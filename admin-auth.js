@@ -46,6 +46,10 @@
         data: opts.body ? JSON.parse(opts.body) : null,
       }, true);
     },
+    async stats() {
+      const r = await call({ action: 'stats' }, true);
+      return r.ok ? r.json() : null;
+    },
     // Same shape as the old api(path, method, body) helpers: returns parsed JSON or null
     async api(path, method = 'GET', data = null) {
       const r = await call({ action: 'db', path, method, data }, true);
