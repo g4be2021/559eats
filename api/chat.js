@@ -24,7 +24,7 @@ let cache = { at: 0, text: '' };
 async function truckFacts() {
   if (Date.now() - cache.at < 60 * 1000 && cache.text) return cache.text;
   const H = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
-  const cols = 'id,name,cuisine_type,neighborhood,address,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until';
+  const cols = 'id,name,cuisine_type,neighborhood,address,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until,sponsor_tier';
   const [t, h, e] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/restaurants?select=${cols}&is_active=eq.true&status=eq.approved&order=name.asc&limit=500`, { headers: H }).then((r) => r.json()),
     fetch(`${SUPABASE_URL}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`, { headers: H }).then((r) => r.json()),
@@ -42,7 +42,7 @@ async function truckFacts() {
       `status now: ${s.label}${s.todayText ? ` (today ${s.todayText})` : ''}`,
       r.phone ? `phone ${r.phone}` : '',
       r.special && Truck.future(r.special_until) ? `special today: ${r.special}` : '',
-      Truck.featured(r) ? 'featured' : '',
+      Truck.tier(r) ? 'sponsored: ' + Truck.TIERS[Truck.tier(r)] : '',
       `page ${SITE}/truck/${r.id}`,
     ].filter(Boolean);
     return '- ' + parts.join(' | ');

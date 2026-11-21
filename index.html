@@ -73,8 +73,20 @@
     .pin.unknown { border-style: dashed; border-color: #b9aea9; }
     .pin.live { border-color: #e11d48; }
     .pin .star { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #f5b301; color: #fff; font-size: 11px; line-height: 18px; text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
-    .pin.feat { box-shadow: 0 0 0 3px #f5b301, 0 3px 10px rgba(0,0,0,.25); }
+    /* Sponsor glows: Premium (3) > Featured (2) > Spotlight (1) */
+    .pin.t1 { box-shadow: 0 0 0 3px rgba(232,81,42,.55), 0 0 14px 4px rgba(232,81,42,.35), 0 3px 10px rgba(0,0,0,.25); }
+    .pin.t2 { box-shadow: 0 0 0 3px #f5b301, 0 0 20px 7px rgba(245,179,1,.55), 0 3px 10px rgba(0,0,0,.25); }
+    .pin.t3 { width: 48px; height: 48px; font-size: 1.5rem; box-shadow: 0 0 0 4px #ffcf33, 0 0 26px 10px rgba(255,191,0,.75), 0 0 52px 18px rgba(255,140,0,.35); animation: glow3 2.2s ease-in-out infinite; }
+    @keyframes glow3 { 0%,100% { box-shadow: 0 0 0 4px #ffcf33, 0 0 22px 8px rgba(255,191,0,.65), 0 0 44px 14px rgba(255,140,0,.28); } 50% { box-shadow: 0 0 0 4px #ffe27a, 0 0 34px 14px rgba(255,191,0,.9), 0 0 70px 26px rgba(255,140,0,.45); } }
+    .pin-wrap.t3 .pin-label { opacity: 1; top: 52px; background: linear-gradient(90deg,#b8860b,#f5b301); color: #1a1310; }
+    .pin.t1 .star { background: #E8512A; }
+    .pin.t3 .star { width: 22px; height: 22px; line-height: 22px; font-size: 13px; top: -7px; right: -7px; }
     .feat-tag { display: inline-block; font-size: .66rem; font-weight: 800; color: #8a6200; background: #fff4cc; border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+    .feat-tag.t1 { color: #c73e18; background: var(--orange-light); }
+    .feat-tag.t3 { color: #1a1310; background: linear-gradient(90deg,#f5b301,#ffd95a); }
+    .card.t3 { background: linear-gradient(90deg, #fff8e1, #fff); border-color: #f5b301; }
+    .card.t2 { border-color: #f6d67a; }
+    @media (prefers-reduced-motion: reduce) { .pin.t3 { animation: none; } }
     .pin.live::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid #e11d48; opacity: .6; animation: pulse 1.8s ease-out infinite; }
     @keyframes pulse { from { transform: scale(.8); opacity: .7; } to { transform: scale(1.5); opacity: 0; } }
     .pin-wrap:hover .pin, .pin-wrap.sel .pin { transform: scale(1.15); }
@@ -170,6 +182,8 @@
       },
     });
     map.addLayer(cluster);
+    // Premium sponsors never hide inside a cluster bubble
+    const premiumLayer = L.layerGroup().addTo(map);
     // Show truck names on every pin once zoomed in
     const labelZoom = () => document.getElementById('map').classList.toggle('show-labels', map.getZoom() >= 14);
     map.on('zoomend', labelZoom);
@@ -183,7 +197,8 @@
       r._pos = Truck.position(r);
       r._icon = Truck.cuisineIcon(r.cuisine_type);
       r._dist = me && r._pos ? Truck.distanceMiles(me, r._pos) : null;
-      r._feat = Truck.featured(r);
+      r._tier = Truck.tier(r);
+      r._feat = r._tier > 0;
       return r;
     }
 
@@ -214,13 +229,13 @@
       });
       const rank = (t) => (t._live ? 0 : t._status.state === 'open' ? 1 : t._status.state === 'unknown' ? 2 : 3);
       // Featured (paid) trucks go first, then live / open / no hours / closed
-      list.sort((a, b) => (b._feat - a._feat) || (me ? (a._dist ?? 1e9) - (b._dist ?? 1e9) : rank(a) - rank(b) || (a.name || '').localeCompare(b.name || '')));
+      list.sort((a, b) => (b._tier - a._tier) || (me ? (a._dist ?? 1e9) - (b._dist ?? 1e9) : rank(a) - rank(b) || (a.name || '').localeCompare(b.name || '')));
       return list;
     }
 
     function pinHtml(t) {
       const cls = t._live ? 'live' : t._status.state;
-      return `<div class="pin-wrap" data-id="${t.id}"><div class="pin ${cls} ${t._feat ? 'feat' : ''}">${t._icon}${t._feat ? '<span class="star">★</span>' : ''}</div><div class="pin-label">${esc(t.name)}</div></div>`;
+      return `<div class="pin-wrap ${t._tier ? 't' + t._tier : ''}" data-id="${t.id}"><div class="pin ${cls} ${t._tier ? 't' + t._tier : ''}">${t._icon}${t._tier >= 2 || t._tier === 1 ? '<span class="star">★</span>' : ''}</div><div class="pin-label">${esc(t.name)}</div></div>`;
     }
 
     function popupHtml(t) {
@@ -230,7 +245,7 @@
       const pillCls = t._live ? 'live' : s.state === 'open' ? 'open' : '';
       return `<div class="pop-photo" id="pp-${t.id}">${t._icon}</div>
         <div class="pop-body">
-          <div class="pop-name">${esc(t.name)}${t._feat ? '<span class="feat-tag">★ Featured</span>' : ''}</div>
+          <div class="pop-name">${esc(t.name)}${t._tier ? `<span class="feat-tag t${t._tier}">★ ${Truck.TIERS[t._tier]}</span>` : ''}</div>
           <div class="pop-meta">${esc([t.cuisine_type, t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
           <span class="pill ${pillCls}">${esc(s.label)}</span>
           ${t._live && t._live.note ? `<div class="pop-line">📍 <strong>Today:</strong> ${esc(t._live.note)}</div>` : ''}
@@ -258,15 +273,15 @@
     function setPhoto(t) { const el = document.getElementById('pp-' + t.id); if (el) { el.style.backgroundImage = `url("${t._photo.replace(/"/g, '%22')}")`; el.textContent = ''; } }
 
     function renderMarkers(list) {
-      cluster.clearLayers(); markers = {};
+      cluster.clearLayers(); premiumLayer.clearLayers(); markers = {};
       list.forEach((t) => {
         if (!t._pos) return;
-        const m = L.marker(t._pos, { zIndexOffset: t._feat ? 500 : 0, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
+        const m = L.marker(t._pos, { zIndexOffset: t._tier * 300, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [48, 48] : [40, 40], iconAnchor: t._tier === 3 ? [24, 24] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
         m._open = t._status.state === 'open';
         m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
         m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
         m.on('popupclose', () => { if (selected === t.id) select(null, false); history.replaceState(null, '', location.pathname); });
-        cluster.addLayer(m); markers[t.id] = m;
+        (t._tier === 3 ? premiumLayer : cluster).addLayer(m); markers[t.id] = m;
       });
     }
 
@@ -280,10 +295,10 @@
         return;
       }
       el.innerHTML = list.map((t) => `
-        <div class="card ${selected === t.id ? 'active' : ''}" data-id="${t.id}">
+        <div class="card ${selected === t.id ? 'active' : ''} ${t._tier ? 't' + t._tier : ''}" data-id="${t.id}">
           <div class="avatar ${t._status.state}">${t._icon}${t._live ? '<span class="live-dot" title="Here now"></span>' : ''}</div>
           <div class="card-body">
-            <div class="card-name">${esc(t.name)}${t._feat ? '<span class="feat-tag">★ Featured</span>' : ''}</div>
+            <div class="card-name">${esc(t.name)}${t._tier ? `<span class="feat-tag t${t._tier}">★ ${Truck.TIERS[t._tier]}</span>` : ''}</div>
             <div class="card-meta">${esc([t.cuisine_type, t._live ? t._live.note : t.neighborhood].filter(Boolean).join(' · '))}${t._dist != null ? ' · ' + t._dist.toFixed(1) + ' mi' : ''}</div>
             <div class="card-status ${t._status.state === 'open' ? 'open' : ''}">${esc(t._status.label)}</div>
             ${t.special && Truck.future(t.special_until) ? `<div class="card-special">⭐ ${esc(t.special)}</div>` : ''}
@@ -315,7 +330,8 @@
       if (!t) return;
       document.body.classList.remove('list-view'); document.getElementById('viewToggle').textContent = '☰ List';
       if (!m) { location.href = '/truck/' + id; return; }
-      cluster.zoomToShowLayer(m, () => { map.panTo(m.getLatLng()); m.openPopup(); });
+      if (premiumLayer.hasLayer(m)) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 14)); m.openPopup(); }
+      else cluster.zoomToShowLayer(m, () => { map.panTo(m.getLatLng()); m.openPopup(); });
       select(id, true);
     }
 
@@ -357,7 +373,7 @@
 
     async function init() {
       try {
-        const cols = 'id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until';
+        const cols = 'id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,is_featured,sponsored_until,sponsor_tier';
         const [r1, r2] = await Promise.all([
           fetch(`${SUPA}/rest/v1/restaurants?select=${cols}&is_active=eq.true&order=name.asc&limit=1000`, { headers: H }),
           fetch(`${SUPA}/rest/v1/hours?select=restaurant_id,day_of_week,open_time,close_time,is_closed&limit=10000`, { headers: H }),
