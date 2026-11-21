@@ -25,7 +25,7 @@ const FACTS = `
 - Customers: find trucks, hours, today's spot and menus at https://www.559eats.com. Truck nights: https://www.559eats.com/events.html
 - Catering: people request trucks at https://www.559eats.com/catering.html with date, headcount, budget and location. We match them with trucks. No fee to the customer; the truck pays 559eats 15% on jobs it confirms.
 - Truck owners: listing is free forever, no cut of everyday sales. Apply at https://www.559eats.com/apply.html or text JOIN to (757) 970-3964 (texting may still be pending approval; the form always works). Already listed: log in at https://www.559eats.com/login.html to post hours, today's spot, specials, menu and photos.
-- Featured plan: $29/month, gold star pin, top of list and search, badge on page, cancel anytime: https://www.559eats.com/pricing.html
+- Sponsored plans (truck glows on the map and is listed higher): Spotlight $1/month, Featured $3/month, Premium $6/month. Cancel anytime: https://www.559eats.com/pricing.html
 - Phone for the business: 559-458-2276.
 `;
 

@@ -7,12 +7,12 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { ownerFromRequest, SUPABASE_URL, SERVICE_KEY } = require('./_lib/admin-auth');
 
-const PRICE_FEATURED = 'price_1TKv6u6fFQWsJALk6udajtpi'; // $29 / month (tier 2)
-// Sponsor tiers. Tier 2 reuses the original Featured price; 1 and 3 are created in Stripe on first use.
+const PRICE_FEATURED = 'price_1TKv6u6fFQWsJALk6udajtpi'; // old $29 Featured price, only used to recognize older subscriptions
+// Sponsor tiers. Prices are created in Stripe on first use (looked up by lookup_key after that).
 const TIERS = {
-  1: { name: 'Spotlight', cents: 1900, lookup: 'eats_sponsor_spotlight_monthly' },
-  2: { name: 'Featured', cents: 2900, price: PRICE_FEATURED },
-  3: { name: 'Premium', cents: 5900, lookup: 'eats_sponsor_premium_monthly' },
+  1: { name: 'Spotlight', cents: 100, lookup: 'eats_sponsor_spotlight_1usd_monthly' },
+  2: { name: 'Featured', cents: 300, lookup: 'eats_sponsor_featured_3usd_monthly' },
+  3: { name: 'Premium', cents: 600, lookup: 'eats_sponsor_premium_6usd_monthly' },
 };
 const priceCache = {};
 async function priceFor(tier) {
