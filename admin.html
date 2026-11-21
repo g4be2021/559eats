@@ -753,7 +753,7 @@
     const btn = document.getElementById('edit-lookup-btn');
     btn.textContent = 'Looking up...'; btn.disabled = true;
     try {
-      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${MAPS_KEY}`);
+      const res = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`, { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
       const data = await res.json();
       if (data.results && data.results[0]) {
         const result = data.results[0];
