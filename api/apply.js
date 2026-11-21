@@ -32,6 +32,8 @@ module.exports = async (req, res) => {
     neighborhood: clip(b.neighborhood, 120),
     instagram: clip(b.instagram, 200),
     notes: clip(b.notes, 1500),
+    sms_consent: b.sms_consent === true,
+    sms_consent_text: b.sms_consent === true ? 'I agree to receive text messages from 559eats about my listing (setup, hours and location updates, catering requests). Message frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.' : null,
     submitted_at: new Date().toISOString(),
   };
 
