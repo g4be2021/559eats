@@ -34,6 +34,7 @@ Style: simple, natural, professional, short (under 150 words). No em dashes. No 
 Use only the FACTS. Never invent prices, availability, dates or promises. If something needs Gabriel's decision (a quote, a date, a partnership, a complaint, anything legal or about money beyond the listed prices), write a short holding reply that says he will follow up, and set needs_gabriel true.
 For catering requests, thank them and ask for anything missing: date, start and end time, headcount, budget, address, food preference. Point them to the catering form if they haven't used it.
 Reply in the sender's language.
+Always answer by calling the triage tool. Never reply with plain text.
 
 FACTS:${FACTS}`;
 
@@ -119,13 +120,15 @@ function callClaude_(key, user) {
     payload: JSON.stringify({
       model: MODEL, max_tokens: 900, system: SYSTEM,
       messages: [{ role: 'user', content: user }],
-      tools: [TOOL], tool_choice: { type: 'tool', name: 'triage' },
+      tools: [TOOL], tool_choice: { type: 'auto' },
     }),
     muteHttpExceptions: true,
   });
   if (res.getResponseCode() !== 200) throw new Error('Claude ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
   const j = JSON.parse(res.getContentText());
-  return j.content.filter((c) => c.type === 'tool_use')[0].input;
+  const t = j.content.filter((c) => c.type === 'tool_use')[0];
+  if (!t) throw new Error('Claude did not call triage: ' + JSON.stringify(j.content).slice(0, 200));
+  return t.input;
 }
 
 function getLabel_(name) {
