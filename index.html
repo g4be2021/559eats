@@ -20,7 +20,7 @@
     :root {
       --orange: #E8512A; --orange-dark: #c73e18; --orange-light: #f9ede8;
       --cream: #faf7f4; --dark: #1a1310; --text: #2d2420; --muted: #7a6e6a;
-      --border: #e8e0da; --white: #fff; --green: #1f9d55; --green-light: #e6f6ec; --gray: #9a8f8a;
+      --border: #e8e0da; --white: #fff; --green: #1f9d55; --green-light: #e6f6ec; --gray: #9a8f8a; --live: #2563eb; --closed: #dc2626;
     }
     body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--cream); overflow: hidden; }
     nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(250,247,244,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); height: 64px; display: flex; align-items: center; padding: 0 24px; gap: 32px; }
@@ -51,10 +51,10 @@
     .card { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 12px; cursor: pointer; border: 1.5px solid transparent; margin-bottom: 4px; }
     .card:hover { background: var(--cream); }
     .card.active { background: var(--orange-light); border-color: var(--orange); }
-    .avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--cream); border: 3px solid var(--gray); flex-shrink: 0; position: relative; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--cream); border: 3px solid var(--closed); flex-shrink: 0; position: relative; }
     .avatar.open { border-color: var(--green); background: var(--green-light); }
-    .avatar.unknown { border-style: dashed; }
-    .avatar .live-dot { position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; border-radius: 50%; background: #e11d48; border: 2px solid #fff; }
+    .avatar.unknown { border-style: dashed; border-color: #b9aea9; }
+    .avatar .live-dot { position: absolute; top: -3px; right: -3px; width: 14px; height: 14px; border-radius: 50%; background: var(--live); border: 2px solid #fff; }
     .card-body { flex: 1; min-width: 0; }
     .card-name { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-meta { font-size: .76rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -68,10 +68,10 @@
     #map { flex: 1; z-index: 1; }
     /* markers */
     .pin-wrap { position: relative; }
-    .pin { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 3px 10px rgba(0,0,0,.25); transition: transform .15s; }
+    .pin { width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 3px solid var(--closed); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 3px 10px rgba(0,0,0,.25); transition: transform .15s; }
     .pin.open { border-color: var(--green); }
     .pin.unknown { border-style: dashed; border-color: #b9aea9; }
-    .pin.live { border-color: #e11d48; }
+    .pin.live { border-color: var(--live); }
     .pin .star { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #f5b301; color: #fff; font-size: 11px; line-height: 18px; text-align: center; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
     /* Sponsor glows: Premium (3) > Featured (2) > Spotlight (1) */
     .pin.t1, .pin.t2, .pin.t3 { border-style: solid; }
@@ -88,7 +88,7 @@
     .card.t3 { background: linear-gradient(90deg, #fff8e1, #fff); border-color: #f5b301; }
     .card.t2 { border-color: #f6d67a; }
     @media (prefers-reduced-motion: reduce) { .pin.t3 { animation: none; } }
-    .pin.live::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid #e11d48; opacity: .6; animation: pulse 1.8s ease-out infinite; }
+    .pin.live::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid var(--live); opacity: .6; animation: pulse 1.8s ease-out infinite; }
     @keyframes pulse { from { transform: scale(.8); opacity: .7; } to { transform: scale(1.5); opacity: 0; } }
     .pin-wrap:hover .pin, .pin-wrap.sel .pin { transform: scale(1.15); }
     .pin-label { position: absolute; left: 50%; top: 44px; transform: translateX(-50%); background: var(--dark); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
@@ -165,7 +165,7 @@
     </aside>
     <div class="map-area">
       <div id="map"></div>
-      <div class="legend"><span><i style="border-color:var(--green)"></i>Open</span><span><i style="border-color:#e11d48"></i>Here now</span><span><i style="border-color:var(--gray)"></i>Closed</span><span><i style="border-color:#b9aea9;border-style:dashed"></i>No hours</span></div>
+      <div class="legend"><span><i style="border-color:var(--green)"></i>Open</span><span><i style="border-color:var(--live)"></i>Here now</span><span><i style="border-color:var(--closed)"></i>Closed</span><span><i style="border-color:#b9aea9;border-style:dashed"></i>No hours</span></div>
     </div>
   </div>
   <button class="view-toggle" id="viewToggle">☰ List</button>
