@@ -30,7 +30,7 @@
     .nav-links a:hover, .nav-links a.active { color: var(--orange); }
     .nav-cta { background: var(--orange); color: #fff !important; padding: 8px 18px; border-radius: 999px; font-weight: 600 !important; }
 
-    .layout { display: flex; height: 100vh; padding-top: 64px; }
+    .layout { display: flex; height: 100vh; height: 100dvh; padding-top: 64px; }
     .sidebar { width: 380px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 2; }
     .side-head { padding: 18px 18px 10px; border-bottom: 1px solid var(--border); }
     .side-head h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin-bottom: 4px; }
@@ -123,7 +123,7 @@
       .sidebar { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; width: 100%; border-right: none; transform: translateY(100%); transition: transform .25s; z-index: 600; }
       body.list-view .sidebar { transform: translateY(0); }
       .view-toggle { display: block; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 900; background: var(--dark); color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
-      .legend { bottom: 80px; }
+      .legend { top: 10px; bottom: auto; left: 10px; max-width: calc(100% - 70px); padding: 6px 9px; font-size: .68rem; line-height: 1.7; }
     }
   .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
 </style>
