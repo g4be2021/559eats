@@ -1,3 +1,16 @@
-/* 559eats logo font (Matcha Boom). Only the logo uses it. */
+/* 559eats brand font (Matcha Boom): logo, headings and big numbers.
+   Body text stays in the readable sans-serif. Matcha Boom has no accented letters,
+   so those fall back to Playfair Display character by character. */
 @font-face{font-family:'Matcha Boom';src:url(/fonts/MatchaBoom.woff2) format('woff2');font-display:swap}
-.nav-logo,a.logo,.logo,nav > a:first-child{font-family:'Matcha Boom','Playfair Display',Georgia,serif!important;font-weight:400!important;font-synthesis:none;letter-spacing:.5px!important;font-style:normal!important}
+.nav-logo,a.logo,.logo,nav > a:first-child,.auth-logo,.login-logo{font-family:'Matcha Boom','Playfair Display',Georgia,serif!important;font-weight:400!important;font-synthesis:none;letter-spacing:.5px!important;font-style:normal!important}
+h1,h2,
+.page-title,.section-title,.modal-title,.pop-name,
+.ev-body h3,.form-card h3,.contact-form h3,
+.stat-num,.stat-value,.nf-code,.plan .price,.ev-date .d,.story-visual .sv-num,.rev-item .rev-value,.st-h{
+  font-family:'Matcha Boom','Playfair Display',Georgia,serif!important;font-weight:400!important;font-synthesis:none;font-style:normal!important;letter-spacing:.3px;line-height:1.12}
+h1 em,h2 em{font-style:normal!important}
+@media (max-width:600px){
+  .page-hero h1,.hero h1{font-size:clamp(1.7rem,8.2vw,2.3rem)!important}
+  .page-hero h1 br,.hero h1 br{display:none}
+  h2{font-size:min(1.6rem,7vw)}
+}
