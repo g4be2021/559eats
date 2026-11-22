@@ -53,7 +53,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 24px
 ul{list-style:none}.t{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.tn{font-weight:700;font-size:1.05rem;color:#2d2420;text-decoration:none}.b{color:#f5b301}.tm{color:#7a6e6a;font-size:.85rem}.ta{font-size:.88rem;margin-top:4px}.tl{font-size:.85rem;margin-top:6px;color:#7a6e6a}.tl a{color:#c73e18;font-weight:600;text-decoration:none}
 .own{background:#f9ede8;border-radius:14px;padding:18px;margin-top:24px;font-size:.92rem}.own a{color:#c73e18;font-weight:700}.more{margin-top:28px;font-size:.88rem;color:#7a6e6a}.more a{color:#c73e18;text-decoration:none}
 footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:28px;font-size:.85rem}footer a{color:rgba(255,255,255,.8);margin:0 8px;text-decoration:none}</style>
-<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script></head><body>
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script><link rel="stylesheet" href="/brand.css"></head><body>
 <nav><a class="logo" href="/">559eats</a><div><a href="/">Map</a><a href="/browse.html">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a></div></nav>
 <div class="hero"><h1>${esc(L.h1)}</h1><p>${esc(L.intro)}</p></div>
 <div class="wrap"><a class="cta" href="/">Open the live map</a>
