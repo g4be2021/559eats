@@ -452,7 +452,7 @@
     document.getElementById('main-content').style.display = 'block';
 
     const owners = await api(`owners?email=eq.${encodeURIComponent(user.email)}&select=*,restaurants(*)`);
-    if (!owners || owners.length === 0) { showToast('No listing found for this email.'); return; }
+    if (!owners || owners.length === 0) { showToast('No truck is linked to ' + user.email + ' yet. Use the claim link we sent you, or email gabe@559eats.com.'); return; }
 
     ownerRecord = owners[0];
     restaurant = ownerRecord.restaurants;
