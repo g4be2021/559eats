@@ -5,7 +5,7 @@
     ['/', 'Map'],
     ['/browse.html', 'Browse trucks'],
     ['/events.html', 'Events'],
-    ['/catering.html', 'Book a truck for an event'],
+    ['/catering.html', 'Catering'],
     ['/apply.html', 'List your truck (free)'],
     ['/login.html', 'Owner login'],
     ['/pricing.html', 'Pricing'],
@@ -26,7 +26,7 @@
       '.mnav-panel a{display:block;padding:14px 22px;font-size:1rem;font-weight:600;color:#2d2420;text-decoration:none;font-family:inherit}' +
       '.mnav-panel a:active,.mnav-panel a:hover{background:#f9ede8;color:#c73e18}' +
       '.mnav-panel a.cur{color:#E8512A}' +
-      '.mnav-panel a.sep{border-top:1px solid #f0e8e2;margin-top:6px;padding-top:16px;font-weight:500;color:#7a6e6a}' +
+      '.mnav-panel a.sep{border-top:1px solid #f0e8e2;margin-top:6px;padding-top:16px}' +
       '@media (max-width:760px){.mnav-btn{display:inline-flex}}' +
       '@media (max-width:420px){nav .nav-cta{padding:7px 12px!important;font-size:.8rem!important}nav{gap:10px!important}.mnav-btn span{display:none}.mnav-btn{padding:8px 10px}}';
     document.head.appendChild(css);
