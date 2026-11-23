@@ -70,7 +70,7 @@
     }
     save(); send.disabled = false; render(); input.focus();
   }
-  btn.addEventListener('click', () => { const o = panel.classList.toggle('open'); btn.textContent = o ? '✕' : '💬'; if (o) { render(); input.focus(); } });
+  btn.addEventListener('click', () => { const o = panel.classList.toggle('open'); btn.textContent = o ? '✕' : '💬'; if (o) { render(); if (!matchMedia('(pointer: coarse)').matches) input.focus(); } });
   panel.querySelector('.ec-x').addEventListener('click', () => { panel.classList.remove('open'); btn.textContent = '💬'; });
   form.addEventListener('submit', (e) => { e.preventDefault(); ask(input.value); });
   sug.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) ask(b.textContent); });
