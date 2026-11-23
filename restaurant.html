@@ -97,7 +97,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
 (async()=>{
   const id=new URLSearchParams(location.search).get('id')||window.TRUCK_ID||(location.pathname.match(/\/truck\/([0-9a-f-]{36})/)||[])[1];
   if(!id||!/^[0-9a-f-]{36}$/i.test(id)) return notFound();
-  const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,website,description,is_food_truck,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,menu,instagram,facebook,accepts,is_featured,sponsored_until,sponsor_tier';
+  const cols='id,name,cuisine_type,neighborhood,address,latitude,longitude,phone,website,description,is_food_truck,today_spot,today_lat,today_lng,today_until,open_override,open_override_until,special,special_until,menu,instagram,facebook,accepts,is_featured,sponsored_until,sponsor_tier,hours_source';
   const [rows,hours,photos]=await Promise.all([
     get(`restaurants?id=eq.${id}&select=${cols}&limit=1`),
     get(`hours?restaurant_id=eq.${id}&select=restaurant_id,day_of_week,open_time,close_time,is_closed`),
@@ -160,7 +160,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   // weekly hours, today highlighted
   const today=Truck.nowLocal().day;
   const order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  document.getElementById('hours').innerHTML=hours.length?order.map(day=>{const h=hours.find(x=>x.day_of_week===day);const txt=!h?'—':h.is_closed?'Closed':`${Truck.fmtTime(h.open_time)} – ${Truck.fmtTime(h.close_time)}`;return `<div class="hours-row ${day===today?'today':''}"><span>${day}</span><span>${esc(txt)}</span></div>`;}).join(''):'<span class="muted">This truck hasn\'t posted hours yet. Call or check their social media before heading out.</span>';
+  document.getElementById('hours').innerHTML=hours.length?order.map(day=>{const h=hours.find(x=>x.day_of_week===day);const txt=!h?'—':h.is_closed?'Closed':`${Truck.fmtTime(h.open_time)} – ${Truck.fmtTime(h.close_time)}`;return `<div class="hours-row ${day===today?'today':''}"><span>${day}</span><span>${esc(txt)}</span></div>`;}).join('')+(d.hours_source==='google'?'<div class="muted" style="font-size:.8rem;margin-top:8px">Hours from Google. Not yet confirmed by the truck, so check before you go.</div>':''):'<span class="muted">This truck hasn\'t posted hours yet. Call or check their social media before heading out.</span>';
 
   const ig=Truck.instagramUrl(d.instagram), fb=Truck.safeUrl(d.facebook), web=Truck.safeUrl(d.website);
   const info=[

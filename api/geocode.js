@@ -2,6 +2,8 @@
 //   /api/geocode?address=...                         -> Geocoding
 //   /api/geocode?nearby=1&lat=..&lng=..&radius=..&type=..  -> Places nearby search (Discover Local tool)
 //   /api/geocode?search=taco+truck+fresno[&pagetoken=..]   -> Places text search (Google truck finder)
+//   /api/geocode?find=Tacos+El+Nene+Fresno                  -> best matching place for a truck name
+//   /api/geocode?details=PLACE_ID                            -> hours, location, phone for one place
 const { isAdmin } = require('./_lib/admin-auth');
 
 module.exports = async (req, res) => {
@@ -14,6 +16,17 @@ module.exports = async (req, res) => {
       if (!Number.isFinite(la) || !Number.isFinite(ln)) return res.status(400).json({ error: 'lat and lng are required' });
       const t = /^[a-z_]+$/.test(type || '') ? type : 'restaurant';
       const r = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${la},${ln}&radius=${rad}&type=${t}&key=${key}`);
+      return res.status(200).json(await r.json());
+    }
+    if (req.query.find) {
+      const q = String(req.query.find).slice(0, 160);
+      const r = await fetch(`https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(q)}&inputtype=textquery&fields=place_id,name,formatted_address&locationbias=circle:60000@36.78,-119.75&key=${key}`);
+      return res.status(200).json(await r.json());
+    }
+    if (req.query.details) {
+      const id = String(req.query.details);
+      if (!/^[A-Za-z0-9_-]{10,300}$/.test(id)) return res.status(400).json({ error: 'Bad place id' });
+      const r = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${id}&fields=place_id,name,formatted_address,geometry/location,opening_hours/periods,business_status,formatted_phone_number&key=${key}`);
       return res.status(200).json(await r.json());
     }
     if (req.query.search || req.query.pagetoken) {

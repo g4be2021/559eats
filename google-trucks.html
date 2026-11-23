@@ -67,6 +67,16 @@ taco truck Kerman</textarea>
     </div>
   </div>
 
+
+  <div class="box">
+    <b>Update trucks already on 559eats from Google</b>
+    <p class="status" style="margin:6px 0 10px">Looks up every active truck on Google and copies its hours, map location and phone number. Trucks whose owner set their own hours are never touched. Hours copied from Google show a "not yet confirmed by the truck" note on the truck page.</p>
+    <label style="font-size:.88rem;margin-right:14px"><input type="checkbox" id="s-hours" checked> Hours</label>
+    <label style="font-size:.88rem;margin-right:14px"><input type="checkbox" id="s-loc" checked> Map location and address</label>
+    <label style="font-size:.88rem;margin-right:14px"><input type="checkbox" id="s-phone" checked> Phone number (only if missing)</label>
+    <div class="row"><button class="btn" id="sync" onclick="syncAll()">Update from Google</button><span class="status" id="sync-status"></span></div>
+    <table id="sync-tbl" style="display:none;margin-top:14px"><thead><tr><th>Truck</th><th>Google match</th><th>What changed</th></tr></thead><tbody id="sync-body"></tbody></table>
+  </div>
   <div class="box filters" id="filters" style="display:none">
     <label><input type="checkbox" id="f-have" onchange="render()"> Show ones already on 559eats</label>
     <label><input type="checkbox" id="f-closed" onchange="render()"> Show permanently closed</label>
@@ -128,7 +138,7 @@ taco truck Kerman</textarea>
     go.disabled = true;
     try {
       existing = (await Admin.api('restaurants?select=id,name,latitude,longitude,admin_notes,status')) || [];
-      existing.forEach((e) => { e.notes = e.admin_notes; });
+      existing.forEach((e) => { e.notes = JSON.stringify(e.admin_notes || ''); });
       problems.length = 0;
       const qs = document.getElementById('queries').value.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 25);
       for (let i = 0; i < qs.length; i++) {
@@ -204,7 +214,7 @@ taco truck Kerman</textarea>
     if (!picks.length) return;
     if (!confirm(`Add ${picks.length} place(s) to Pending review? They stay hidden until you approve them.`)) return;
     const b = document.getElementById('add'); b.disabled = true;
-    let ok = 0;
+    let ok = 0; const me = Admin.info() || {};
     for (const p of picks) {
       const loc = p.geometry && p.geometry.location;
       const row = {
@@ -212,13 +222,93 @@ taco truck Kerman</textarea>
         latitude: loc ? loc.lat : null, longitude: loc ? loc.lng : null,
         neighborhood: town(p.formatted_address), cuisine_type: cuisineFor(p.name),
         is_food_truck: true, status: 'pending', is_active: false,
-        admin_notes: `google:${p.place_id} · found on Google Maps searching "${p._q}" on ${new Date().toLocaleDateString()}. Call to confirm before approving.`,
+        admin_notes: [{ initials: (me.initials || 'G4'), name: me.name || 'Google finder', color: me.color || '#D85A30', timestamp: new Date().toISOString(),
+          text: `Found on Google Maps searching "${p._q}". Call to confirm details before approving. google:${p.place_id}` }],
       };
       const r = await Admin.fetch('restaurants', { method: 'POST', body: JSON.stringify(row) });
-      if (r.ok) { ok++; existing.push({ name: p.name, latitude: row.latitude, longitude: row.longitude, notes: row.admin_notes }); }
+      if (r.ok) { ok++; existing.push({ name: p.name, latitude: row.latitude, longitude: row.longitude, notes: JSON.stringify(row.admin_notes) }); }
     }
     toast(`Added ${ok} to Pending review`);
     render();
+  }
+  // ── Update existing trucks from Google ──
+  const DAYS_G = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const hm = (t) => t ? t.slice(0, 2) + ':' + t.slice(2, 4) : null;
+  function hoursFromPeriods(periods) {
+    if (!periods || !periods.length) return null;
+    // Open 24/7: one period, open Sunday 0000, no close
+    if (periods.length === 1 && periods[0].open && !periods[0].close) return DAYS_G.map((d) => ({ day_of_week: d, open_time: '00:00', close_time: '23:59', is_closed: false }));
+    const byDay = {};
+    periods.forEach((p) => {
+      if (!p.open) return;
+      const d = p.open.day, o = hm(p.open.time), c = p.close ? hm(p.close.time) : '23:59';
+      const cur = byDay[d];
+      if (!cur) byDay[d] = { o, c };
+      else { if (o < cur.o) cur.o = o; cur.c = c; } // split shifts: first open to last close
+    });
+    return DAYS_G.map((d, i) => byDay[i] ? { day_of_week: d, open_time: byDay[i].o, close_time: byDay[i].c, is_closed: false } : { day_of_week: d, open_time: '', close_time: '', is_closed: true });
+  }
+  function similar(a, b) {
+    const A = norm(a), B = norm(b);
+    if (!A || !B) return false;
+    if (A === B || A.includes(B) || B.includes(A)) return true;
+    const words = (x) => String(x).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter((w) => w.length >= 4 && !/^(taco|tacos|truck|food|fresno|clovis|taqueria|mexican|grill|kitchen)$/.test(w));
+    const wb = new Set(words(b));
+    return words(a).some((w) => wb.has(w));
+  }
+
+  async function syncAll() {
+    const btn = document.getElementById('sync'), st = document.getElementById('sync-status'), body = document.getElementById('sync-body');
+    const doHours = document.getElementById('s-hours').checked, doLoc = document.getElementById('s-loc').checked, doPhone = document.getElementById('s-phone').checked;
+    if (!confirm('Update hours, locations and phone numbers for every active truck from Google? Owner-set hours are skipped.')) return;
+    btn.disabled = true; body.innerHTML = ''; document.getElementById('sync-tbl').style.display = '';
+    const trucks = (await Admin.api('restaurants?select=id,name,address,neighborhood,latitude,longitude,phone,google_place_id,hours_source&is_active=eq.true&order=name.asc')) || [];
+    let updated = 0, missed = 0;
+    for (let i = 0; i < trucks.length; i++) {
+      const t = trucks[i];
+      st.textContent = `Checking ${i + 1} of ${trucks.length}: ${t.name}`;
+      const out = (match, changes, cls) => body.insertAdjacentHTML('beforeend', `<tr class="${cls || ''}"><td><b>${esc(t.name)}</b><br><span class="status">${esc(t.address || t.neighborhood || '')}</span></td><td>${match}</td><td>${changes}</td></tr>`);
+      try {
+        let pid = t.google_place_id, found = null;
+        if (!pid) {
+          const f = await google({ find: [t.name, t.address || t.neighborhood || 'Fresno CA'].join(' ') });
+          const c = (f.candidates || [])[0];
+          if (c && similar(t.name, c.name)) { pid = c.place_id; found = c; }
+          else { missed++; out(c ? `No good match (Google suggested "${esc(c.name)}")` : 'Not on Google', 'Nothing changed', 'dim'); continue; }
+        }
+        const d = await google({ details: pid });
+        if (d.status !== 'OK' || !d.result) { missed++; out('Google lookup failed: ' + esc(d.status || ''), 'Nothing changed', 'dim'); continue; }
+        const g = d.result, patch = { google_place_id: pid }, changes = [];
+        const maps = `<a href="https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(pid)}" target="_blank" rel="noopener">${esc(g.name)}</a>`;
+        if (g.business_status === 'CLOSED_PERMANENTLY') changes.push('<span class="tag t-closed">Google says permanently closed</span>');
+        if (doLoc && g.geometry && g.geometry.location) {
+          const L = g.geometry.location;
+          const moved = !t.latitude || km(L.lat, L.lng, t.latitude, t.longitude) > 0.15;
+          if (moved) { patch.latitude = L.lat; patch.longitude = L.lng; patch.address = g.formatted_address || t.address; changes.push(`Moved pin to ${esc(g.formatted_address || '')}`); }
+        }
+        if (doPhone && !t.phone && g.formatted_phone_number) { patch.phone = g.formatted_phone_number; changes.push('Added phone ' + esc(g.formatted_phone_number)); }
+        let rows = null;
+        if (doHours) {
+          if (t.hours_source === 'owner') changes.push('Kept owner hours');
+          else {
+            rows = hoursFromPeriods(g.opening_hours && g.opening_hours.periods);
+            if (rows) { patch.hours_source = 'google'; patch.hours_synced_at = new Date().toISOString(); changes.push('Hours: ' + rows.filter((r) => !r.is_closed).map((r) => `${r.day_of_week.slice(0, 3)} ${r.open_time}–${r.close_time}`).join(', ')); }
+            else changes.push('No hours on Google');
+          }
+        }
+        const r1 = await Admin.fetch(`restaurants?id=eq.${t.id}`, { method: 'PATCH', body: JSON.stringify(patch) });
+        if (!r1.ok) throw new Error('save failed');
+        if (rows) {
+          await Admin.fetch(`hours?restaurant_id=eq.${t.id}`, { method: 'DELETE' });
+          const r2 = await Admin.fetch('hours', { method: 'POST', body: JSON.stringify(rows.map((r) => ({ ...r, restaurant_id: t.id }))) });
+          if (!r2.ok) throw new Error('hours save failed');
+        }
+        updated++;
+        out(maps + (found ? ' <span class="status">(matched by name)</span>' : ''), changes.join('<br>') || 'Already up to date');
+      } catch (e) { missed++; out('Error', esc(e.message), 'dim'); }
+    }
+    st.textContent = `Done. ${updated} trucks updated from Google, ${missed} not found or skipped (listed in gray).`;
+    btn.disabled = false;
   }
 </script>
 </body>

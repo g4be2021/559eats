@@ -618,6 +618,7 @@
       is_closed: document.getElementById('closed-' + day).checked
     }));
     await api('hours', 'POST', rows);
+    await api(`restaurants?id=eq.${restaurant.id}`, 'PATCH', { hours_source: 'owner', hours_synced_at: new Date().toISOString() });
     showToast('✅ Hours saved!');
   }
 
