@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Find trucks on Google · 559eats admin</title>
+<link rel="stylesheet" href="/brand.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:#faf7f4;color:#2d2420;line-height:1.45}
+#auth-gate{position:fixed;inset:0;background:#faf7f4;display:flex;align-items:center;justify-content:center;z-index:999}
+.gate{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 20px rgba(0,0,0,.08);width:320px;text-align:center}
+.gate input{width:100%;padding:11px;border:1.5px solid #e8e0da;border-radius:10px;margin:14px 0 8px;font:inherit}
+.btn{background:#E8512A;color:#fff;border:0;border-radius:999px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.light{background:#fff;color:#2d2420;border:1.5px solid #e8e0da}
+.err{color:#c0392b;font-size:.85rem;min-height:1.2em}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:#fff;border-bottom:1px solid #e8e0da}
+header a{color:#7a6e6a;text-decoration:none;font-size:.9rem}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:1.8rem;margin-bottom:6px}
+.sub{color:#7a6e6a;margin-bottom:18px;max-width:760px}
+.box{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:18px}
+textarea{width:100%;min-height:120px;border:1.5px solid #e8e0da;border-radius:10px;padding:10px;font:inherit;font-size:.9rem}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.status{color:#7a6e6a;font-size:.9rem}
+.filters label{font-size:.88rem;margin-right:14px;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+th,td{padding:10px 12px;text-align:left;font-size:.87rem;border-bottom:1px solid #f0e8e2;vertical-align:top}
+th{background:#f9f5f2;font-weight:700}
+td a{color:#c73e18}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;margin:2px 4px 0 0}
+.t-truck{background:#e6f6ec;color:#1f9d55}.t-have{background:#eef2ff;color:#1d4ed8}.t-closed{background:#fde8e8;color:#b91c1c}.t-shop{background:#f3eee9;color:#7a6e6a}
+tr.dim td{opacity:.5}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2d2420;color:#fff;padding:10px 18px;border-radius:999px;display:none;z-index:1000}
+</style>
+</head>
+<body>
+<div id="auth-gate"><div class="gate">
+  <h2 style="font-size:1.3rem">Admin sign in</h2>
+  <input id="auth-input" type="password" placeholder="Admin password" onkeydown="if(event.key==='Enter')checkAuth()">
+  <div class="err" id="auth-error"></div>
+  <button class="btn" onclick="checkAuth()">Sign in</button>
+</div></div>
+
+<header><strong>559eats admin</strong><a href="admin.html">← Admin panel</a></header>
+<div class="wrap">
+  <h1>Find trucks on Google</h1>
+  <p class="sub">Searches Google Maps with the phrases below, hides anything already on 559eats, and lets you add the rest to <b>Pending review</b> in the admin panel. Nothing goes on the public map until you approve it there. Google also returns sit-down taquerias, so check before adding.</p>
+
+  <div class="box">
+    <b>Searches</b> <span class="status">(one per line, up to 60 results each)</span>
+    <textarea id="queries">taco truck Fresno
+food truck Fresno
+taco truck Clovis
+food truck Clovis
+lonchera Fresno
+birria truck Fresno
+mariscos truck Fresno
+taco truck Sanger
+taco truck Selma
+food truck Madera
+taco truck Kerman</textarea>
+    <div class="row">
+      <button class="btn" id="go" onclick="run()">Search Google</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+
+  <div class="box filters" id="filters" style="display:none">
+    <label><input type="checkbox" id="f-have" onchange="render()"> Show ones already on 559eats</label>
+    <label><input type="checkbox" id="f-closed" onchange="render()"> Show permanently closed</label>
+    <label><input type="checkbox" id="f-truckonly" onchange="render()"> Only names that look like trucks</label>
+    <div class="row">
+      <button class="btn" id="add" onclick="addSelected()" disabled>Add selected to Pending review</button>
+      <button class="btn light" onclick="selectTrucks()">Select all that look like trucks</button>
+      <span class="status" id="count"></span>
+    </div>
+  </div>
+
+  <table id="tbl" style="display:none">
+    <thead><tr><th></th><th>Name</th><th>Address</th><th>Google</th><th>Notes</th></tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="/admin-auth.js"></script>
+<script>
+  async function checkAuth() {
+    const input = document.getElementById('auth-input');
+    try { await Admin.login(input.value); document.getElementById('auth-gate').style.display = 'none'; }
+    catch (e) { document.getElementById('auth-error').textContent = e.message; input.value = ''; }
+  }
+  Admin.check().then((ok) => { if (ok) document.getElementById('auth-gate').style.display = 'none'; });
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+  const TRUCKY = /truck|lonchera|troca|cart|carreta|trailer|mobile|street|stand|puesto/i;
+  const toast = (m) => { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2600); };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  let results = new Map(); // place_id -> place
+  let existing = [];       // [{id,name,lat,lng,notes}]
+
+  async function google(params) {
+    const r = await fetch('/api/geocode?' + new URLSearchParams(params), { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
+    if (r.status === 401) { Admin.logout(); location.reload(); }
+    return r.json();
+  }
+
+  function km(a, b, c, d) {
+    const R = 6371, x = (c - a) * Math.PI / 180, y = (d - b) * Math.PI / 180;
+    const h = Math.sin(x / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(y / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function match(p) {
+    const n = norm(p.name), loc = p.geometry && p.geometry.location;
+    return existing.find((e) => (e.notes || '').includes('google:' + p.place_id)
+      || (n && norm(e.name) === n)
+      || (n.length > 5 && norm(e.name).length > 5 && (norm(e.name).includes(n) || n.includes(norm(e.name))) && loc && e.latitude && km(loc.lat, loc.lng, e.latitude, e.longitude) < 3));
+  }
+
+  async function run() {
+    const go = document.getElementById('go'), st = document.getElementById('status');
+    go.disabled = true;
+    try {
+      existing = (await Admin.api('restaurants?select=id,name,latitude,longitude,admin_notes,status')) || [];
+      existing.forEach((e) => { e.notes = e.admin_notes; });
+      const qs = document.getElementById('queries').value.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 25);
+      for (let i = 0; i < qs.length; i++) {
+        let page = 1, tok = null;
+        do {
+          st.textContent = `Searching "${qs[i]}" (${i + 1} of ${qs.length}, page ${page})... ${results.size} found so far`;
+          if (tok) await sleep(2200); // Google needs a moment before the next page works
+          const j = await google(tok ? { pagetoken: tok } : { search: qs[i] });
+          if (j.status === 'INVALID_REQUEST' && tok) { await sleep(2000); continue; }
+          if (j.status && !['OK', 'ZERO_RESULTS'].includes(j.status)) { st.textContent = `Google said: ${j.status} ${j.error_message || ''}`; break; }
+          (j.results || []).forEach((p) => { if (!results.has(p.place_id)) results.set(p.place_id, { ...p, _q: qs[i] }); });
+          tok = j.next_page_token; page++;
+        } while (tok && page <= 3);
+      }
+      st.textContent = `Done. ${results.size} places from Google.`;
+      document.getElementById('filters').style.display = '';
+      document.getElementById('tbl').style.display = '';
+      render();
+    } catch (e) { st.textContent = 'Error: ' + e.message; }
+    go.disabled = false;
+  }
+
+  function render() {
+    const showHave = document.getElementById('f-have').checked, showClosed = document.getElementById('f-closed').checked, truckOnly = document.getElementById('f-truckonly').checked;
+    const rows = [];
+    let shown = 0, have = 0;
+    [...results.values()].sort((a, b) => (TRUCKY.test(b.name) - TRUCKY.test(a.name)) || a.name.localeCompare(b.name)).forEach((p) => {
+      const m = match(p), closed = p.business_status === 'CLOSED_PERMANENTLY', trucky = TRUCKY.test(p.name);
+      if (m) have++;
+      if ((m && !showHave) || (closed && !showClosed) || (truckOnly && !trucky)) return;
+      shown++;
+      const tags = [trucky ? '<span class="tag t-truck">Looks like a truck</span>' : '<span class="tag t-shop">Could be a restaurant</span>'];
+      if (m) tags.push(`<span class="tag t-have">On 559eats: ${esc(m.name)}</span>`);
+      if (closed) tags.push('<span class="tag t-closed">Permanently closed</span>');
+      if (p.business_status === 'CLOSED_TEMPORARILY') tags.push('<span class="tag t-closed">Temporarily closed</span>');
+      const maps = `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(p.place_id)}`;
+      rows.push(`<tr class="${m || closed ? 'dim' : ''}">
+        <td><input type="checkbox" class="pick" value="${esc(p.place_id)}" ${m ? 'disabled' : ''} onchange="countSel()"></td>
+        <td><b>${esc(p.name)}</b><br><span class="status">from "${esc(p._q)}"</span></td>
+        <td>${esc(p.formatted_address || '')}</td>
+        <td><a href="${maps}" target="_blank" rel="noopener">Open in Maps</a><br>${p.rating ? `${p.rating}★ (${p.user_ratings_total || 0})` : 'No reviews'}</td>
+        <td>${tags.join('')}</td></tr>`);
+    });
+    document.getElementById('body').innerHTML = rows.join('') || '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#7a6e6a">Nothing new to show.</td></tr>';
+    document.getElementById('count').textContent = `${shown} shown · ${have} already on 559eats`;
+    countSel();
+  }
+
+  function countSel() {
+    const n = document.querySelectorAll('.pick:checked').length;
+    const b = document.getElementById('add');
+    b.disabled = !n; b.textContent = n ? `Add ${n} to Pending review` : 'Add selected to Pending review';
+  }
+  function selectTrucks() {
+    document.querySelectorAll('.pick:not(:disabled)').forEach((c) => { const p = results.get(c.value); c.checked = TRUCKY.test(p.name); });
+    countSel();
+  }
+
+  function cuisineFor(name) {
+    if (/taco|taqu|birria|mariscos|lonchera|torta|elote|antojito|mexican|michoac|jalisco|sinaloa|oaxac/i.test(name)) return 'Mexican Street Food';
+    return null;
+  }
+  function town(addr) {
+    const m = String(addr || '').match(/,\s*([A-Za-z .]+),\s*CA/);
+    return m ? m[1].trim() : null;
+  }
+
+  async function addSelected() {
+    const picks = [...document.querySelectorAll('.pick:checked')].map((c) => results.get(c.value));
+    if (!picks.length) return;
+    if (!confirm(`Add ${picks.length} place(s) to Pending review? They stay hidden until you approve them.`)) return;
+    const b = document.getElementById('add'); b.disabled = true;
+    let ok = 0;
+    for (const p of picks) {
+      const loc = p.geometry && p.geometry.location;
+      const row = {
+        name: p.name, address: p.formatted_address || null,
+        latitude: loc ? loc.lat : null, longitude: loc ? loc.lng : null,
+        neighborhood: town(p.formatted_address), cuisine_type: cuisineFor(p.name),
+        is_food_truck: true, status: 'pending', is_active: false,
+        admin_notes: `google:${p.place_id} · found on Google Maps searching "${p._q}" on ${new Date().toLocaleDateString()}. Call to confirm before approving.`,
+      };
+      const r = await Admin.fetch('restaurants', { method: 'POST', body: JSON.stringify(row) });
+      if (r.ok) { ok++; existing.push({ name: p.name, latitude: row.latitude, longitude: row.longitude, notes: row.admin_notes }); }
+    }
+    toast(`Added ${ok} to Pending review`);
+    render();
+  }
+</script>
+</body>
+</html>
