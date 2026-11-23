@@ -30,7 +30,8 @@
     .nav-links a:hover, .nav-links a.active { color: var(--orange); }
     .nav-cta { background: var(--orange); color: #fff !important; padding: 8px 18px; border-radius: 999px; font-weight: 600 !important; }
 
-    .layout { display: flex; height: 100vh; height: 100dvh; padding-top: 64px; }
+    .layout { display: flex; height: 100vh; height: 100dvh; padding-top: 64px; position: relative; overflow: hidden; }
+    html { height: 100%; overflow: hidden; overscroll-behavior: none; }
     .sidebar { width: 380px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 2; }
     .side-head { padding: 18px 18px 10px; border-bottom: 1px solid var(--border); }
     .side-head h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; margin-bottom: 4px; }
@@ -127,6 +128,7 @@
     @media (max-width: 760px) {
       nav { padding: 0 14px; } .nav-links li:not(:last-child) { display: none; }
       .layout { flex-direction: column; }
+      body { position: fixed; inset: 0; }
       .sidebar { position: absolute; left: 0; right: 0; bottom: 0; top: 64px; width: 100%; border-right: none; transform: translateY(100%); transition: transform .25s; z-index: 600; }
       body.list-view .sidebar { transform: translateY(0); }
       .view-toggle { display: block; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 900; background: var(--dark); color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
@@ -378,6 +380,17 @@
       if (res === 'copied') toast('Link copied');
     };
     function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; setTimeout(() => (t.style.display = 'none'), 2200); }
+
+    // After the phone keyboard closes (chat box, search), put the map back where it belongs
+    function snapBack() {
+      const a = document.activeElement;
+      if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+      window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
+      setTimeout(() => map.invalidateSize(), 60);
+    }
+    if (window.visualViewport) visualViewport.addEventListener('resize', () => setTimeout(snapBack, 120));
+    document.addEventListener('focusout', () => setTimeout(snapBack, 250));
+    window.addEventListener('orientationchange', () => setTimeout(snapBack, 300));
 
     function render() {
       trucks.forEach(enrich);
