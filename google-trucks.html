@@ -102,9 +102,11 @@ taco truck Kerman</textarea>
 
   let results = new Map(); // place_id -> place
   let existing = [];       // [{id,name,lat,lng,notes}]
+  const problems = [];
 
   async function google(params) {
-    const r = await fetch('/api/geocode?' + new URLSearchParams(params), { headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } });
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20000);
+    const r = await fetch('/api/geocode?' + new URLSearchParams(params), { signal: ctl.signal, headers: { Authorization: 'Bearer ' + (sessionStorage.getItem('559eats-admin-token') || '') } }).finally(() => clearTimeout(t));
     if (r.status === 401) { Admin.logout(); location.reload(); }
     return r.json();
   }
@@ -127,20 +129,24 @@ taco truck Kerman</textarea>
     try {
       existing = (await Admin.api('restaurants?select=id,name,latitude,longitude,admin_notes,status')) || [];
       existing.forEach((e) => { e.notes = e.admin_notes; });
+      problems.length = 0;
       const qs = document.getElementById('queries').value.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 25);
       for (let i = 0; i < qs.length; i++) {
-        let page = 1, tok = null;
-        do {
+        let page = 1, tok = null, tries = 0;
+        while (page <= 3) {
           st.textContent = `Searching "${qs[i]}" (${i + 1} of ${qs.length}, page ${page})... ${results.size} found so far`;
-          if (tok) await sleep(2200); // Google needs a moment before the next page works
-          const j = await google(tok ? { pagetoken: tok } : { search: qs[i] });
-          if (j.status === 'INVALID_REQUEST' && tok) { await sleep(2000); continue; }
-          if (j.status && !['OK', 'ZERO_RESULTS'].includes(j.status)) { st.textContent = `Google said: ${j.status} ${j.error_message || ''}`; break; }
+          if (tok) await sleep(2500); // Google needs a moment before the next page works
+          let j;
+          try { j = await google(tok ? { pagetoken: tok } : { search: qs[i] }); }
+          catch (e) { problems.push(`${qs[i]}: ${e.message}`); break; }
+          if (j.status === 'INVALID_REQUEST' && tok && ++tries <= 2) continue; // next page not ready yet, try twice more
+          if (j.status && !['OK', 'ZERO_RESULTS'].includes(j.status)) { problems.push(`${qs[i]}: ${j.status} ${j.error_message || ''}`); break; }
           (j.results || []).forEach((p) => { if (!results.has(p.place_id)) results.set(p.place_id, { ...p, _q: qs[i] }); });
-          tok = j.next_page_token; page++;
-        } while (tok && page <= 3);
+          tok = j.next_page_token; page++; tries = 0;
+          if (!tok) break;
+        }
       }
-      st.textContent = `Done. ${results.size} places from Google.`;
+      st.textContent = `Done. ${results.size} places from Google.` + (problems.length ? ` Skipped: ${problems.join(' | ')}` : '');
       document.getElementById('filters').style.display = '';
       document.getElementById('tbl').style.display = '';
       render();
