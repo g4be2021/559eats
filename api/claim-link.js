@@ -2,6 +2,7 @@
 //   POST {a:'make', restaurant_id, email?}  (admin)  -> { url }
 //   GET  ?t=TOKEN                                     -> { name, claimed }
 //   POST {a:'use', t}  (signed-in owner session)      -> links the signed-in email to the truck
+//   POST {a:'text', restaurant_id, url, phone, consent:true, lang?} (admin) -> texts the claim link to an owner who asked for it
 // Tokens are HMAC-signed with a key derived from ADMIN_SECRET, so they can never pass as admin tokens.
 const crypto = require('crypto');
 const { isAdmin, bearer, SUPABASE_URL, SERVICE_KEY } = require('./_lib/admin-auth');
@@ -69,6 +70,36 @@ module.exports = async (req, res) => {
       if (!truck) return res.status(404).json({ error: 'Truck not found.' });
       const t = sign({ k: 'claim', r: truck.id, n: crypto.randomBytes(4).toString('hex'), exp: Date.now() + DAYS * 864e5 });
       return res.json({ url: `${SITE}/claim?t=${t}`, name: truck.name, days: DAYS });
+    }
+
+    // Admin texts a claim link to an owner who asked for it on a call
+    if (b.a === 'text') {
+      if (!isAdmin(req)) return res.status(401).json({ error: 'Admins only.' });
+      if (b.consent !== true) return res.status(400).json({ error: 'Only text owners who asked you to text them the link.' });
+      const id = String(b.restaurant_id || '');
+      if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({ error: 'Missing truck.' });
+      const url = String(b.url || '');
+      const t = url.startsWith(`${SITE}/claim?t=`) ? url.slice(`${SITE}/claim?t=`.length) : '';
+      const p = verify(t);
+      if (!p || p.r !== id) return res.status(400).json({ error: 'Make a fresh claim link for this truck first.' });
+      const digits = String(b.phone || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+      if (digits.length !== 10) return res.status(400).json({ error: 'Enter a 10-digit cell number.' });
+      // Never text anyone who replied STOP
+      const ten = (x) => String(x || '').replace(/\D/g, '').slice(-10);
+      const opted = [
+        ...((await db('prospects?status=eq.opted_out&select=phone&limit=5000')) || []),
+        ...((await db('owners?sms_opt_out=is.true&select=phone&limit=5000')) || []),
+      ];
+      if (opted.some((o) => ten(o.phone) === digits)) return res.status(409).json({ error: 'This number replied STOP. Do not text it.' });
+      const [truck] = (await db(`restaurants?id=eq.${id}&select=id,name`)) || [];
+      if (!truck) return res.status(404).json({ error: 'Truck not found.' });
+      const msg = b.lang === 'es'
+        ? `559eats: Hola, soy Gabe. Aqui esta el link para reclamar ${truck.name} en el mapa (gratis): ${url} Responda STOP para no recibir mas mensajes.`
+        : `559eats: Hi, it's Gabe. Here's the link to claim ${truck.name} on the map (free): ${url} Reply STOP to opt out.`;
+      const r = await sendSms(digits, msg);
+      await db('sms_log', 'POST', [{ restaurant_id: id, direction: 'outbound', message: msg, phone: digits, status: r.ok ? 'sent' : 'failed', kind: 'claim_link_requested', provider_id: r.id, error: r.ok ? null : r.error }]).catch(() => {});
+      if (!r.ok) return res.status(502).json({ error: `Text not sent: ${r.error}. Until Vonage approves the campaign, use Copy text or Email instead.` });
+      return res.json({ ok: true });
     }
 
     // Owner uses a link after signing in (Google or email link)

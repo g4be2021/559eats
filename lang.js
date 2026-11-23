@@ -318,7 +318,10 @@
 "No trucks listed here yet.": "Todavía no hay food trucks aquí.",
 "Open the live map": "Abrir el mapa en vivo",
 "See on map": "Ver en el mapa",
-"Log in and open Billing. Pick another plan to switch (the price difference is prorated), or tap \"Cancel at end of month\". You keep your plan until the month you paid for ends, then go back to the free listing automatically.": "Entre y abra Billing. Elija otro plan para cambiar (la diferencia de precio se prorratea), o toque \"Cancel at end of month\". Conserva su plan hasta que termine el mes que pagó y luego regresa al anuncio gratis automáticamente."
+"Log in and open Billing. Pick another plan to switch (the price difference is prorated), or tap \"Cancel at end of month\". You keep your plan until the month you paid for ends, then go back to the free listing automatically.": "Entre y abra Billing. Elija otro plan para cambiar (la diferencia de precio se prorratea), o toque \"Cancel at end of month\". Conserva su plan hasta que termine el mes que pagó y luego regresa al anuncio gratis automáticamente.",
+"🌙 Open late": "🌙 Abierto tarde",
+"No trucks open past 10 PM today.": "Ningún truck abierto después de las 10 PM hoy.",
+"Text it": "Text it"
 };
   var PATTERNS = [
     [/^Open now · until (.+)$/, 'Abierto ahora · hasta las $1'],

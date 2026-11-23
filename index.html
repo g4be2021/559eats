@@ -243,7 +243,7 @@
     function buildChips() {
       const cuisines = {};
       trucks.forEach((t) => { const c = (t.cuisine_type || '').trim(); if (c && c !== 'Other') cuisines[c] = (cuisines[c] || 0) + 1; });
-      const base = [['all', 'All'], ['open', '🟢 Open now', 'green'], ['live', '📍 Here today'], ['fav', '❤ Saved']];
+      const base = [['all', 'All'], ['open', '🟢 Open now', 'green'], ['late', '🌙 Open late'], ['live', '📍 Here today'], ['fav', '❤ Saved']];
       const cz = Object.entries(cuisines).sort((a, b) => b[1] - a[1]).map(([c]) => ['c:' + c, Truck.cuisineIcon(c) + ' ' + c]);
       document.getElementById('chips').innerHTML = [...base, ...cz].map(([k, l, cls]) =>
         `<button class="chip ${cls || ''} ${filters.chip === k ? 'on' : ''}" data-k="${esc(k)}">${esc(l)}</button>`).join('');
@@ -254,12 +254,23 @@
       buildChips(); render();
     });
 
+    // Open late: today's hours run to 10 PM or later (or past midnight)
+    const toMin = (x) => { const m = /^(\d{1,2}):(\d{2})/.exec(x || ''); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+    function isLate(t) {
+      const day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long' }).format(new Date());
+      const h = hours.find((r) => r.restaurant_id === t.id && r.day_of_week === day);
+      if (!h || h.is_closed) return false;
+      const o = toMin(h.open_time), c = toMin(h.close_time);
+      if (o == null || c == null) return false;
+      return c >= 22 * 60 || c < o;
+    }
     function visible() {
       const q = filters.q.toLowerCase(), favs = Truck.favs();
       let list = trucks.filter((t) => {
         if (q && ![t.name, t.cuisine_type, t.neighborhood, t.address, t.today_spot, t.special].some((v) => (v || '').toLowerCase().includes(q))) return false;
         const c = filters.chip;
         if (c === 'open') return t._status.state === 'open';
+        if (c === 'late') return isLate(t);
         if (c === 'live') return !!t._live;
         if (c === 'fav') return favs.has(t.id);
         if (c.startsWith('c:')) return (t.cuisine_type || '') === c.slice(2);
@@ -329,7 +340,7 @@
       document.getElementById('count').textContent = `${list.length} truck${list.length === 1 ? '' : 's'}${open ? ` · ${open} open now` : ''}${me ? ' · sorted by distance' : ''}`;
       const el = document.getElementById('list');
       if (!list.length) {
-        el.innerHTML = `<div class="empty">${filters.chip === 'fav' ? 'Tap ♡ on any truck to save it here.' : filters.chip === 'live' ? 'No trucks have posted today\'s spot yet.' : 'No trucks match that.'}</div>`;
+        el.innerHTML = `<div class="empty">${filters.chip === 'fav' ? 'Tap ♡ on any truck to save it here.' : filters.chip === 'live' ? 'No trucks have posted today\'s spot yet.' : filters.chip === 'late' ? 'No trucks open past 10 PM today.' : 'No trucks match that.'}</div>`;
         return;
       }
       el.innerHTML = list.map((t) => `
