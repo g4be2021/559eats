@@ -132,7 +132,21 @@
       .view-toggle { display: block; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 900; background: var(--dark); color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font: inherit; font-weight: 700; font-size: .9rem; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
       .legend { top: 10px; bottom: auto; left: 10px; max-width: calc(100% - 70px); padding: 6px 9px; font-size: .68rem; line-height: 1.7; }
     }
-  .leaflet-tile-pane{filter:saturate(.55) brightness(1.04) contrast(.95)}
+
+    /* local look */
+    .cluster { width: 46px; height: 46px; border-radius: 50%; background: #2d1a14; color: #fff3e8; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid #fff; box-shadow: 0 4px 14px rgba(45,26,20,.35); position: relative; }
+    .cluster b { font-family: 'Matcha Boom', 'Playfair Display', serif; font-weight: 400; font-size: 1.15rem; line-height: 1; }
+    .cluster.big { width: 54px; height: 54px; } .cluster.big b { font-size: 1.3rem; }
+    .cluster.has-open { border-color: var(--green); box-shadow: 0 0 0 4px rgba(31,157,85,.22), 0 4px 14px rgba(45,26,20,.35); }
+    .cluster i { position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; font-style: normal; font-size: .58rem; font-weight: 800; padding: 1px 6px; border-radius: 999px; white-space: nowrap; border: 1.5px solid #fff; }
+    .pin.open { box-shadow: 0 0 0 4px rgba(31,157,85,.2), 0 3px 10px rgba(0,0,0,.25); }
+    .pin-wrap:not(.t1):not(.t2):not(.t3) .pin.closed { opacity: .78; filter: saturate(.55); width: 34px; height: 34px; font-size: 1.05rem; margin: 3px; }
+    .hood { font-family: 'Matcha Boom', 'Playfair Display', serif; font-size: 12px; letter-spacing: 1px; color: rgba(74,34,24,.55); text-shadow: 0 0 3px #fbf6ef, 0 0 6px #fbf6ef; white-space: nowrap; transform: translate(-50%, -50%); pointer-events: none; text-transform: uppercase; }
+    .hood-pane-hidden .hood { display: none; }
+    .now-chip { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; background: #2d1a14; color: #fff3e8; border: none; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: .8rem; font-weight: 700; box-shadow: 0 4px 14px rgba(45,26,20,.3); cursor: pointer; white-space: nowrap; }
+    .now-chip em { font-style: normal; color: #7ee2a8; }
+    @media (max-width: 760px) { .now-chip { top: 60px; left: 10px; transform: none; font-size: .74rem; padding: 7px 12px; max-width: calc(100% - 70px); overflow: hidden; text-overflow: ellipsis; } }
+  .leaflet-tile-pane{filter:grayscale(.88) sepia(.28) saturate(1.15) brightness(1.05) contrast(.86)}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 <link rel="preload" href="/fonts/MatchaBoom.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/brand.css">
@@ -188,12 +202,24 @@
       showCoverageOnHover: false, maxClusterRadius: 45, spiderfyOnMaxZoom: true,
       iconCreateFunction: (c) => {
         const kids = c.getAllChildMarkers(); const open = kids.filter((m) => m._open).length;
-        return L.divIcon({ className: '', html: `<div class="cluster"><div>${kids.length}${open ? `<small>${open} open</small>` : ''}</div></div>`, iconSize: [44, 44] });
+        const big = kids.length >= 6;
+        return L.divIcon({ className: '', html: `<div class="cluster ${big ? 'big' : ''} ${open ? 'has-open' : ''}"><b>${kids.length}</b>${open ? `<i>${open} open</i>` : ''}</div>`, iconSize: big ? [54, 54] : [46, 46] });
       },
     });
     map.addLayer(cluster);
     // Premium sponsors never hide inside a cluster bubble
     const premiumLayer = L.layerGroup().addTo(map);
+    // Neighborhood names so the map feels like home
+    map.createPane('hoods'); map.getPane('hoods').style.zIndex = 450; map.getPane('hoods').style.pointerEvents = 'none';
+    const HOODS = [
+      ['Tower District', 36.7655, -119.7975], ['Downtown', 36.7360, -119.7890], ['Southeast Fresno', 36.7240, -119.7420],
+      ['Blackstone', 36.7930, -119.7905], ['Fig Garden', 36.8270, -119.8180], ['River Park', 36.8560, -119.7780],
+      ['Fresno State', 36.8125, -119.7465], ['Old Town Clovis', 36.8255, -119.7030], ['Sunnyside', 36.7390, -119.7020],
+      ['West Fresno', 36.7150, -119.8200], ['Calwa', 36.7110, -119.7570], ['Herndon', 36.8370, -119.8600],
+    ];
+    HOODS.forEach(([n, la, ln]) => L.marker([la, ln], { pane: 'hoods', interactive: false, keyboard: false, icon: L.divIcon({ className: '', html: `<div class="hood">${n}</div>`, iconSize: [0, 0] }) }).addTo(map));
+    const hoodZoom = () => document.getElementById('map').classList.toggle('hood-pane-hidden', map.getZoom() < 11 || map.getZoom() > 14);
+    map.on('zoomend', hoodZoom); hoodZoom();
     // Show truck names on every pin once zoomed in
     const labelZoom = () => document.getElementById('map').classList.toggle('show-labels', map.getZoom() >= 14);
     map.on('zoomend', labelZoom);
@@ -286,7 +312,7 @@
       cluster.clearLayers(); premiumLayer.clearLayers(); markers = {};
       list.forEach((t) => {
         if (!t._pos) return;
-        const m = L.marker(t._pos, { zIndexOffset: t._tier * 300, icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [52, 52] : t._tier === 2 ? [44, 44] : [40, 40], iconAnchor: t._tier === 3 ? [26, 26] : t._tier === 2 ? [22, 22] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
+        const m = L.marker(t._pos, { zIndexOffset: t._tier * 300 + (t._live ? 200 : t._status.state === 'open' ? 100 : 0), icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [52, 52] : t._tier === 2 ? [44, 44] : [40, 40], iconAnchor: t._tier === 3 ? [26, 26] : t._tier === 2 ? [22, 22] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
         m._open = t._status.state === 'open';
         m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
         m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
@@ -356,7 +382,22 @@
     function render() {
       trucks.forEach(enrich);
       const list = visible();
-      renderMarkers(list); renderList(list);
+      renderMarkers(list); renderList(list); nowChip();
+    }
+    function nowChip() {
+      let el = document.getElementById('nowChip');
+      if (!el) {
+        el = document.createElement('button'); el.id = 'nowChip'; el.className = 'now-chip'; el.type = 'button';
+        el.addEventListener('click', () => { filters.chip = filters.chip === 'open' ? 'all' : 'open'; buildChips(); render(); });
+        document.querySelector('.map-area').appendChild(el);
+      }
+      const n = trucks.filter((t) => t._live || t._status.state === 'open').length;
+      const h = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hour12: false }).format(new Date())) % 24;
+      const when = h < 5 || h >= 21 ? '🌙 Late night' : h < 11 ? '☀️ Morning' : h < 15 ? '🌮 Lunch time' : h < 17 ? '🌤 Afternoon' : '🌆 Dinner time';
+      el.innerHTML = n
+        ? `${when} in the 559 · <em>${n} truck${n === 1 ? '' : 's'} open now</em>`
+        : `${when} in the 559 · no trucks open right now`;
+      el.title = filters.chip === 'open' ? 'Show all trucks' : 'Show only open trucks';
     }
 
     let qTimer;

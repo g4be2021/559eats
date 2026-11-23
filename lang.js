@@ -324,6 +324,13 @@
     [/^Open now · until (.+)$/, 'Abierto ahora · hasta las $1'],
     [/^Here now · until (.+)$/, 'Aquí ahora · hasta las $1'],
     [/^Opens at (.+)$/, 'Abre a las $1'],
+    [/^(\d+) trucks? open now$/, '$1 abiertos ahora'],
+    [/^(.+) in the 559 · no trucks open right now$/, '$1 en el 559 · ningún truck abierto ahorita'],
+    [/^🌙 Late night in the 559 ·$/, '🌙 Noche en el 559 ·'],
+    [/^☀️ Morning in the 559 ·$/, '☀️ Mañana en el 559 ·'],
+    [/^🌮 Lunch time in the 559 ·$/, '🌮 Hora de comer en el 559 ·'],
+    [/^🌤 Afternoon in the 559 ·$/, '🌤 Tarde en el 559 ·'],
+    [/^🌆 Dinner time in the 559 ·$/, '🌆 Hora de cenar en el 559 ·'],
   ];
   // Every character Matcha Boom can draw.
   var MB = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¢£¤¥­±¶×÷‘’“”…€™−";
