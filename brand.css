@@ -14,3 +14,6 @@ h1 em,h2 em{font-style:normal!important}
   .page-hero h1 br,.hero h1 br{display:none}
   h2{font-size:min(1.6rem,7vw)}
 }
+
+/* iPhone zooms in when you tap a text box with text smaller than 16px; keep form text at 16px on phones */
+@media (max-width:760px){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}}
