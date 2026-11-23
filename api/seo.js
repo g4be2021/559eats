@@ -40,7 +40,18 @@ async function landingPage(req, res) {
       <div class="tl">${withHours.has(r.id) ? '<a href="/truck/' + r.id + '">Hours &amp; menu</a>' : '<span>Hours not posted yet</span>'}${r.phone ? ` · <a href="tel:${esc(r.phone)}">${esc(r.phone)}</a>` : ''} · <a href="/?truck=${r.id}">See on map</a></div>
     </li>`).join('');
   const others = Object.entries(LANDINGS).filter(([k]) => k !== key).map(([k, v]) => `<a href="/food-trucks/${k}">${esc(v.h1)}</a>`).join(' · ');
-  const ld = { '@context': 'https://schema.org', '@type': 'ItemList', name: L.h1, itemListElement: list.slice(0, 50).map((r, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/truck/${r.id}`, name: r.name })) };
+  const city = key.includes('clovis') ? 'Clovis' : 'Fresno';
+  const what = L.h1.replace(/ in .*/, '').toLowerCase();
+  const faq = [
+    [`Where can I find ${what} in ${city} today?`, `The live map at 559eats.com shows which of the ${list.length} ${what} listed here are open right now and where each one is parked today. Owners update their own hours and location, so check the truck's status before you head out.`],
+    [`How do I book a food truck for an event in ${city}?`, `Fill out the catering form at 559eats.com/catering with your date, guest count and budget. 559eats connects you with available local trucks within 24 hours, and you book directly with the truck you choose.`],
+    [`Is 559eats free?`, `Yes. Finding trucks is free for everyone, and food trucks can list themselves for free.`],
+  ];
+  const faqHtml = `<div class="faq"><h2>Common questions</h2>${faq.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join('')}</div>`;
+  const ld = [
+    { '@context': 'https://schema.org', '@type': 'ItemList', name: L.h1, itemListElement: list.slice(0, 50).map((r, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/truck/${r.id}`, name: r.name })) },
+    { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
+  ];
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(L.title)} · 559eats</title><meta name="description" content="${esc(L.intro)}"><link rel="canonical" href="${url}">
 <meta property="og:title" content="${esc(L.h1)} · 559eats"><meta property="og:description" content="${esc(L.intro)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${SITE}/og-default.png"><meta name="twitter:card" content="summary_large_image">
@@ -51,7 +62,7 @@ async function landingPage(req, res) {
 .hero{background:linear-gradient(160deg,#2d1a14,#4a2218 60%,#E8512A);color:#fff;padding:48px 24px;text-align:center}.hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4vw,2.8rem)}.hero p{opacity:.85;max-width:620px;margin:10px auto 0}
 .wrap{max-width:820px;margin:0 auto;padding:28px 20px 60px}.count{color:#7a6e6a;font-size:.9rem;margin-bottom:12px}.cta{display:inline-block;background:#E8512A;color:#fff;font-weight:700;padding:11px 22px;border-radius:999px;text-decoration:none;margin:4px 0 20px}
 ul{list-style:none}.t{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,.05)}.tn{font-weight:700;font-size:1.05rem;color:#2d2420;text-decoration:none}.b{color:#f5b301}.tm{color:#7a6e6a;font-size:.85rem}.ta{font-size:.88rem;margin-top:4px}.tl{font-size:.85rem;margin-top:6px;color:#7a6e6a}.tl a{color:#c73e18;font-weight:600;text-decoration:none}
-.own{background:#f9ede8;border-radius:14px;padding:18px;margin-top:24px;font-size:.92rem}.own a{color:#c73e18;font-weight:700}.more{margin-top:28px;font-size:.88rem;color:#7a6e6a}.more a{color:#c73e18;text-decoration:none}
+.own{background:#f9ede8;border-radius:14px;padding:18px;margin-top:24px;font-size:.92rem}.own a{color:#c73e18;font-weight:700}.faq{margin-top:32px}.faq h2{font-size:1.3rem;margin-bottom:10px}.faq h3{font-size:1rem;margin:16px 0 4px}.faq p{color:#5a4f4a;font-size:.93rem}.more{margin-top:28px;font-size:.88rem;color:#7a6e6a}.more a{color:#c73e18;text-decoration:none}
 footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:28px;font-size:.85rem}footer a{color:rgba(255,255,255,.8);margin:0 8px;text-decoration:none}</style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script><link rel="stylesheet" href="/brand.css"><script src="/mobile-nav.js" defer></script><script src="/lang.js" defer></script></head><body>
 <nav><a class="logo" href="/">559eats</a><div><a href="/">Map</a><a href="/browse.html">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a></div></nav>
@@ -59,6 +70,7 @@ footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:2
 <div class="wrap"><a class="cta" href="/">Open the live map</a>
 <div class="count">${list.length} truck${list.length === 1 ? '' : 's'} listed</div><ul>${items || '<li class="t">No trucks listed here yet.</li>'}</ul>
 <div class="own">Own a food truck${key.includes('clovis') ? ' in Clovis' : ' in Fresno'}? <a href="/apply.html">List it free</a> and post your hours, menu and today's spot.</div>
+${faqHtml}
 <div class="more">More: ${others}</div></div>
 <footer><a href="/apply.html">List your truck</a><a href="/catering.html">Book a truck</a><a href="/contact.html">Contact</a><a href="/terms.html">Terms &amp; Privacy</a></footer>
 <script src="/chat-widget.js" defer></script></body></html>`;
@@ -68,7 +80,7 @@ footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:2
 
 async function sitemap(req, res) {
   const trucks = await get('restaurants?select=id,updated_at,created_at&is_active=eq.true&status=eq.approved&limit=5000');
-  const pages = ['/', '/browse.html', '/events.html', '/catering.html', '/apply.html', '/pricing.html', '/about.html', '/contact.html', ...Object.keys(LANDINGS).map((k) => `/food-trucks/${k}`)];
+  const pages = ['/', '/browse', '/events', '/catering', '/apply', '/pricing', '/about', '/contact', ...Object.keys(LANDINGS).map((k) => `/food-trucks/${k}`)];
   const urls = [
     ...pages.map((p) => `<url><loc>${SITE}${p}</loc><changefreq>daily</changefreq><priority>${p === '/' ? '1.0' : '0.6'}</priority></url>`),
     ...trucks.map((t) => {
