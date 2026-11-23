@@ -487,6 +487,15 @@
             <button class="action-btn" type="button" onclick="copyClaim('text')">Copy text/DM message</button>
             <button class="action-btn approve" type="button" onclick="emailClaim()">Email it from Gmail</button>
           </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border, #eee)">
+            <div style="font-weight:600;font-size:12px;margin-bottom:6px">Text it from 559eats (757) 970-3964</div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+              <input class="form-input" id="claim-phone" placeholder="Owner cell, e.g. 559 555 0100">
+              <select class="form-input" id="claim-lang" style="width:auto"><option value="en">English</option><option value="es">Español</option></select>
+              <button class="action-btn approve" type="button" onclick="textClaim(this)">Text it</button>
+            </div>
+            <label style="display:flex;gap:6px;align-items:flex-start;font-size:11px;margin-top:6px;color:var(--ink-muted)"><input type="checkbox" id="claim-consent" style="margin-top:2px"> The owner asked me to text them this link (on a call or in person). Only text people who asked.</label>
+          </div>
         </div>
         <p style="font-size:11px;color:var(--ink-muted);margin-top:6px">Works for 30 days. The owner taps it, then Continue with Google (or gets an email link), and the truck is theirs. You get a text when it's claimed.</p>
       </div>
@@ -981,6 +990,8 @@
       claimInfo = d;
       document.getElementById('claim-url').value = d.url;
       document.getElementById('claim-out').style.display = 'block';
+      const ph = document.getElementById('edit-phone'); const cp = document.getElementById('claim-phone');
+      if (ph && cp && !cp.value) cp.value = ph.value || '';
     } catch(e) { showToast(e.message); }
   }
   function claimMessage() {
@@ -990,6 +1001,20 @@
     if (!claimInfo) return;
     try { await navigator.clipboard.writeText(kind === 'url' ? claimInfo.url : claimMessage()); showToast('Copied'); }
     catch(e) { document.getElementById('claim-url').select(); showToast('Press Ctrl+C to copy'); }
+  }
+  async function textClaim(btn) {
+    if (!claimInfo) return showToast('Make the link first');
+    const phone = document.getElementById('claim-phone').value.trim();
+    if (!document.getElementById('claim-consent').checked) return showToast('Check the box: only text owners who asked for the link');
+    btn.disabled = true; const old = btn.textContent; btn.textContent = 'Sending...';
+    try {
+      const r = await fetch('/api/claim-link', { method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer '+(sessionStorage.getItem('559eats-admin-token')||'')}, body: JSON.stringify({ a:'text', restaurant_id: document.getElementById('edit-id').value, url: claimInfo.url, phone, consent: true, lang: document.getElementById('claim-lang').value }) });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok) throw new Error(d.error || 'Text not sent');
+      showToast('✅ Text sent');
+      document.getElementById('claim-consent').checked = false;
+    } catch(e) { showToast(e.message); }
+    btn.disabled = false; btn.textContent = old;
   }
   function emailClaim() {
     if (!claimInfo) return;
