@@ -1,0 +1,27 @@
+# 559eats
+
+> 559eats is a free, live map of food trucks in Fresno, Clovis and the Central Valley of California (area code 559). It shows which trucks are open right now, where each truck is parked today, their hours, menus and photos, and lets people request a food truck for catering and events.
+
+Owners update their own hours and today's location, so the map is the most current place to check where a Fresno or Clovis food truck is today. Most listed trucks serve Mexican street food (tacos, birria, mariscos), plus American, Mediterranean and fusion trucks.
+
+## Find food trucks
+- [Live food truck map](https://www.559eats.com/): who's open now and where they're parked, with directions
+- [Browse all food trucks](https://www.559eats.com/browse): every truck with open/closed status, photos and hours
+- [Food trucks in Fresno](https://www.559eats.com/food-trucks/fresno)
+- [Food trucks in Clovis](https://www.559eats.com/food-trucks/clovis)
+- [Taco trucks in Fresno](https://www.559eats.com/food-trucks/taco-trucks-fresno)
+- [Birria in Fresno](https://www.559eats.com/food-trucks/birria-fresno)
+- [Mariscos trucks in Fresno](https://www.559eats.com/food-trucks/mariscos-fresno)
+- [Food truck events](https://www.559eats.com/events): truck nights and pop-ups around Fresno and Clovis
+
+## Book a food truck
+- [Food truck catering](https://www.559eats.com/catering): request quotes from local trucks for weddings, parties, schools and work events; 559eats replies within 24 hours
+
+## For food truck owners
+- [List your truck free](https://www.559eats.com/apply)
+- [Pricing](https://www.559eats.com/pricing): listing is free; optional map glow from $1/month; 15% fee only on catering jobs 559eats books and the truck accepts
+
+## About
+- [About 559eats](https://www.559eats.com/about): Fresno-born, covers only the Central Valley
+- [Contact](https://www.559eats.com/contact): gabe@559eats.com
+- Every truck has its own page at https://www.559eats.com/truck/{id}; the full list is in the [sitemap](https://www.559eats.com/sitemap.xml)

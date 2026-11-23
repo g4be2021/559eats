@@ -9,6 +9,29 @@ Disallow: /google-trucks.html
 Disallow: /photo-route.html
 Disallow: /dashboard.html
 Disallow: /login.html
-Disallow: /fliplog/
-Sitemap: https://www.559eats.com/sitemap.xml
+Disallow: /claim.html
 Disallow: /flyer.html
+Disallow: /fliplog/
+Disallow: /api/
+
+# AI search and assistant crawlers are welcome to read the public pages
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /analytics.html
+Disallow: /dashboard.html
+Disallow: /login.html
+Disallow: /claim.html
+Disallow: /api/
+
+Sitemap: https://www.559eats.com/sitemap.xml
