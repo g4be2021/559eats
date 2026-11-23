@@ -150,6 +150,7 @@
   <h1 class="page-title">Your truck <span class="status-badge status-approved" id="status-badge">Approved</span></h1>
   <p class="page-sub">Tell customers where you are today, update your menu and photos, and manage catering requests. <a id="view-page-link" href="#" target="_blank" style="color:var(--coral);font-weight:600">View your public page →</a></p>
 
+  <div id="views-card" style="display:none;background:#fff;border:1px solid var(--card-border);border-radius:12px;padding:14px 16px;margin:0 0 16px;font-size:.95rem"></div>
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('today', this)">📍 Today</button>
     <button class="tab-btn" onclick="switchTab('listing', this)">📋 My listing</button>
@@ -441,6 +442,20 @@
   }
 
   // ── Init ──
+  // How many people looked at this truck on 559eats in the last 7 days
+  async function loadViews() {
+    try {
+      const since = new Date(Date.now() - 6 * 864e5).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+      const rows = await api(`truck_views?restaurant_id=eq.${restaurant.id}&day=gte.${since}&select=page_views,map_views`);
+      let p = 0, m = 0; (rows || []).forEach(r => { p += r.page_views; m += r.map_views; });
+      const el = document.getElementById('views-card');
+      el.innerHTML = (p + m)
+        ? `👀 <strong>${p + m} ${p + m === 1 ? 'person' : 'people'}</strong> looked at your truck on 559eats in the last 7 days <span style="color:var(--ink-muted,#7a6e6a);font-size:.85rem">(${m} tapped your pin on the map, ${p} opened your page)</span>. Keep your hours and today's spot up to date so they find you open.`
+        : `👀 Your truck is on the map. Post your hours and today's spot so people who look you up can find you open.`;
+      el.style.display = 'block';
+    } catch (e) {}
+  }
+
   async function init() {
     initStripe();
     session = await getSession();
@@ -478,6 +493,7 @@
     loadPhotos();
     renderToday();
 
+    loadViews();
     const badge = document.getElementById('status-badge');
     badge.textContent = restaurant.status;
     badge.className = 'status-badge ' + (restaurant.status === 'approved' ? 'status-approved' : 'status-pending');

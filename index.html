@@ -328,7 +328,7 @@
         const m = L.marker(t._pos, { zIndexOffset: t._tier * 300 + (t._live ? 200 : t._status.state === 'open' ? 100 : 0), icon: L.divIcon({ className: '', html: pinHtml(t), iconSize: t._tier === 3 ? [52, 52] : t._tier === 2 ? [44, 44] : [40, 40], iconAnchor: t._tier === 3 ? [26, 26] : t._tier === 2 ? [22, 22] : [20, 20], popupAnchor: [0, -18] }), riseOnHover: true, title: t.name });
         m._open = t._status.state === 'open';
         m.bindPopup(() => popupHtml(t), { maxWidth: 300, autoPanPaddingTopLeft: [20, 80] });
-        m.on('popupopen', () => { select(t.id, false); loadPhoto(t); history.replaceState(null, '', '?truck=' + t.id); });
+        m.on('popupopen', () => { select(t.id, false); loadPhoto(t); Truck.trackView(t.id, 'map'); history.replaceState(null, '', '?truck=' + t.id); });
         m.on('popupclose', () => { if (selected === t.id) select(null, false); history.replaceState(null, '', location.pathname); });
         (t._tier === 3 ? premiumLayer : cluster).addLayer(m); markers[t.id] = m;
       });

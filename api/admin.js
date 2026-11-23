@@ -14,6 +14,7 @@ const TOKEN_HOURS = 12;
 const TABLES = new Set([
   'restaurants', 'hours', 'photos', 'owners', 'claim_requests', 'catering_bookings',
   'bookings', 'sms_log', 'prospects', 'reviews', 'contact_messages', 'events',
+  'truck_views',
 ]);
 
 // Best-effort brute-force guard (per warm instance)

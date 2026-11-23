@@ -125,5 +125,22 @@
   const TIERS = ['', 'Spotlight', 'Featured', 'Premium'];
   const tier = (r) => (r && r.is_featured && (!r.sponsored_until || future(r.sponsored_until))) ? (Number(r.sponsor_tier) || 2) : 0;
   const featured = (r) => tier(r) > 0;
-  window.Truck = { tier, TIERS, featured, DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future };
+  // Count a visit to a truck (page or map popup), once per truck per browser per day.
+  // Skips your own visits on any browser where you've opened the admin page, and automated browsers.
+  function trackView(id, src) {
+    try {
+      if (!id || navigator.webdriver || localStorage.getItem('559eats_staff') === '1') return;
+      const day = new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+      const k = '559eats_v_' + (src || 'page') + '_' + id;
+      if (localStorage.getItem(k) === day) return;
+      localStorage.setItem(k, day);
+      const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndscHVndGVveWNvdXZ2bmhhbW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4MzY3MjksImV4cCI6MjA5MTQxMjcyOX0.RndK-tL1KG7Yg23JxtMqRlv5rECd6ppJubwNwoM2d5g';
+      fetch('https://wlpugteoycouvvnhamnm.supabase.co/rest/v1/rpc/bump_truck_view', {
+        method: 'POST', keepalive: true,
+        headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rid: id, src: src === 'map' ? 'map' : 'page' }),
+      }).catch(() => {});
+    } catch (e) {}
+  }
+  window.Truck = { tier, TIERS, featured, DAYS, esc, nowLocal, fmtTime, liveSpot, position, status, cuisineIcon, directionsLinks, distanceMiles, favs, toggleFav, share, safeUrl, instagramUrl, future, trackView };
 })();
