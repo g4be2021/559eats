@@ -26,7 +26,7 @@
   .ec-sug button{font:inherit;font-size:.76rem;font-weight:600;border:1.5px solid #e8e0da;background:#fff;border-radius:999px;padding:6px 10px;cursor:pointer;color:#2d2420}
   .ec-sug button:hover{border-color:#E8512A;color:#E8512A}
   .ec-form{display:flex;gap:8px;padding:10px;border-top:1px solid #eee4dc;background:#fff}
-  .ec-form input{flex:1;border:1.5px solid #e8e0da;border-radius:999px;padding:10px 14px;font:inherit;font-size:.9rem;outline:none}
+  .ec-form input{flex:1;border:1.5px solid #e8e0da;border-radius:999px;padding:10px 14px;font:inherit;font-size:16px;outline:none}
   .ec-form input:focus{border-color:#E8512A}
   .ec-form button{border:none;background:#E8512A;color:#fff;border-radius:999px;padding:0 16px;font-weight:700;cursor:pointer}
   .ec-form button:disabled{opacity:.5}
