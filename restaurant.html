@@ -103,7 +103,7 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
     get(`hours?restaurant_id=eq.${id}&select=restaurant_id,day_of_week,open_time,close_time,is_closed`),
     get(`photos?restaurant_id=eq.${id}&select=url,is_primary,sort_order&order=is_primary.desc,sort_order.asc&limit=24`),
   ]);
-  const d=rows[0]; if(!d) return notFound();
+  const d=rows[0]; if(!d) return notFound(); Truck.trackView(d.id,'page');
   const st=Truck.status(d,hours), live=Truck.liveSpot(d), pos=Truck.position(d), icon=Truck.cuisineIcon(d.cuisine_type);
 
   document.title=`${d.name} · ${d.cuisine_type||'Food truck'} in ${d.neighborhood||'Fresno'} · 559eats`;
