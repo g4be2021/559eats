@@ -138,7 +138,7 @@ taco truck Kerman</textarea>
     go.disabled = true;
     try {
       existing = (await Admin.api('restaurants?select=id,name,latitude,longitude,admin_notes,status')) || [];
-      existing.forEach((e) => { e.notes = e.admin_notes; });
+      existing.forEach((e) => { e.notes = JSON.stringify(e.admin_notes || ''); });
       problems.length = 0;
       const qs = document.getElementById('queries').value.split('\n').map((s) => s.trim()).filter(Boolean).slice(0, 25);
       for (let i = 0; i < qs.length; i++) {
@@ -214,7 +214,7 @@ taco truck Kerman</textarea>
     if (!picks.length) return;
     if (!confirm(`Add ${picks.length} place(s) to Pending review? They stay hidden until you approve them.`)) return;
     const b = document.getElementById('add'); b.disabled = true;
-    let ok = 0;
+    let ok = 0; const me = Admin.info() || {};
     for (const p of picks) {
       const loc = p.geometry && p.geometry.location;
       const row = {
@@ -222,10 +222,11 @@ taco truck Kerman</textarea>
         latitude: loc ? loc.lat : null, longitude: loc ? loc.lng : null,
         neighborhood: town(p.formatted_address), cuisine_type: cuisineFor(p.name),
         is_food_truck: true, status: 'pending', is_active: false,
-        admin_notes: `google:${p.place_id} · found on Google Maps searching "${p._q}" on ${new Date().toLocaleDateString()}. Call to confirm before approving.`,
+        admin_notes: [{ initials: (me.initials || 'G4'), name: me.name || 'Google finder', color: me.color || '#D85A30', timestamp: new Date().toISOString(),
+          text: `Found on Google Maps searching "${p._q}". Call to confirm details before approving. google:${p.place_id}` }],
       };
       const r = await Admin.fetch('restaurants', { method: 'POST', body: JSON.stringify(row) });
-      if (r.ok) { ok++; existing.push({ name: p.name, latitude: row.latitude, longitude: row.longitude, notes: row.admin_notes }); }
+      if (r.ok) { ok++; existing.push({ name: p.name, latitude: row.latitude, longitude: row.longitude, notes: JSON.stringify(row.admin_notes) }); }
     }
     toast(`Added ${ok} to Pending review`);
     render();
