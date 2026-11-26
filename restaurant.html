@@ -50,6 +50,12 @@
   .nb:hover{background:var(--cream)}
   .nb-ico{width:40px;height:40px;border-radius:50%;background:var(--orange-light);display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
   .nb-name{font-weight:700;font-size:.86rem}.nb-meta{font-size:.76rem;color:var(--muted)}
+  .rpt{margin-top:12px;border-top:1px solid #f2ece8;padding-top:10px}
+  .rpt-link{background:none;border:none;color:var(--orange-dark);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;padding:0}
+  .rpt-form{display:grid;gap:8px;margin-top:8px}
+  .rpt-form textarea,.rpt-form input[type=email]{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;font:inherit;font-size:.88rem;resize:vertical}
+  .rpt-form .act{justify-content:center}
+  .rpt-done{font-size:.85rem;color:#1f9d55;font-weight:600;margin-top:8px}
   .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:3000;cursor:zoom-out}
   .lightbox img{max-width:92vw;max-height:88vh;border-radius:10px}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;display:none;z-index:3000}
@@ -75,7 +81,13 @@
     <div class="sec" id="photoSec" style="display:none"><h2>Photos</h2><div class="gallery" id="gallery"></div></div>
   </main>
   <aside>
-    <div class="sec"><h2>Hours</h2><div id="hours"><span class="muted">Loading&hellip;</span></div></div>
+    <div class="sec"><h2>Hours</h2><div id="hours"><span class="muted">Loading&hellip;</span></div><div class="rpt"><button type="button" class="rpt-link" id="rptOpen">Hours or location wrong? Tell us</button>
+      <form id="rptForm" class="rpt-form" hidden>
+        <textarea id="rptMsg" maxlength="1000" rows="3" placeholder="What's wrong? Example: closed on Mondays now, or parks at Shaw &amp; Blackstone." required></textarea>
+        <input type="email" id="rptEmail" maxlength="200" placeholder="Your email (optional, if you want a reply)">
+        <input type="text" id="rptHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
+        <button type="submit" class="act primary" id="rptSend">Send</button>
+      </form><div class="rpt-done" id="rptDone" hidden>Thanks! We'll check it and fix the listing.</div></div></div>
     <div class="sec" id="infoSec"></div>
     <div class="claim" id="claim">Is this your truck? <a href="/login.html">Owner sign in</a> or <a href="/contact.html">claim this listing</a> to update your hours, location and menu.</div>
     <div class="sec" style="margin-top:18px" id="nearbySec"><h2>More trucks</h2><div class="nearby" id="nearby"></div></div>
@@ -161,6 +173,19 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.sty
   const today=Truck.nowLocal().day;
   const order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   document.getElementById('hours').innerHTML=hours.length?order.map(day=>{const h=hours.find(x=>x.day_of_week===day);const txt=!h?'—':h.is_closed?'Closed':`${Truck.fmtTime(h.open_time)} – ${Truck.fmtTime(h.close_time)}`;return `<div class="hours-row ${day===today?'today':''}"><span>${day}</span><span>${esc(txt)}</span></div>`;}).join('')+(d.hours_source==='google'?'<div class="muted" style="font-size:.8rem;margin-top:8px">Hours from Google. Not yet confirmed by the truck, so check before you go.</div>':''):'<span class="muted">This truck hasn\'t posted hours yet. Call or check their social media before heading out.</span>';
+
+  // "Hours wrong?" report -> admin Inbox (contact_messages)
+  document.getElementById('rptOpen').onclick=()=>{document.getElementById('rptForm').hidden=false;document.getElementById('rptOpen').hidden=true;document.getElementById('rptMsg').focus();};
+  document.getElementById('rptForm').onsubmit=async(e)=>{e.preventDefault();
+    const btn=document.getElementById('rptSend'),msg=document.getElementById('rptMsg').value.trim();if(!msg)return;
+    btn.disabled=true;btn.textContent='Sending...';
+    try{const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      topic:'Wrong hours report',email:document.getElementById('rptEmail').value.trim(),website_url:document.getElementById('rptHp').value,
+      message:`Truck: ${d.name}\nPage: ${location.origin}/truck/${d.id}\nHours source: ${d.hours_source||'unknown'}\n\n${msg}`})});
+      if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||'Could not send');
+      document.getElementById('rptForm').hidden=true;document.getElementById('rptDone').hidden=false;
+    }catch(err){btn.disabled=false;btn.textContent='Send';toast(err.message||'Could not send. Try again.');}
+  };
 
   const ig=Truck.instagramUrl(d.instagram), fb=Truck.safeUrl(d.facebook), web=Truck.safeUrl(d.website);
   const info=[
