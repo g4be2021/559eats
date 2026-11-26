@@ -4,6 +4,12 @@
 // (no accents, ñ, ¿ or ¡). If not, the whole heading stays in English so it never renders broken.
 (function () {
   var ES = {
+"Hours or location wrong? Tell us": "¿Horario o ubicación incorrectos? Avísenos",
+"Thanks! We'll check it and fix the listing.": "¡Gracias! Lo revisaremos y corregiremos el anuncio.",
+"What's wrong? Example: closed on Mondays now, or parks at Shaw & Blackstone.": "¿Qué está mal? Ejemplo: ahora cierra los lunes, o se estaciona en Shaw y Blackstone.",
+"Your email (optional, if you want a reply)": "Su correo (opcional, si quiere respuesta)",
+"Sending...": "Enviando...",
+"Send": "Enviar",
 "Browse": "Explorar",
 "Map": "Mapa",
 "Events": "Eventos",
