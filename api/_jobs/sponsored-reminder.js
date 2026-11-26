@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
       if (o.sms_opt_out || !o.phone) continue;
       const body =
         `Hey, it's 559eats. Your sponsored spot for ${r.name} ends ${ends}. ` +
-        `Renew here to keep the top placement: ${SITE}/pricing.html Reply STOP to opt out.`;
+        `Renew here to keep the top placement: ${SITE}/pricing Reply STOP to opt out.`;
       const out = await sendSms({ to: o.phone, body, kind: 'sponsored_reminder', restaurantId: r.id, ownerId: o.id });
       if (out.ok) { any = true; sent++; }
     }

@@ -3,14 +3,14 @@
 (function () {
   var LINKS = [
     ['/', 'Map'],
-    ['/browse.html', 'Browse trucks'],
-    ['/events.html', 'Events'],
-    ['/catering.html', 'Catering'],
-    ['/apply.html', 'List your truck (free)'],
+    ['/browse', 'Browse trucks'],
+    ['/events', 'Events'],
+    ['/catering', 'Catering'],
+    ['/apply', 'List your truck (free)'],
     ['/login.html', 'Owner login'],
-    ['/pricing.html', 'Pricing'],
-    ['/about.html', 'About'],
-    ['/contact.html', 'Contact'],
+    ['/pricing', 'Pricing'],
+    ['/about', 'About'],
+    ['/contact', 'Contact'],
   ];
 
   function init() {

@@ -65,14 +65,14 @@ ul{list-style:none}.t{background:#fff;border-radius:14px;padding:16px 18px;margi
 .own{background:#f9ede8;border-radius:14px;padding:18px;margin-top:24px;font-size:.92rem}.own a{color:#c73e18;font-weight:700}.faq{margin-top:32px}.faq h2{font-size:1.3rem;margin-bottom:10px}.faq h3{font-size:1rem;margin:16px 0 4px}.faq p{color:#5a4f4a;font-size:.93rem}.more{margin-top:28px;font-size:.88rem;color:#7a6e6a}.more a{color:#c73e18;text-decoration:none}
 footer{background:#1a1310;color:rgba(255,255,255,.6);text-align:center;padding:28px;font-size:.85rem}footer a{color:rgba(255,255,255,.8);margin:0 8px;text-decoration:none}</style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script><link rel="stylesheet" href="/brand.css"><script src="/mobile-nav.js" defer></script><script src="/lang.js" defer></script></head><body>
-<nav><a class="logo" href="/">559eats</a><div><a href="/">Map</a><a href="/browse.html">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a></div></nav>
+<nav><a class="logo" href="/">559eats</a><div><a href="/">Map</a><a href="/browse">Browse</a><a href="/events">Events</a><a href="/catering">Catering</a></div></nav>
 <div class="hero"><h1>${esc(L.h1)}</h1><p>${esc(L.intro)}</p></div>
 <div class="wrap"><a class="cta" href="/">Open the live map</a>
 <div class="count">${list.length} truck${list.length === 1 ? '' : 's'} listed</div><ul>${items || '<li class="t">No trucks listed here yet.</li>'}</ul>
-<div class="own">Own a food truck${key.includes('clovis') ? ' in Clovis' : ' in Fresno'}? <a href="/apply.html">List it free</a> and post your hours, menu and today's spot.</div>
+<div class="own">Own a food truck${key.includes('clovis') ? ' in Clovis' : ' in Fresno'}? <a href="/apply">List it free</a> and post your hours, menu and today's spot.</div>
 ${faqHtml}
 <div class="more">More: ${others}</div></div>
-<footer><a href="/apply.html">List your truck</a><a href="/catering.html">Book a truck</a><a href="/contact.html">Contact</a><a href="/terms.html">Terms &amp; Privacy</a></footer>
+<footer><a href="/apply">List your truck</a><a href="/catering">Book a truck</a><a href="/contact">Contact</a><a href="/terms">Terms &amp; Privacy</a></footer>
 <script src="/chat-widget.js" defer></script></body></html>`;
   res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');
   return res.status(200).send(html);

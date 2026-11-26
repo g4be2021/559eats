@@ -38,7 +38,7 @@
 <link rel="preload" href="/fonts/MatchaBoom.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/brand.css">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Service", "serviceType": "Food truck catering", "name": "Book a food truck for your event", "provider": {"@type": "Organization", "name": "559eats", "url": "https://www.559eats.com/"}, "areaServed": ["Fresno, CA", "Clovis, CA", "Central Valley, CA"], "url": "https://www.559eats.com/catering", "description": "Tell us your event date, guest count and budget, and we connect you with local Fresno and Clovis food trucks for weddings, parties, schools and work events."}</script>
 </head>
-<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/">Map</a><a href="/browse.html">Browse</a><a href="/events.html">Events</a><a href="/catering.html">Catering</a><a href="/apply.html" class="nav-cta">List your truck</a></div></nav>
+<body><nav id="nav"><a href="/" class="nav-logo">559eats</a><div class="nav-links"><a href="/">Map</a><a href="/browse">Browse</a><a href="/events">Events</a><a href="/catering">Catering</a><a href="/apply" class="nav-cta">List your truck</a></div></nav>
 <div class="page-hero">
   <span class="eyebrow">Catering &amp; events</span>
   <h1>Book a food truck <br>for your next event</h1>
@@ -64,7 +64,7 @@
   <div style="margin-bottom:48px">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px">
       <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700">Available trucks</h2>
-      <a href="/apply.html" style="font-size:.9rem;font-weight:600;color:var(--orange);text-decoration:none">List your truck &rarr;</a>
+      <a href="/apply" style="font-size:.9rem;font-weight:600;color:var(--orange);text-decoration:none">List your truck &rarr;</a>
     </div>
     <div class="trucks-grid" id="cateringTrucks">
       <div class="truck-card"><div class="tc-img">&#127868;</div><div class="tc-body"><div class="tc-name">Loading trucks&hellip;</div></div></div>
@@ -97,12 +97,12 @@
       <div class="fg"><label>Event location / address</label><input type="text" id="qLocation" placeholder="Fresno or Clovis area"></div>
       <div class="fg"><label>Additional details</label><textarea id="qNotes" placeholder="Dietary needs, theme, special requests&hellip;"></textarea></div>
       <button class="btn-quote" onclick="submitQuote()">Request catering quote &rarr;</button>
-      <p style="font-size:.78rem;color:#7a6e6a;margin-top:10px;text-align:center">By sending a request you agree to our <a href="/terms.html#catering" style="color:#E8512A">Terms &amp; Privacy</a>. Your booking is with the truck you choose.</p>
+      <p style="font-size:.78rem;color:#7a6e6a;margin-top:10px;text-align:center">By sending a request you agree to our <a href="/terms#catering" style="color:#E8512A">Terms &amp; Privacy</a>. Your booking is with the truck you choose.</p>
     </div>
     <div class="sent-banner" id="quoteSent">&#10003; Quote request received! We&rsquo;ll connect you with available trucks within 24 hours.</div>
   </div>
 </div>
-<footer><div class="footer-links"><a href="/food-trucks/fresno">Food trucks in Fresno</a><a href="/food-trucks/clovis">Food trucks in Clovis</a><a href="/food-trucks/taco-trucks-fresno">Taco trucks Fresno</a><a href="/food-trucks/birria-fresno">Birria Fresno</a><a href="/apply.html">List your food truck</a><a href="/contact.html">Contact</a><a href="/about.html">About</a><a href="/pricing.html">Pricing</a><a href="/terms.html">Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
+<footer><div class="footer-links"><a href="/food-trucks/fresno">Food trucks in Fresno</a><a href="/food-trucks/clovis">Food trucks in Clovis</a><a href="/food-trucks/taco-trucks-fresno">Taco trucks Fresno</a><a href="/food-trucks/birria-fresno">Birria Fresno</a><a href="/apply">List your food truck</a><a href="/contact">Contact</a><a href="/about">About</a><a href="/pricing">Pricing</a><a href="/terms">Terms &amp; Privacy</a></div><p>559eats &middot; Celebrating local food in the Central Valley</p></footer>
 <script>
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40),{passive:true});
 const SUPA='https://wlpugteoycouvvnhamnm.supabase.co';
